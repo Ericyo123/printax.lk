@@ -12,13 +12,28 @@ export const authOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null
+        console.log('Auth attempt for:', credentials?.email)
+        if (!credentials?.email || !credentials?.password) {
+          console.log('Missing credentials')
+          return null
+        }
         const user = await prisma.user.findUnique({
           where: { email: credentials.email.trim().toLowerCase() },
         })
-        if (!user || !user.active) return null
+        if (!user) {
+          console.log('User not found in DB')
+          return null
+        }
+        if (!user.active) {
+          console.log('User is inactive')
+          return null
+        }
         const isValid = await bcrypt.compare(credentials.password, user.password)
-        if (!isValid) return null
+        if (!isValid) {
+          console.log('Invalid password')
+          return null
+        }
+        console.log('Auth successful for:', user.email)
         return { id: user.id, name: user.name, email: user.email, role: user.role }
       },
     }),
