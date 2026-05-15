@@ -18,9 +18,9 @@ export const jobSchema = z.object({
   copies: z.number().int().min(1),
   pricingType: z.enum(['PER_PAGE', 'PER_COPY', 'PER_BOOK', 'MANUAL']),
   manualPrice: z.number().optional().nullable(),
-  baseAmount: z.number().min(0),
-  additionalTotal: z.number().min(0),
-  totalAmount: z.number().min(0),
+  baseAmount: z.number().min(0).optional(),
+  additionalTotal: z.number().min(0).optional(),
+  totalAmount: z.number().min(0).optional(),
   notes: z.string().optional().nullable(),
   services: z.array(z.object({
     serviceId: z.string().optional().nullable(),
