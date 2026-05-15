@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { calculateBaseAmount, calculateTotal } from '@/lib/pricing'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '../auth/[...nextauth]/route'
+import { createJobSchema } from '@/lib/validations'
 
 export async function GET(req: NextRequest) {
+  const session = await getServerSession(authOptions)
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   try {
     const { searchParams } = new URL(req.url)
     const invoiceId = searchParams.get('invoiceId')
@@ -19,14 +24,17 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const session = await getServerSession(authOptions)
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   try {
     const body = await req.json()
+    const validatedData = createJobSchema.parse(body)
     const {
       description, paperSizeId, printType, printMode,
       pages, copies, pricingType, notes,
       services = [], customServices = [], manualPrice,
       customerId, createInvoice, dueDate, paymentMethod,
-    } = body
+    } = validatedData as any
 
     // Get pricing rule
     const rule = await prisma.pricingRule.findUnique({

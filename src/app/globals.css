@@ -219,7 +219,15 @@ a { color: var(--primary-light); text-decoration: none; }
 }
 .form-control:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(124,58,237,0.15); background: rgba(124,58,237,0.05); }
 .form-control::placeholder { color: var(--text-muted); }
-select.form-control { cursor: pointer; }
+select.form-control { 
+  cursor: pointer; 
+  background-color: var(--bg-elevated);
+  color: var(--text-primary);
+}
+select.form-control option {
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+}
 textarea.form-control { resize: vertical; min-height: 80px; }
 .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
 .form-hint { font-size: 0.75rem; color: var(--text-muted); }

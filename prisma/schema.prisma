@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -12,7 +12,7 @@ model User {
   name      String
   email     String   @unique
   password  String
-  role      String   @default("STAFF") // ADMIN | STAFF
+  role      String   @default("STAFF")
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -23,28 +23,28 @@ model PaperSize {
   name         String        @unique
   description  String?
   active       Boolean       @default(true)
-  pricingRules PricingRule[]
   jobs         Job[]
+  pricingRules PricingRule[]
 }
 
 model PricingRule {
-  id          String    @id @default(cuid())
-  paperSizeId String
-  paperSize   PaperSize @relation(fields: [paperSizeId], references: [id], onDelete: Cascade)
-  printType   String    // COLOR | BW
-  pricePerPage  Float   @default(0)
-  pricePerCopy  Float   @default(0)
-  pricePerBook  Float   @default(0)
-  updatedAt   DateTime  @updatedAt
+  id           String    @id @default(cuid())
+  paperSizeId  String
+  printType    String
+  pricePerPage Float     @default(0)
+  pricePerCopy Float     @default(0)
+  pricePerBook Float     @default(0)
+  updatedAt    DateTime  @updatedAt
+  paperSize    PaperSize @relation(fields: [paperSizeId], references: [id], onDelete: Cascade)
 
   @@unique([paperSizeId, printType])
 }
 
 model AdditionalService {
-  id          String            @id @default(cuid())
-  name        String            @unique
-  price       Float             @default(0)
-  active      Boolean           @default(true)
+  id          String       @id @default(cuid())
+  name        String       @unique
+  price       Float        @default(0)
+  active      Boolean      @default(true)
   jobServices JobService[]
 }
 
@@ -55,7 +55,7 @@ model Customer {
   email              String?
   address            String?
   notes              String?
-  type               String    @default("WALK_IN") // WALK_IN | MONTHLY
+  type               String    @default("WALK_IN")
   outstandingBalance Float     @default(0)
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
@@ -66,12 +66,11 @@ model Job {
   id              String       @id @default(cuid())
   description     String
   paperSizeId     String
-  paperSize       PaperSize    @relation(fields: [paperSizeId], references: [id])
-  printType       String       // COLOR | BW
-  printMode       String       // SINGLE | DOUBLE
+  printType       String
+  printMode       String
   pages           Int          @default(1)
   copies          Int          @default(1)
-  pricingType     String       // PER_PAGE | PER_COPY | PER_BOOK | MANUAL
+  pricingType     String
   baseAmount      Float        @default(0)
   additionalTotal Float        @default(0)
   totalAmount     Float        @default(0)
@@ -79,36 +78,37 @@ model Job {
   date            DateTime     @default(now())
   invoiceId       String?
   invoice         Invoice?     @relation(fields: [invoiceId], references: [id])
+  paperSize       PaperSize    @relation(fields: [paperSizeId], references: [id])
   services        JobService[]
 }
 
 model JobService {
   id          String             @id @default(cuid())
   jobId       String
-  job         Job                @relation(fields: [jobId], references: [id], onDelete: Cascade)
   serviceId   String?
-  service     AdditionalService? @relation(fields: [serviceId], references: [id])
   customLabel String?
   amount      Float
+  job         Job                @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  service     AdditionalService? @relation(fields: [serviceId], references: [id])
 }
 
 model Invoice {
-  id            String    @id @default(cuid())
-  invoiceNumber String    @unique
-  date          DateTime  @default(now())
+  id            String     @id @default(cuid())
+  invoiceNumber String     @unique
+  date          DateTime   @default(now())
   dueDate       DateTime?
   customerId    String?
-  customer      Customer? @relation(fields: [customerId], references: [id])
-  totalAmount   Float     @default(0)
-  paymentStatus String    @default("UNPAID") // PAID | UNPAID | PARTIAL
-  paymentMethod String?   // CASH | BANK_TRANSFER | CARD | ONLINE | OTHER
+  totalAmount   Float      @default(0)
+  paymentStatus String     @default("UNPAID")
+  paymentMethod String?
   paymentDate   DateTime?
   notes         String?
   statementId   String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  customer      Customer?  @relation(fields: [customerId], references: [id])
   statement     Statement? @relation(fields: [statementId], references: [id])
   jobs          Job[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
 }
 
 model Statement {
@@ -119,7 +119,7 @@ model Statement {
   year        Int
   totalAmount Float     @default(0)
   paidAmount  Float     @default(0)
-  status      String    @default("UNPAID") // PAID | UNPAID | PARTIAL
+  status      String    @default("UNPAID")
   dueDate     DateTime?
   generatedAt DateTime  @default(now())
   invoices    Invoice[]
