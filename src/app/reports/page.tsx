@@ -133,16 +133,24 @@ export default function ReportsPage() {
             <span className="spinner" style={{ width: 32, height: 32 }} />
           </div>
         ) : tab === 'customer' ? (
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={data.slice(0, 15)} layout="vertical" margin={{ left: 100 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={false} />
-              <XAxis type="number" tick={{ fill: '#475569', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `${v}`} />
-              <YAxis type="category" dataKey="name" tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`Rs. ${v.toLocaleString()}`]} />
-              <Bar dataKey="revenue" fill="#155e96" radius={[0, 4, 4, 0]} name="Revenue" />
-              <Bar dataKey="paidAmount" fill="#10b981" radius={[0, 4, 4, 0]} name="Paid" />
-            </BarChart>
-          </ResponsiveContainer>
+          data.length === 0 ? (
+            <div style={{ height: 300, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+              <span style={{ fontSize: '2rem', marginBottom: '1rem' }}>👥</span>
+              <p>No customer data found.</p>
+              <p style={{ fontSize: '0.875rem' }}>Create customers and assign invoices to them to see analytics here.</p>
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={data.slice(0, 15)} layout="vertical" margin={{ left: 100 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={false} />
+                <XAxis type="number" tick={{ fill: '#475569', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `${v}`} />
+                <YAxis type="category" dataKey="name" tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`Rs. ${v.toLocaleString()}`]} />
+                <Bar dataKey="totalRevenue" fill="#155e96" radius={[0, 4, 4, 0]} name="Total Revenue" />
+                <Bar dataKey="paidAmount" fill="#10b981" radius={[0, 4, 4, 0]} name="Paid" />
+              </BarChart>
+            </ResponsiveContainer>
+          )
         ) : (
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={data} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
@@ -169,7 +177,13 @@ export default function ReportsPage() {
             </tr>
           </thead>
           <tbody>
-            {data.map((row: any, i: number) => (
+            {data.length === 0 ? (
+              <tr>
+                <td colSpan={5} style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+                  No data available to display.
+                </td>
+              </tr>
+            ) : data.map((row: any, i: number) => (
               <tr key={i}>
                 {tab === 'customer' ? (
                   <>
