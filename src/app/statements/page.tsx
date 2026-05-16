@@ -113,29 +113,34 @@ export default function StatementsPage() {
     doc.setFont('helvetica', 'normal')
     doc.text(`${MONTHS[stmt.month - 1]} ${stmt.year}`, 196, yPos, { align: 'right' })
 
-    const rows = stmt.invoices.map((inv: any) => [
-      inv.invoiceNumber,
-      new Date(inv.date).toLocaleDateString(),
+    const rows = (stmt.invoices || []).map((inv: any) => [
+      inv.invoiceNumber || '',
+      inv.date ? new Date(inv.date).toLocaleDateString() : '',
       inv.jobs?.length || 0,
-      inv.paymentStatus,
-      `Rs. ${inv.totalAmount.toLocaleString()}`,
+      inv.paymentStatus || '',
+      `Rs. ${(inv.totalAmount || 0).toLocaleString()}`,
     ])
 
-    autoTable(doc, {
-      startY: yPos + 10,
-      head: [['Invoice #', 'Date', 'Items', 'Status', 'Amount']],
-      body: rows,
-      theme: 'grid',
-      styles: { fontSize: 9, cellPadding: 5 },
-      headStyles: { fillColor: primaryColor, textColor: 255, fontStyle: 'bold' },
-      columnStyles: {
-        2: { halign: 'center' },
-        4: { halign: 'right', fontStyle: 'bold' },
-      },
-      margin: { left: 14, right: 14 },
-    })
+    try {
+      autoTable(doc, {
+        startY: yPos + 10,
+        head: [['Invoice #', 'Date', 'Items', 'Status', 'Amount']],
+        body: rows,
+        theme: 'grid',
+        styles: { fontSize: 9, cellPadding: 5 },
+        headStyles: { fillColor: primaryColor, textColor: 255, fontStyle: 'bold' },
+        columnStyles: {
+          2: { halign: 'center' },
+          4: { halign: 'right', fontStyle: 'bold' },
+        },
+        margin: { left: 14, right: 14 },
+      })
+    } catch (e) {
+      console.error('Statement autoTable failed', e)
+      doc.text('Table generation failed', 14, yPos + 10)
+    }
 
-    let finalY = (doc as any).lastAutoTable.finalY + 15
+    let finalY = ((doc as any).lastAutoTable?.finalY || yPos + 20) + 15
     
     // Summary Box
     doc.setFillColor(248, 250, 252)
@@ -145,17 +150,17 @@ export default function StatementsPage() {
 
     doc.setFontSize(14); doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]); doc.setFont('helvetica', 'bold')
     doc.text('TOTAL DUE:', 135, finalY + 10)
-    doc.text(`Rs. ${stmt.totalAmount.toLocaleString()}`, 195, finalY + 10, { align: 'right' })
+    doc.text(`Rs. ${(stmt.totalAmount || 0).toLocaleString()}`, 195, finalY + 10, { align: 'right' })
 
     finalY += 15
     doc.setFontSize(10); doc.setTextColor(stmt.status === 'PAID' ? [16, 185, 129] : [245, 158, 11])
-    doc.text(stmt.status, 195, finalY, { align: 'right' })
+    doc.text(stmt.status || '', 195, finalY, { align: 'right' })
 
     // Footer Note
     doc.setFontSize(9); doc.setTextColor(greyColor[0], greyColor[1], greyColor[2]); doc.setFont('helvetica', 'italic')
     doc.text('Please make payment by the due date. Thank you!', 105, 280, { align: 'center' })
 
-    doc.save(`${stmt.statementNo}.pdf`)
+    doc.save(`${stmt.statementNo || 'statement'}.pdf`)
     } catch (err) {
       console.error('Statement PDF error:', err)
       alert('Failed to generate statement PDF. Please try again.')

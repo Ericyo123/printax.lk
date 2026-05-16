@@ -117,31 +117,37 @@ export default function InvoiceDetailPage() {
       doc.text(`Due Date: ${new Date(inv.dueDate).toLocaleDateString()}`, 196, yPos - (inv.customer?.phone ? 5 : 0), { align: 'right' })
     }
 
-    const rows = inv.jobs.map((job: any) => [
-      job.description,
-      `${job.paperSize?.name || ''}\n${job.printType} · ${job.printMode}`,
-      `${job.pages}p × ${job.copies}c`,
-      `Rs. ${job.baseAmount.toLocaleString()}`,
-      `Rs. ${job.additionalTotal.toLocaleString()}`,
-      `Rs. ${job.totalAmount.toLocaleString()}`,
+    const rows = (inv.jobs || []).map((job: any) => [
+      job.description || '',
+      `${job.paperSize?.name || ''}\n${job.printType || ''} · ${job.printMode || ''}`,
+      `${job.pages || 0}p × ${job.copies || 0}c`,
+      `Rs. ${(job.baseAmount || 0).toLocaleString()}`,
+      `Rs. ${(job.additionalTotal || 0).toLocaleString()}`,
+      `Rs. ${(job.totalAmount || 0).toLocaleString()}`,
     ])
 
-    autoTable(doc, {
-      startY: yPos + 10,
-      head: [['Description', 'Specification', 'Qty', 'Base', 'Extras', 'Total']],
-      body: rows,
-      theme: 'grid',
-      styles: { fontSize: 9, cellPadding: 5 },
-      headStyles: { fillColor: primaryColor, textColor: 255, fontStyle: 'bold' },
-      columnStyles: {
-        3: { halign: 'right' },
-        4: { halign: 'right' },
-        5: { halign: 'right', fontStyle: 'bold' },
-      },
-      margin: { left: 14, right: 14 },
-    })
+    try {
+      autoTable(doc, {
+        startY: yPos + 10,
+        head: [['Description', 'Specification', 'Qty', 'Base', 'Extras', 'Total']],
+        body: rows,
+        theme: 'grid',
+        styles: { fontSize: 9, cellPadding: 5 },
+        headStyles: { fillColor: primaryColor, textColor: 255, fontStyle: 'bold' },
+        columnStyles: {
+          3: { halign: 'right' },
+          4: { halign: 'right' },
+          5: { halign: 'right', fontStyle: 'bold' },
+        },
+        margin: { left: 14, right: 14 },
+      })
+    } catch (e) {
+      console.error('autoTable failed', e)
+      // Fallback: just add a text if table fails
+      doc.text('Table generation failed', 14, yPos + 10)
+    }
 
-    let finalY = (doc as any).lastAutoTable.finalY + 15
+    let finalY = ((doc as any).lastAutoTable?.finalY || yPos + 20) + 15
     
     // Summary Box
     doc.setFillColor(248, 250, 252)
@@ -149,11 +155,11 @@ export default function InvoiceDetailPage() {
     doc.setDrawColor(226, 232, 240)
     doc.rect(130, finalY - 5, 70, 45, 'D')
 
-    const totalDiscount = inv.jobs.reduce((sum: number, job: any) => sum + (job.discount || 0), 0)
+    const totalDiscount = (inv.jobs || []).reduce((sum: number, job: any) => sum + (job.discount || 0), 0)
     
     doc.setFontSize(10); doc.setTextColor(greyColor[0], greyColor[1], greyColor[2])
     doc.text('Subtotal:', 135, finalY)
-    doc.text(`Rs. ${(inv.totalAmount + totalDiscount).toLocaleString()}`, 195, finalY, { align: 'right' })
+    doc.text(`Rs. ${((inv.totalAmount || 0) + totalDiscount).toLocaleString()}`, 195, finalY, { align: 'right' })
 
     if (totalDiscount > 0) {
       finalY += 8
@@ -168,17 +174,17 @@ export default function InvoiceDetailPage() {
     
     doc.setFontSize(14); doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]); doc.setFont('helvetica', 'bold')
     doc.text('TOTAL:', 135, finalY + 2)
-    doc.text(`Rs. ${inv.totalAmount.toLocaleString()}`, 195, finalY + 2, { align: 'right' })
+    doc.text(`Rs. ${(inv.totalAmount || 0).toLocaleString()}`, 195, finalY + 2, { align: 'right' })
 
     finalY += 8
     doc.setFontSize(10); doc.setTextColor(inv.paymentStatus === 'PAID' ? [16, 185, 129] : [245, 158, 11])
-    doc.text(inv.paymentStatus, 195, finalY + 2, { align: 'right' })
+    doc.text(inv.paymentStatus || '', 195, finalY + 2, { align: 'right' })
 
     // Footer Note
     doc.setFontSize(9); doc.setTextColor(greyColor[0], greyColor[1], greyColor[2]); doc.setFont('helvetica', 'italic')
     doc.text('Thank you for choosing printax.lk!', 105, 280, { align: 'center' })
 
-    doc.save(`${inv.invoiceNumber}.pdf`)
+    doc.save(`${inv.invoiceNumber || 'invoice'}.pdf`)
     } catch (err) {
       console.error('PDF error:', err)
       alert('Failed to generate PDF. Please try again or use the Print button.')
