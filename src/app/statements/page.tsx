@@ -53,26 +53,26 @@ export default function StatementsPage() {
       const { default: autoTable } = await import('jspdf-autotable')
       const doc = new jsPDF()
 
-      // Load logo as base64
+      // Load logo as base64 - Optional
       const getBase64 = (url: string): Promise<string> => {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
           const img = new Image()
-          img.crossOrigin = 'Anonymous'
           img.onload = () => {
-            const canvas = document.createElement('canvas')
-            canvas.width = img.width
-            canvas.height = img.height
-            const ctx = canvas.getContext('2d')
-            ctx?.drawImage(img, 0, 0)
-            resolve(canvas.toDataURL('image/png'))
+            try {
+              const canvas = document.createElement('canvas')
+              canvas.width = img.width
+              canvas.height = img.height
+              const ctx = canvas.getContext('2d')
+              ctx?.drawImage(img, 0, 0)
+              resolve(canvas.toDataURL('image/png'))
+            } catch (e) { resolve('') }
           }
-          img.onerror = reject
+          img.onerror = () => resolve('')
           img.src = url
         })
       }
 
-      let logoBase64 = ''
-      try { logoBase64 = await getBase64('/logo.png') } catch (e) { console.error('Logo failed', e) }
+      const logoBase64 = await getBase64('/logo.png')
 
       const primaryColor = [21, 94, 150]
       const accentColor = [19, 37, 73]
@@ -83,9 +83,14 @@ export default function StatementsPage() {
       doc.rect(0, 0, 210, 40, 'F')
 
       // Logo & Header Info
-      if (logoBase64) doc.addImage(logoBase64, 'PNG', 14, 12, 35, 12)
+      if (logoBase64) {
+        doc.addImage(logoBase64, 'PNG', 14, 12, 35, 12)
+      } else {
+        doc.setTextColor(255, 255, 255); doc.setFontSize(18); doc.setFont('helvetica', 'bold')
+        doc.text('printax.lk', 14, 22)
+      }
       doc.setTextColor(255, 255, 255)
-      doc.setFontSize(10)
+      doc.setFontSize(10); doc.setFont('helvetica', 'normal')
       doc.text('Print Shop Management System', 14, 30)
 
     doc.setFontSize(22); doc.setFont('helvetica', 'bold')
