@@ -84,19 +84,22 @@ export default function StatementsPage() {
 
       const logoBase64 = await getBase64('/logo.png')
 
-      const purpleColor = [99, 57, 180]
-      const lightPurple = [243, 240, 255]
+      const settings = await fetch('/api/settings').then(res => res.json()).catch(() => ({}))
+      
+      const primaryColor = [21, 94, 160]
+      const accentColor = [19, 37, 73]
+      const lightBlue = [240, 247, 255]
       const greyColor = [100, 100, 100]
       const darkText = [30, 30, 30]
 
       // Header
-      doc.setTextColor(purpleColor[0], purpleColor[1], purpleColor[2])
+      doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2])
       doc.setFontSize(28); doc.setFont('helvetica', 'bold')
       doc.text('Statement', 14, 25)
 
-      // Logo on Top Right
+      // Logo on Top Right - BIGGER
       if (logoBase64) {
-        doc.addImage(logoBase64, 'PNG', 160, 12, 36, 18)
+        doc.addImage(logoBase64, 'PNG', 140, 10, 60, 30)
       }
 
       // Statement Details
@@ -109,23 +112,23 @@ export default function StatementsPage() {
       doc.setFont('helvetica', 'normal'); doc.text('Period', 14, infoY); doc.setFont('helvetica', 'bold'); doc.text(`${MONTHS[stmt.month - 1]} ${stmt.year}`, 45, infoY)
 
       // Address Boxes
-      let boxY = 60
-      // Billed By
-      doc.setFillColor(lightPurple[0], lightPurple[1], lightPurple[2])
+      let boxY = 65
+      // Billed By (Blue Theme)
+      doc.setFillColor(lightBlue[0], lightBlue[1], lightBlue[2])
       doc.roundedRect(14, boxY, 90, 45, 3, 3, 'F')
-      doc.setTextColor(purpleColor[0], purpleColor[1], purpleColor[2])
+      doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2])
       doc.setFontSize(14); doc.setFont('helvetica', 'bold')
       doc.text('Billed By', 18, boxY + 8)
       doc.setTextColor(darkText[0], darkText[1], darkText[2])
       doc.setFontSize(10); doc.setFont('helvetica', 'bold')
-      doc.text('Printax Solutions', 18, boxY + 15)
+      doc.text(settings.businessName || 'Printax Solutions', 18, boxY + 15)
       doc.setFont('helvetica', 'normal')
-      doc.text('132, Kolonnawa Road,\nDemetagoda,\nSri Lanka', 18, boxY + 22)
+      doc.text(settings.address || '132, Kolonnawa Road,\nDemetagoda,\nSri Lanka', 18, boxY + 22)
 
-      // Billed To
-      doc.setFillColor(lightPurple[0], lightPurple[1], lightPurple[2])
+      // Billed To (Blue Theme)
+      doc.setFillColor(lightBlue[0], lightBlue[1], lightBlue[2])
       doc.roundedRect(106, boxY, 90, 45, 3, 3, 'F')
-      doc.setTextColor(purpleColor[0], purpleColor[1], purpleColor[2])
+      doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2])
       doc.setFontSize(14); doc.setFont('helvetica', 'bold')
       doc.text('Statement For', 110, boxY + 8)
       doc.setTextColor(darkText[0], darkText[1], darkText[2])
@@ -140,7 +143,7 @@ export default function StatementsPage() {
         inv.invoiceNumber || '',
         inv.date ? new Date(inv.date).toLocaleDateString() : '',
         inv.paymentStatus || '',
-        `LKR ${(inv.totalAmount || 0).toLocaleString()}`,
+        `Rs. ${(inv.totalAmount || 0).toLocaleString()}`,
       ])
 
       autoTable(doc, {
@@ -148,7 +151,7 @@ export default function StatementsPage() {
         head: [['#', 'Invoice #', 'Date', 'Status', 'Amount']],
         body: rows,
         theme: 'striped',
-        headStyles: { fillColor: purpleColor, textColor: 255, fontStyle: 'bold' },
+        headStyles: { fillColor: primaryColor, textColor: 255, fontStyle: 'bold' },
         styles: { fontSize: 9, cellPadding: 5 },
         columnStyles: {
           0: { halign: 'center' },
@@ -164,17 +167,17 @@ export default function StatementsPage() {
       doc.setTextColor(darkText[0], darkText[1], darkText[2])
       doc.setFontSize(14); doc.setFont('helvetica', 'bold')
       doc.text('Total Due (LKR)', 130, finalY + 10)
-      doc.setFontSize(16)
-      doc.text(`LKR ${(stmt.totalAmount || 0).toLocaleString()}.00`, 196, finalY + 10, { align: 'right' })
+      doc.setFontSize(18); doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2])
+      doc.text(`Rs. ${(stmt.totalAmount || 0).toLocaleString()}.00`, 196, finalY + 10, { align: 'right' })
       
-      doc.setDrawColor(30, 30, 30)
+      doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2])
       doc.setLineWidth(0.5)
       doc.line(130, finalY + 2, 196, finalY + 2)
       doc.line(130, finalY + 15, 196, finalY + 15)
 
       // Footer
       doc.setFontSize(9); doc.setTextColor(greyColor[0], greyColor[1], greyColor[2]); doc.setFont('helvetica', 'normal')
-      doc.text(`For any enquiry, reach out via call on +94 72 724 5518`, 105, 280, { align: 'center' })
+      doc.text(`For any enquiry, reach out via call on ${settings.phone || '+94 72 724 5518'}`, 105, 285, { align: 'center' })
 
       doc.save(`${stmt.statementNo || 'statement'}.pdf`)
     } catch (err) {

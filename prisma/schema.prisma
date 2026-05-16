@@ -126,3 +126,18 @@ model Statement {
   generatedAt DateTime  @default(now())
   invoices    Invoice[]
 }
+
+model Settings {
+  id             String  @id @default("default")
+  businessName   String  @default("Printax Solutions")
+  address        String  @default("132, Kolonnawa Road, Demetagoda, Sri Lanka")
+  phone          String  @default("0727245518")
+  email          String  @default("mohommadammar826@gmail.com")
+  bankName       String  @default("HNB")
+  accountName    String  @default("Y A Mohammed")
+  accountNumber  String  @default("250020308604")
+  swiftCode      String  @default("HBLILKLX")
+  branch         String  @default("Mount Lavinia")
+  logoUrl        String?
+  currency       String  @default("LKR")
+}
