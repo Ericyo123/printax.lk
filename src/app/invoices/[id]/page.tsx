@@ -85,17 +85,15 @@ export default function InvoiceDetailPage() {
       const greyColor = [100, 100, 100]
       const darkText = [30, 30, 30]
 
-      // Header
       doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2])
       doc.setFontSize(28); doc.setFont('helvetica', 'bold')
       doc.text('Invoice', 14, 25)
 
-      // Logo on Top Right - EVEN BIGGER
+      // Logo on Top Right - REDUCED AGAIN
       if (logoBase64) {
-        doc.addImage(logoBase64, 'PNG', 126, 5, 70, 50)
+        doc.addImage(logoBase64, 'PNG', 150, 8, 40, 35)
       }
 
-      // Invoice Details
       doc.setTextColor(darkText[0], darkText[1], darkText[2])
       doc.setFontSize(10); doc.setFont('helvetica', 'normal')
       
@@ -108,9 +106,7 @@ export default function InvoiceDetailPage() {
         doc.setFont('helvetica', 'normal'); doc.text('Due Date', 14, infoY); doc.setFont('helvetica', 'bold'); doc.text(new Date(inv.dueDate).toLocaleDateString(), 45, infoY)
       }
 
-      // Address Boxes
       let boxY = 65
-      // Billed By (Blue Theme)
       doc.setFillColor(lightBlue[0], lightBlue[1], lightBlue[2])
       doc.roundedRect(14, boxY, 90, 45, 3, 3, 'F')
       doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2])
@@ -122,7 +118,6 @@ export default function InvoiceDetailPage() {
       doc.setFont('helvetica', 'normal')
       doc.text(settings.address || '132, Kolonnawa Road,\nDemetagoda,\nSri Lanka', 18, boxY + 22)
 
-      // Billed To (Blue Theme)
       doc.setFillColor(lightBlue[0], lightBlue[1], lightBlue[2])
       doc.roundedRect(106, boxY, 90, 45, 3, 3, 'F')
       doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2])
@@ -150,10 +145,10 @@ export default function InvoiceDetailPage() {
 
       autoTable(doc, {
         startY: boxY + 55,
-        head: [['Item Description', 'Quantity', 'Rate', 'Amount']],
+        head: [['', '', '', '']],
         body: rows,
         theme: 'striped',
-        headStyles: { fillColor: primaryColor, textColor: 255, fontStyle: 'bold' },
+        headStyles: { fillColor: [255, 255, 255], textColor: 0 },
         styles: { fontSize: 9, cellPadding: 5 },
         columnStyles: {
           1: { halign: 'center' },
@@ -163,9 +158,19 @@ export default function InvoiceDetailPage() {
         margin: { left: 14, right: 14 },
       })
 
-      let finalY = ((doc as any).lastAutoTable?.finalY || 180) + 15
+      const tableFinalY = (doc as any).lastAutoTable.finalY
+      const tableStartY = boxY + 55
+      doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2])
+      doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2])
+      doc.roundedRect(14, tableStartY, 182, 10, 3, 3, 'F')
+      doc.setTextColor(255, 255, 255); doc.setFontSize(9); doc.setFont('helvetica', 'bold')
+      doc.text('Item Description', 19, tableStartY + 7)
+      doc.text('Quantity', 105, tableStartY + 7, { align: 'center' })
+      doc.text('Rate', 150, tableStartY + 7, { align: 'right' })
+      doc.text('Amount', 191, tableStartY + 7, { align: 'right' })
+
+      let finalY = tableFinalY + 15
       
-      // Bank Details Box
       if (settings.bankName) {
         doc.setFillColor(lightBlue[0], lightBlue[1], lightBlue[2])
         doc.roundedRect(14, finalY - 5, 100, 50, 3, 3, 'F')

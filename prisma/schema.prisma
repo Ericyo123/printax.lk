@@ -133,11 +133,11 @@ model Settings {
   address        String  @default("132, Kolonnawa Road, Demetagoda, Sri Lanka")
   phone          String  @default("0727245518")
   email          String  @default("mohommadammar826@gmail.com")
-  bankName       String  @default("HNB")
-  accountName    String  @default("Y A Mohammed")
-  accountNumber  String  @default("250020308604")
-  swiftCode      String  @default("HBLILKLX")
-  branch         String  @default("Mount Lavinia")
+  bankName       String  @default("COMMERCIAL BANK")
+  accountName    String  @default("MJAAM AMMAR")
+  accountNumber  String  @default("8017227052")
+  swiftCode      String  @default("")
+  branch         String  @default("RAJAGIRIYA")
   logoUrl        String?
   currency       String  @default("LKR")
 }
