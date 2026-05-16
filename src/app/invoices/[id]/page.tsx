@@ -82,33 +82,34 @@ export default function InvoiceDetailPage() {
       const accentColor = [19, 37, 73]
       const greyColor = [100, 100, 100]
 
-      // Header Background
-      doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2])
-      doc.rect(0, 0, 210, 40, 'F')
+      // Header Decorative Line
+      doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2])
+      doc.setLineWidth(1.5)
+      doc.line(14, 38, 196, 38)
 
       // Logo & Header Info
       if (logoBase64) {
         doc.addImage(logoBase64, 'PNG', 14, 12, 35, 12)
       } else {
-        doc.setTextColor(255, 255, 255); doc.setFontSize(18); doc.setFont('helvetica', 'bold')
+        doc.setTextColor(accentColor[0], accentColor[1], accentColor[2]); doc.setFontSize(18); doc.setFont('helvetica', 'bold')
         doc.text('printax.lk', 14, 22)
       }
-      doc.setTextColor(255, 255, 255)
+      doc.setTextColor(greyColor[0], greyColor[1], greyColor[2])
       doc.setFontSize(10); doc.setFont('helvetica', 'normal')
       doc.text('Print Shop Management System', 14, 30)
 
-    doc.setFontSize(24); doc.setFont('helvetica', 'bold')
-    doc.text('INVOICE', 196, 25, { align: 'right' })
-    doc.setFontSize(10); doc.setFont('helvetica', 'normal')
-    doc.text(inv.invoiceNumber, 196, 32, { align: 'right' })
+      doc.setFontSize(24); doc.setFont('helvetica', 'bold'); doc.setTextColor(accentColor[0], accentColor[1], accentColor[2])
+      doc.text('INVOICE', 196, 25, { align: 'right' })
+      doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(greyColor[0], greyColor[1], greyColor[2])
+      doc.text(inv.invoiceNumber || 'invoice', 196, 32, { align: 'right' })
 
-    // Bill To & Invoice Info
-    let yPos = 55
-    doc.setTextColor(accentColor[0], accentColor[1], accentColor[2])
-    doc.setFontSize(12); doc.setFont('helvetica', 'bold')
-    doc.text('BILL TO', 14, yPos)
-    
-    doc.text('INVOICE DETAILS', 196, yPos, { align: 'right' })
+      // Bill To & Invoice Info
+      let yPos = 55
+      doc.setTextColor(accentColor[0], accentColor[1], accentColor[2])
+      doc.setFontSize(12); doc.setFont('helvetica', 'bold')
+      doc.text('BILL TO', 14, yPos)
+      
+      doc.text('INVOICE DETAILS', 196, yPos, { align: 'right' })
 
     yPos += 8
     doc.setTextColor(30, 30, 30); doc.setFontSize(10); doc.setFont('helvetica', 'bold')
@@ -160,8 +161,6 @@ export default function InvoiceDetailPage() {
     let finalY = ((doc as any).lastAutoTable?.finalY || yPos + 20) + 15
     
     // Summary Box
-    doc.setFillColor(248, 250, 252)
-    doc.rect(130, finalY - 5, 70, 45, 'F')
     doc.setDrawColor(226, 232, 240)
     doc.rect(130, finalY - 5, 70, 45, 'D')
 
