@@ -41,23 +41,46 @@ export default function InvoiceDetailPage() {
   function printInvoice() { window.print() }
 
   async function downloadPDF() {
-    const { default: jsPDF } = await import('jspdf')
-    const { default: autoTable } = await import('jspdf-autotable')
-    const doc = new jsPDF()
-    const inv = invoice
-    const primaryColor = [21, 94, 150]
-    const accentColor = [19, 37, 73]
-    const greyColor = [100, 100, 100]
+    try {
+      const { default: jsPDF } = await import('jspdf')
+      const { default: autoTable } = await import('jspdf-autotable')
+      const doc = new jsPDF()
+      const inv = invoice
 
-    // Header Background
-    doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2])
-    doc.rect(0, 0, 210, 40, 'F')
+      // Load logo as base64
+      const getBase64 = (url: string): Promise<string> => {
+        return new Promise((resolve, reject) => {
+          const img = new Image()
+          img.crossOrigin = 'Anonymous'
+          img.onload = () => {
+            const canvas = document.createElement('canvas')
+            canvas.width = img.width
+            canvas.height = img.height
+            const ctx = canvas.getContext('2d')
+            ctx?.drawImage(img, 0, 0)
+            resolve(canvas.toDataURL('image/png'))
+          }
+          img.onerror = reject
+          img.src = url
+        })
+      }
 
-    // Logo & Header Info
-    doc.addImage('/logo.png', 'PNG', 14, 12, 35, 12)
-    doc.setTextColor(255, 255, 255)
-    doc.setFontSize(10)
-    doc.text('Print Shop Management System', 14, 30)
+      let logoBase64 = ''
+      try { logoBase64 = await getBase64('/logo.png') } catch (e) { console.error('Logo failed', e) }
+
+      const primaryColor = [21, 94, 150]
+      const accentColor = [19, 37, 73]
+      const greyColor = [100, 100, 100]
+
+      // Header Background
+      doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2])
+      doc.rect(0, 0, 210, 40, 'F')
+
+      // Logo & Header Info
+      if (logoBase64) doc.addImage(logoBase64, 'PNG', 14, 12, 35, 12)
+      doc.setTextColor(255, 255, 255)
+      doc.setFontSize(10)
+      doc.text('Print Shop Management System', 14, 30)
 
     doc.setFontSize(24); doc.setFont('helvetica', 'bold')
     doc.text('INVOICE', 196, 25, { align: 'right' })
@@ -151,6 +174,11 @@ export default function InvoiceDetailPage() {
     doc.text('Thank you for choosing printax.lk!', 105, 280, { align: 'center' })
 
     doc.save(`${inv.invoiceNumber}.pdf`)
+    } catch (err) {
+      console.error('PDF error:', err)
+      alert('Failed to generate PDF. Please try again or use the Print button.')
+    }
+  }
 
   if (loading) return <AppShell><div className="empty-state"><span className="spinner" style={{ width: 36, height: 36 }} /></div></AppShell>
   if (!invoice) return <AppShell><div className="empty-state"><p>Invoice not found</p></div></AppShell>

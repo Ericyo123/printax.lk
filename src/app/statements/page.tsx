@@ -48,22 +48,45 @@ export default function StatementsPage() {
   }
 
   async function downloadStatementPDF(stmt: any) {
-    const { default: jsPDF } = await import('jspdf')
-    const { default: autoTable } = await import('jspdf-autotable')
-    const doc = new jsPDF()
-    const primaryColor = [21, 94, 150]
-    const accentColor = [19, 37, 73]
-    const greyColor = [100, 100, 100]
+    try {
+      const { default: jsPDF } = await import('jspdf')
+      const { default: autoTable } = await import('jspdf-autotable')
+      const doc = new jsPDF()
 
-    // Header Background
-    doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2])
-    doc.rect(0, 0, 210, 40, 'F')
+      // Load logo as base64
+      const getBase64 = (url: string): Promise<string> => {
+        return new Promise((resolve, reject) => {
+          const img = new Image()
+          img.crossOrigin = 'Anonymous'
+          img.onload = () => {
+            const canvas = document.createElement('canvas')
+            canvas.width = img.width
+            canvas.height = img.height
+            const ctx = canvas.getContext('2d')
+            ctx?.drawImage(img, 0, 0)
+            resolve(canvas.toDataURL('image/png'))
+          }
+          img.onerror = reject
+          img.src = url
+        })
+      }
 
-    // Logo & Header Info
-    doc.addImage('/logo.png', 'PNG', 14, 12, 35, 12)
-    doc.setTextColor(255, 255, 255)
-    doc.setFontSize(10)
-    doc.text('Print Shop Management System', 14, 30)
+      let logoBase64 = ''
+      try { logoBase64 = await getBase64('/logo.png') } catch (e) { console.error('Logo failed', e) }
+
+      const primaryColor = [21, 94, 150]
+      const accentColor = [19, 37, 73]
+      const greyColor = [100, 100, 100]
+
+      // Header Background
+      doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2])
+      doc.rect(0, 0, 210, 40, 'F')
+
+      // Logo & Header Info
+      if (logoBase64) doc.addImage(logoBase64, 'PNG', 14, 12, 35, 12)
+      doc.setTextColor(255, 255, 255)
+      doc.setFontSize(10)
+      doc.text('Print Shop Management System', 14, 30)
 
     doc.setFontSize(22); doc.setFont('helvetica', 'bold')
     doc.text('MONTHLY STATEMENT', 196, 25, { align: 'right' })
@@ -128,6 +151,10 @@ export default function StatementsPage() {
     doc.text('Please make payment by the due date. Thank you!', 105, 280, { align: 'center' })
 
     doc.save(`${stmt.statementNo}.pdf`)
+    } catch (err) {
+      console.error('Statement PDF error:', err)
+      alert('Failed to generate statement PDF. Please try again.')
+    }
   }
 
   return (
