@@ -74,6 +74,7 @@ model Job {
   pricingType     String
   baseAmount      Float        @default(0)
   additionalTotal Float        @default(0)
+  discount        Float        @default(0)
   totalAmount     Float        @default(0)
   notes           String?
   date            DateTime     @default(now())

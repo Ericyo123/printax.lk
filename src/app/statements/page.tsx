@@ -52,8 +52,7 @@ export default function StatementsPage() {
     const { default: autoTable } = await import('jspdf-autotable')
     const doc = new jsPDF()
 
-    doc.setFontSize(22); doc.setTextColor(21, 94, 150)
-    doc.text('printax.lk', 14, 20)
+    doc.addImage('/logo.png', 'PNG', 14, 10, 30, 10)
     doc.setFontSize(12); doc.setTextColor(30, 30, 30)
     doc.text('MONTHLY STATEMENT', 150, 22, { align: 'right' })
     doc.setFontSize(10); doc.setTextColor(100, 100, 100)

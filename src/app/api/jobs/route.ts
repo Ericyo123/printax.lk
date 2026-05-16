@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
       description, paperSizeId, printType, printMode,
       pages, copies, pricingType, notes,
       services = [], customServices = [], manualPrice,
-      customerId, createInvoice, dueDate, paymentMethod,
+      customerId, createInvoice, dueDate, paymentMethod, discount = 0,
     } = validatedData as any
 
     // Get pricing rule
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
       ...customServices.map((s: any) => s.amount),
     ]
     const additionalTotal = additionalAmounts.reduce((a: number, b: number) => a + b, 0)
-    const totalAmount = calculateTotal(baseAmount, additionalAmounts)
+    const totalAmount = calculateTotal(baseAmount, additionalAmounts, discount)
 
     // Build invoice number if needed
     let invoice = null
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
       data: {
         description, paperSizeId, printType, printMode,
         pages, copies, pricingType,
-        baseAmount, additionalTotal, totalAmount, notes,
+        baseAmount, additionalTotal, discount, totalAmount, notes,
         invoiceId: invoice?.id || null,
         services: {
           create: [

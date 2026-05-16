@@ -35,8 +35,9 @@ export function calculateBaseAmount(
 
 export function calculateTotal(
   baseAmount: number,
-  additionalAmounts: number[]
+  additionalAmounts: number[],
+  discount: number = 0
 ): number {
   const additionalTotal = additionalAmounts.reduce((sum, a) => sum + a, 0)
-  return baseAmount + additionalTotal
+  return Math.max(0, baseAmount + additionalTotal - discount)
 }

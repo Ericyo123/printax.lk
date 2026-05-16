@@ -34,6 +34,7 @@ export default function NewJobPage() {
   const [markPaid, setMarkPaid] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState('')
   const [dueDate, setDueDate] = useState('')
+  const [discount, setDiscount] = useState(0)
 
   // Derived
   const currentRule = pricingData?.rules.find(r => r.paperSizeId === paperSizeId && r.printType === printType)
@@ -44,7 +45,7 @@ export default function NewJobPage() {
     .filter(s => selectedServices[s.id])
     .reduce((acc, s) => acc + s.price, 0)
   const customTotal = customServices.reduce((acc, s) => acc + s.amount, 0)
-  const total = baseAmount + servicesTotal + customTotal
+  const total = Math.max(0, baseAmount + servicesTotal + customTotal - discount)
 
   const selectedCustomer = customers.find(c => c.id === customerId)
   const isMonthly = selectedCustomer?.type === 'MONTHLY'
@@ -79,7 +80,7 @@ export default function NewJobPage() {
       services: svcList, customServices,
       manualPrice: pricingType === 'MANUAL' ? manualPrice : undefined,
       customerId: customerId || undefined,
-      createInvoice,
+      createInvoice, discount,
       paymentMethod: (createInvoice && markPaid) ? paymentMethod : undefined,
       dueDate: (createInvoice && !markPaid) ? dueDate : undefined,
     }
@@ -316,6 +317,14 @@ export default function NewJobPage() {
                     <span style={{ fontWeight: 600 }}>Rs. {fmt(customTotal)}</span>
                   </div>
                 )}
+                
+                <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem', background: 'rgba(239, 68, 68, 0.05)', borderRadius: 8 }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--danger)' }}>DISCOUNT</span>
+                  <input type="number" min={0} step="0.5" className="form-control" 
+                    style={{ height: 32, padding: '0 0.5rem', textAlign: 'right', fontWeight: 700, color: 'var(--danger)' }}
+                    value={discount || ''} onChange={e => setDiscount(+e.target.value)} placeholder="0.00" />
+                </div>
+
                 <hr className="divider" />
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontWeight: 700, fontSize: '1rem' }}>TOTAL</span>

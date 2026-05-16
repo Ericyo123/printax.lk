@@ -20,6 +20,7 @@ export const jobSchema = z.object({
   manualPrice: z.number().optional().nullable(),
   baseAmount: z.number().min(0).optional(),
   additionalTotal: z.number().min(0).optional(),
+  discount: z.number().min(0).optional().default(0),
   totalAmount: z.number().min(0).optional(),
   notes: z.string().optional().nullable(),
   services: z.array(z.object({

@@ -46,10 +46,9 @@ export default function InvoiceDetailPage() {
     const doc = new jsPDF()
     const inv = invoice
 
-    doc.setFontSize(22); doc.setTextColor(21, 94, 150)
-    doc.text('printax.lk', 14, 20)
+    doc.addImage('/logo.png', 'PNG', 14, 10, 30, 10)
     doc.setFontSize(10); doc.setTextColor(100, 100, 100)
-    doc.text('Print Shop Management System', 14, 27)
+    doc.text('Print Shop Management System', 14, 25)
 
     doc.setFontSize(18); doc.setTextColor(30, 30, 30)
     doc.text('INVOICE', 150, 22, { align: 'right' })
@@ -75,6 +74,11 @@ export default function InvoiceDetailPage() {
       job.pricingType.replace('_', ' '),
       `Rs. ${job.totalAmount.toLocaleString()}`,
     ])
+
+    const totalDiscount = inv.jobs.reduce((sum: number, job: any) => sum + (job.discount || 0), 0)
+    if (totalDiscount > 0) {
+      rows.push(['Discount', '', '', '', `- Rs. ${totalDiscount.toLocaleString()}`])
+    }
 
     autoTable(doc, {
       startY: 70,
@@ -198,6 +202,7 @@ export default function InvoiceDetailPage() {
                 <td style={{ padding: '0.875rem 1rem', color: '#6b7280', fontSize: '0.875rem' }}>
                   {job.paperSize?.name} · {job.printType === 'COLOR' ? 'Color' : 'B&W'} · {job.printMode === 'SINGLE' ? '1-Sided' : '2-Sided'}
                   <br/>{job.pages} pages × {job.copies} copies
+                  {job.discount > 0 && <div style={{ color: '#ef4444', fontWeight: 600 }}>Discount: -Rs. {job.discount.toLocaleString()}</div>}
                 </td>
                 <td style={{ padding: '0.875rem 1rem', textAlign: 'right', color: '#1a1a1a' }}>Rs. {job.baseAmount.toLocaleString()}</td>
                 <td style={{ padding: '0.875rem 1rem', textAlign: 'right', color: '#6b7280' }}>
@@ -208,6 +213,16 @@ export default function InvoiceDetailPage() {
             ))}
           </tbody>
           <tfoot>
+            {invoice.jobs.some((j: any) => j.discount > 0) && (
+              <tr style={{ background: '#fff' }}>
+                <td colSpan={4} style={{ padding: '0.5rem 1rem', textAlign: 'right', color: '#ef4444', fontSize: '0.875rem', fontWeight: 600 }}>
+                  TOTAL DISCOUNT
+                </td>
+                <td style={{ padding: '0.5rem 1rem', textAlign: 'right', color: '#ef4444', fontWeight: 700 }}>
+                  -Rs. {invoice.jobs.reduce((s: number, j: any) => s + (j.discount || 0), 0).toLocaleString()}
+                </td>
+              </tr>
+            )}
             <tr style={{ background: '#f9fafb' }}>
               <td colSpan={4} style={{ padding: '1rem', textAlign: 'right', fontWeight: 700, fontSize: '1rem', color: '#1a1a1a' }}>TOTAL</td>
               <td style={{ padding: '1rem', textAlign: 'right', fontWeight: 800, fontSize: '1.125rem', color: '#132549' }}>Rs. {invoice.totalAmount.toLocaleString()}</td>
