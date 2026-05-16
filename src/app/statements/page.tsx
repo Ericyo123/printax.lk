@@ -51,32 +51,82 @@ export default function StatementsPage() {
     const { default: jsPDF } = await import('jspdf')
     const { default: autoTable } = await import('jspdf-autotable')
     const doc = new jsPDF()
+    const primaryColor = [21, 94, 150]
+    const accentColor = [19, 37, 73]
+    const greyColor = [100, 100, 100]
 
-    doc.addImage('/logo.png', 'PNG', 14, 10, 30, 10)
-    doc.setFontSize(12); doc.setTextColor(30, 30, 30)
-    doc.text('MONTHLY STATEMENT', 150, 22, { align: 'right' })
-    doc.setFontSize(10); doc.setTextColor(100, 100, 100)
-    doc.text(stmt.statementNo, 150, 29, { align: 'right' })
-    doc.text(`Period: ${MONTHS[stmt.month - 1]} ${stmt.year}`, 150, 35, { align: 'right' })
-    if (stmt.customer) { doc.setTextColor(30, 30, 30); doc.text(stmt.customer.name, 14, 35) }
+    // Header Background
+    doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2])
+    doc.rect(0, 0, 210, 40, 'F')
+
+    // Logo & Header Info
+    doc.addImage('/logo.png', 'PNG', 14, 12, 35, 12)
+    doc.setTextColor(255, 255, 255)
+    doc.setFontSize(10)
+    doc.text('Print Shop Management System', 14, 30)
+
+    doc.setFontSize(22); doc.setFont('helvetica', 'bold')
+    doc.text('MONTHLY STATEMENT', 196, 25, { align: 'right' })
+    doc.setFontSize(10); doc.setFont('helvetica', 'normal')
+    doc.text(stmt.statementNo, 196, 32, { align: 'right' })
+
+    // Bill To & Statement Info
+    let yPos = 55
+    doc.setTextColor(accentColor[0], accentColor[1], accentColor[2])
+    doc.setFontSize(12); doc.setFont('helvetica', 'bold')
+    doc.text('STATEMENT FOR', 14, yPos)
+    
+    doc.text('BILLING PERIOD', 196, yPos, { align: 'right' })
+
+    yPos += 8
+    doc.setTextColor(30, 30, 30); doc.setFontSize(10); doc.setFont('helvetica', 'bold')
+    doc.text(stmt.customer?.name || 'Customer', 14, yPos)
+    
+    doc.setFont('helvetica', 'normal')
+    doc.text(`${MONTHS[stmt.month - 1]} ${stmt.year}`, 196, yPos, { align: 'right' })
 
     const rows = stmt.invoices.map((inv: any) => [
       inv.invoiceNumber,
       new Date(inv.date).toLocaleDateString(),
       inv.jobs?.length || 0,
-      `Rs. ${inv.totalAmount.toLocaleString()}`,
       inv.paymentStatus,
+      `Rs. ${inv.totalAmount.toLocaleString()}`,
     ])
+
     autoTable(doc, {
-      startY: 50,
-      head: [['Invoice #', 'Date', 'Items', 'Amount', 'Status']],
+      startY: yPos + 10,
+      head: [['Invoice #', 'Date', 'Items', 'Status', 'Amount']],
       body: rows,
-      styles: { fontSize: 9 },
-      headStyles: { fillColor: [21, 94, 150] },
+      theme: 'grid',
+      styles: { fontSize: 9, cellPadding: 5 },
+      headStyles: { fillColor: primaryColor, textColor: 255, fontStyle: 'bold' },
+      columnStyles: {
+        2: { halign: 'center' },
+        4: { halign: 'right', fontStyle: 'bold' },
+      },
+      margin: { left: 14, right: 14 },
     })
-    const y = (doc as any).lastAutoTable.finalY + 10
-    doc.setFontSize(12); doc.setFont('helvetica', 'bold')
-    doc.text(`Total: Rs. ${stmt.totalAmount.toLocaleString()}`, 150, y, { align: 'right' })
+
+    let finalY = (doc as any).lastAutoTable.finalY + 15
+    
+    // Summary Box
+    doc.setFillColor(248, 250, 252)
+    doc.rect(130, finalY - 5, 70, 30, 'F')
+    doc.setDrawColor(226, 232, 240)
+    doc.rect(130, finalY - 5, 70, 30, 'D')
+
+    doc.setFontSize(14); doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]); doc.setFont('helvetica', 'bold')
+    doc.text('TOTAL DUE:', 135, finalY + 10)
+    doc.text(`Rs. ${stmt.totalAmount.toLocaleString()}`, 195, finalY + 10, { align: 'right' })
+
+    finalY += 15
+    doc.setFontSize(10); doc.setTextColor(stmt.status === 'PAID' ? [16, 185, 129] : [245, 158, 11])
+    doc.text(stmt.status, 195, finalY, { align: 'right' })
+
+    // Footer Note
+    doc.setFontSize(9); doc.setTextColor(greyColor[0], greyColor[1], greyColor[2]); doc.setFont('helvetica', 'italic')
+    doc.text('Please make payment by the due date. Thank you!', 105, 280, { align: 'center' })
+
     doc.save(`${stmt.statementNo}.pdf`)
   }
 

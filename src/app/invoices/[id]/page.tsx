@@ -45,57 +45,112 @@ export default function InvoiceDetailPage() {
     const { default: autoTable } = await import('jspdf-autotable')
     const doc = new jsPDF()
     const inv = invoice
+    const primaryColor = [21, 94, 150]
+    const accentColor = [19, 37, 73]
+    const greyColor = [100, 100, 100]
 
-    doc.addImage('/logo.png', 'PNG', 14, 10, 30, 10)
-    doc.setFontSize(10); doc.setTextColor(100, 100, 100)
-    doc.text('Print Shop Management System', 14, 25)
+    // Header Background
+    doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2])
+    doc.rect(0, 0, 210, 40, 'F')
 
-    doc.setFontSize(18); doc.setTextColor(30, 30, 30)
-    doc.text('INVOICE', 150, 22, { align: 'right' })
+    // Logo & Header Info
+    doc.addImage('/logo.png', 'PNG', 14, 12, 35, 12)
+    doc.setTextColor(255, 255, 255)
+    doc.setFontSize(10)
+    doc.text('Print Shop Management System', 14, 30)
 
-    doc.setFontSize(10); doc.setTextColor(80, 80, 80)
-    doc.text(`Invoice #: ${inv.invoiceNumber}`, 150, 30, { align: 'right' })
-    doc.text(`Date: ${new Date(inv.date).toLocaleDateString()}`, 150, 36, { align: 'right' })
-    if (inv.dueDate) doc.text(`Due: ${new Date(inv.dueDate).toLocaleDateString()}`, 150, 42, { align: 'right' })
+    doc.setFontSize(24); doc.setFont('helvetica', 'bold')
+    doc.text('INVOICE', 196, 25, { align: 'right' })
+    doc.setFontSize(10); doc.setFont('helvetica', 'normal')
+    doc.text(inv.invoiceNumber, 196, 32, { align: 'right' })
 
-    if (inv.customer) {
-      doc.setFontSize(10)
-      doc.text('Bill To:', 14, 42)
+    // Bill To & Invoice Info
+    let yPos = 55
+    doc.setTextColor(accentColor[0], accentColor[1], accentColor[2])
+    doc.setFontSize(12); doc.setFont('helvetica', 'bold')
+    doc.text('BILL TO', 14, yPos)
+    
+    doc.text('INVOICE DETAILS', 196, yPos, { align: 'right' })
+
+    yPos += 8
+    doc.setTextColor(30, 30, 30); doc.setFontSize(10); doc.setFont('helvetica', 'bold')
+    doc.text(inv.customer?.name || 'Walk-in Customer', 14, yPos)
+    
+    doc.setFont('helvetica', 'normal')
+    doc.text(`Date: ${new Date(inv.date).toLocaleDateString()}`, 196, yPos, { align: 'right' })
+
+    yPos += 6
+    doc.setTextColor(greyColor[0], greyColor[1], greyColor[2])
+    if (inv.customer?.phone) { doc.text(inv.customer.phone, 14, yPos); yPos += 5 }
+    if (inv.customer?.email) { doc.text(inv.customer.email, 14, yPos); yPos += 5 }
+    
+    if (inv.dueDate) {
       doc.setTextColor(30, 30, 30)
-      doc.text(inv.customer.name, 14, 48)
-      if (inv.customer.phone) doc.text(inv.customer.phone, 14, 54)
-      if (inv.customer.email) doc.text(inv.customer.email, 14, 60)
+      doc.text(`Due Date: ${new Date(inv.dueDate).toLocaleDateString()}`, 196, yPos - (inv.customer?.phone ? 5 : 0), { align: 'right' })
     }
 
     const rows = inv.jobs.map((job: any) => [
       job.description,
-      `${job.paperSize?.name || ''} ${job.printType} ${job.printMode}`,
+      `${job.paperSize?.name || ''}\n${job.printType} · ${job.printMode}`,
       `${job.pages}p × ${job.copies}c`,
-      job.pricingType.replace('_', ' '),
+      `Rs. ${job.baseAmount.toLocaleString()}`,
+      `Rs. ${job.additionalTotal.toLocaleString()}`,
       `Rs. ${job.totalAmount.toLocaleString()}`,
     ])
 
-    const totalDiscount = inv.jobs.reduce((sum: number, job: any) => sum + (job.discount || 0), 0)
-    if (totalDiscount > 0) {
-      rows.push(['Discount', '', '', '', `- Rs. ${totalDiscount.toLocaleString()}`])
-    }
-
     autoTable(doc, {
-      startY: 70,
-      head: [['Description', 'Spec', 'Qty', 'Type', 'Amount']],
+      startY: yPos + 10,
+      head: [['Description', 'Specification', 'Qty', 'Base', 'Extras', 'Total']],
       body: rows,
-      styles: { fontSize: 9 },
-      headStyles: { fillColor: [21, 94, 150] },
+      theme: 'grid',
+      styles: { fontSize: 9, cellPadding: 5 },
+      headStyles: { fillColor: primaryColor, textColor: 255, fontStyle: 'bold' },
+      columnStyles: {
+        3: { halign: 'right' },
+        4: { halign: 'right' },
+        5: { halign: 'right', fontStyle: 'bold' },
+      },
+      margin: { left: 14, right: 14 },
     })
 
-    const finalY = (doc as any).lastAutoTable.finalY + 10
-    doc.setFontSize(12); doc.setTextColor(30, 30, 30)
-    doc.text(`Total: Rs. ${inv.totalAmount.toLocaleString()}`, 150, finalY, { align: 'right' })
-    doc.setFontSize(10)
-    doc.text(`Status: ${inv.paymentStatus}`, 150, finalY + 6, { align: 'right' })
+    let finalY = (doc as any).lastAutoTable.finalY + 15
+    
+    // Summary Box
+    doc.setFillColor(248, 250, 252)
+    doc.rect(130, finalY - 5, 70, 45, 'F')
+    doc.setDrawColor(226, 232, 240)
+    doc.rect(130, finalY - 5, 70, 45, 'D')
+
+    const totalDiscount = inv.jobs.reduce((sum: number, job: any) => sum + (job.discount || 0), 0)
+    
+    doc.setFontSize(10); doc.setTextColor(greyColor[0], greyColor[1], greyColor[2])
+    doc.text('Subtotal:', 135, finalY)
+    doc.text(`Rs. ${(inv.totalAmount + totalDiscount).toLocaleString()}`, 195, finalY, { align: 'right' })
+
+    if (totalDiscount > 0) {
+      finalY += 8
+      doc.setTextColor(239, 68, 68)
+      doc.text('Discount:', 135, finalY)
+      doc.text(`- Rs. ${totalDiscount.toLocaleString()}`, 195, finalY, { align: 'right' })
+    }
+
+    finalY += 12
+    doc.setDrawColor(226, 232, 240)
+    doc.line(135, finalY - 5, 195, finalY - 5)
+    
+    doc.setFontSize(14); doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]); doc.setFont('helvetica', 'bold')
+    doc.text('TOTAL:', 135, finalY + 2)
+    doc.text(`Rs. ${inv.totalAmount.toLocaleString()}`, 195, finalY + 2, { align: 'right' })
+
+    finalY += 8
+    doc.setFontSize(10); doc.setTextColor(inv.paymentStatus === 'PAID' ? [16, 185, 129] : [245, 158, 11])
+    doc.text(inv.paymentStatus, 195, finalY + 2, { align: 'right' })
+
+    // Footer Note
+    doc.setFontSize(9); doc.setTextColor(greyColor[0], greyColor[1], greyColor[2]); doc.setFont('helvetica', 'italic')
+    doc.text('Thank you for choosing printax.lk!', 105, 280, { align: 'center' })
 
     doc.save(`${inv.invoiceNumber}.pdf`)
-  }
 
   if (loading) return <AppShell><div className="empty-state"><span className="spinner" style={{ width: 36, height: 36 }} /></div></AppShell>
   if (!invoice) return <AppShell><div className="empty-state"><p>Invoice not found</p></div></AppShell>
