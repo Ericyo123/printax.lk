@@ -84,18 +84,18 @@ export default function SettingsPage() {
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div className="form-group">
-              <label className="label">Business Name</label>
+              <label className="form-label">Business Name</label>
               <input 
-                className="input"
+                className="form-control"
                 value={settings.businessName} 
                 onChange={(e) => setSettings({ ...settings, businessName: e.target.value })} 
                 placeholder="e.g. Printax Solutions"
               />
             </div>
             <div className="form-group">
-              <label className="label">Full Address</label>
+              <label className="form-label">Full Address</label>
               <textarea 
-                className="input"
+                className="form-control"
                 rows={3}
                 value={settings.address} 
                 onChange={(e) => setSettings({ ...settings, address: e.target.value })} 
@@ -105,17 +105,17 @@ export default function SettingsPage() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="form-group">
-                <label className="label">Contact Phone</label>
+                <label className="form-label">Contact Phone</label>
                 <input 
-                  className="input"
+                  className="form-control"
                   value={settings.phone} 
                   onChange={(e) => setSettings({ ...settings, phone: e.target.value })} 
                 />
               </div>
               <div className="form-group">
-                <label className="label">Business Email</label>
+                <label className="form-label">Business Email</label>
                 <input 
-                  className="input"
+                  className="form-control"
                   value={settings.email} 
                   onChange={(e) => setSettings({ ...settings, email: e.target.value })} 
                 />
@@ -131,43 +131,43 @@ export default function SettingsPage() {
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div className="form-group">
-              <label className="label">Bank Name</label>
+              <label className="form-label">Bank Name</label>
               <input 
-                className="input"
+                className="form-control"
                 value={settings.bankName} 
                 onChange={(e) => setSettings({ ...settings, bankName: e.target.value })} 
                 placeholder="e.g. HNB, BOC, Sampath"
               />
             </div>
             <div className="form-group">
-              <label className="label">Account Name</label>
+              <label className="form-label">Account Name</label>
               <input 
-                className="input"
+                className="form-control"
                 value={settings.accountName} 
                 onChange={(e) => setSettings({ ...settings, accountName: e.target.value })} 
               />
             </div>
             <div className="form-group">
-              <label className="label">Account Number</label>
+              <label className="form-label">Account Number</label>
               <input 
-                className="input"
+                className="form-control"
                 value={settings.accountNumber} 
                 onChange={(e) => setSettings({ ...settings, accountNumber: e.target.value })} 
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="form-group">
-                <label className="label">SWIFT / BIC Code</label>
+                <label className="form-label">SWIFT / BIC Code</label>
                 <input 
-                  className="input"
+                  className="form-control"
                   value={settings.swiftCode} 
                   onChange={(e) => setSettings({ ...settings, swiftCode: e.target.value })} 
                 />
               </div>
               <div className="form-group">
-                <label className="label">Branch Name</label>
+                <label className="form-label">Branch Name</label>
                 <input 
-                  className="input"
+                  className="form-control"
                   value={settings.branch} 
                   onChange={(e) => setSettings({ ...settings, branch: e.target.value })} 
                 />
@@ -177,8 +177,8 @@ export default function SettingsPage() {
         </div>
       </div>
       
-      <div style={{ marginTop: '2rem', padding: '1rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.875rem', color: '#64748b' }}>
-        <strong>Note:</strong> These details will be automatically included in all generated Invoices and Monthly Statements.
+      <div style={{ marginTop: '2rem', padding: '1rem', background: 'var(--bg-elevated)', borderRadius: '8px', border: '1px solid var(--border)', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+        <strong style={{ color: 'var(--text-primary)' }}>Note:</strong> These details will be automatically included in all generated Invoices and Monthly Statements.
       </div>
     </div>
   )
