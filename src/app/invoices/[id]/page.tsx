@@ -90,9 +90,9 @@ export default function InvoiceDetailPage() {
       doc.setFontSize(28); doc.setFont('helvetica', 'bold')
       doc.text('Invoice', 14, 25)
 
-      // Logo on Top Right - STRETCHED VERTICALLY
+      // Logo on Top Right - EVEN BIGGER
       if (logoBase64) {
-        doc.addImage(logoBase64, 'PNG', 150, 8, 45, 35)
+        doc.addImage(logoBase64, 'PNG', 126, 5, 70, 50)
       }
 
       // Invoice Details
