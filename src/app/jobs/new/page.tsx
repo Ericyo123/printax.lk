@@ -230,12 +230,16 @@ export default function NewJobPage() {
                 <label className="form-label">Select Customer (optional for walk-in)</label>
                 <select className="form-control" value={customerId} onChange={e => setCustomerId(e.target.value)}>
                   <option value="">Walk-in Customer</option>
-                  <optgroup label="Monthly Customers">
-                    {customers.filter(c => c.type === 'MONTHLY').map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                  </optgroup>
-                  <optgroup label="Walk-in Customers">
-                    {customers.filter(c => c.type === 'WALK_IN').map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                  </optgroup>
+                  {customers.filter(c => c.type === 'MONTHLY').length > 0 && (
+                    <optgroup label="Monthly Customers">
+                      {customers.filter(c => c.type === 'MONTHLY').map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    </optgroup>
+                  )}
+                  {customers.filter(c => c.type === 'WALK_IN').length > 0 && (
+                    <optgroup label="Walk-in Customers">
+                      {customers.filter(c => c.type === 'WALK_IN').map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    </optgroup>
+                  )}
                 </select>
               </div>
               {isMonthly && (

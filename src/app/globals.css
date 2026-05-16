@@ -230,6 +230,11 @@ select.form-control {
   background-size: 1rem;
   padding-right: 2.5rem;
 }
+select.form-control optgroup {
+  background-color: #1a2235;
+  color: #94a3b8;
+  font-weight: 600;
+}
 select.form-control option {
   background-color: #1a2235;
   color: #f1f5f9;
