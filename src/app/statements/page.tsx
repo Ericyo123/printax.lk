@@ -149,7 +149,11 @@ export default function StatementsPage() {
       const headerHeight = 10
       doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2])
       doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2])
-      doc.roundedRect(14, tableStartY, 182, headerHeight, 3, 3, 'F')
+      // Draw rounded header
+      doc.roundedRect(14, tableStartY, 182, headerHeight, 4, 4, 'F')
+      // Square off bottom corners of the header to connect with body
+      doc.rect(14, tableStartY + headerHeight / 2, 182, headerHeight / 2, 'F')
+
       doc.setTextColor(255, 255, 255); doc.setFontSize(9); doc.setFont('helvetica', 'bold')
       
       doc.text('#', 20, tableStartY + 7, { align: 'center' })
@@ -162,8 +166,8 @@ export default function StatementsPage() {
         startY: tableStartY + headerHeight,
         showHead: 'never',
         body: rows,
-        theme: 'striped',
-        styles: { fontSize: 9, cellPadding: 5 },
+        theme: 'plain',
+        styles: { fontSize: 9, cellPadding: 6, textColor: [30, 30, 30] },
         columnStyles: {
           0: { cellWidth: 12, halign: 'center' },
           1: { cellWidth: 45 },
@@ -172,6 +176,35 @@ export default function StatementsPage() {
           4: { cellWidth: 50, halign: 'right', fontStyle: 'bold' },
         },
         margin: { left: 14, right: 14 },
+        willDrawCell: (data: any) => {
+          if (data.section === 'body') {
+            const isLastRow = data.row.index === data.table.body.length - 1
+            const isFirstCol = data.column.index === 0
+            const isLastCol = data.column.index === data.table.columns.length - 1
+            const isEven = data.row.index % 2 === 0
+            
+            if (isEven) {
+              doc.setFillColor(244, 244, 245)
+            } else {
+              doc.setFillColor(255, 255, 255)
+            }
+            
+            const x = data.cell.x
+            const y = data.cell.y
+            const w = data.cell.width
+            const h = data.cell.height
+            const r = 4
+
+            if (isLastRow) {
+               doc.roundedRect(x, y, w, h, r, r, 'F')
+               doc.rect(x, y, w, h / 2, 'F')
+               if (!isFirstCol) doc.rect(x, y + h / 2, w / 2, h / 2, 'F')
+               if (!isLastCol) doc.rect(x + w / 2, y + h / 2, w / 2, h / 2, 'F')
+            } else {
+               doc.rect(x, y, w, h, 'F')
+            }
+          }
+        }
       })
 
       let finalY = ((doc as any).lastAutoTable?.finalY || 180) + 15
