@@ -87,7 +87,6 @@ export default function StatementsPage() {
       const settings = await fetch('/api/settings').then(res => res.json()).catch(() => ({}))
       
       const primaryColor = [21, 94, 160]
-      const accentColor = [19, 37, 73]
       const lightBlue = [240, 247, 255]
       const greyColor = [100, 100, 100]
       const darkText = [30, 30, 30]
@@ -97,9 +96,9 @@ export default function StatementsPage() {
       doc.setFontSize(28); doc.setFont('helvetica', 'bold')
       doc.text('Statement', 14, 25)
 
-      // Logo on Top Right - BIGGER
+      // Logo on Top Right - STRETCHED VERTICALLY
       if (logoBase64) {
-        doc.addImage(logoBase64, 'PNG', 140, 10, 60, 30)
+        doc.addImage(logoBase64, 'PNG', 150, 8, 45, 35)
       }
 
       // Statement Details
@@ -163,9 +162,9 @@ export default function StatementsPage() {
 
       let finalY = ((doc as any).lastAutoTable?.finalY || 180) + 15
       
-      // Total Section
+      // Summary
       doc.setTextColor(darkText[0], darkText[1], darkText[2])
-      doc.setFontSize(14); doc.setFont('helvetica', 'bold')
+      doc.setFontSize(12); doc.setFont('helvetica', 'bold')
       doc.text('Total Due (LKR)', 130, finalY + 10)
       doc.setFontSize(18); doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2])
       doc.text(`Rs. ${(stmt.totalAmount || 0).toLocaleString()}.00`, 196, finalY + 10, { align: 'right' })
@@ -177,7 +176,7 @@ export default function StatementsPage() {
 
       // Footer
       doc.setFontSize(9); doc.setTextColor(greyColor[0], greyColor[1], greyColor[2]); doc.setFont('helvetica', 'normal')
-      doc.text(`For any enquiry, reach out via call on ${settings.phone || '+94 72 724 5518'}`, 105, 285, { align: 'center' })
+      doc.text(`132, Kolonnawa Road Demetagoda  |  Phone: ${settings.phone || ''}  |  Email: ${settings.email || ''}`, 105, 285, { align: 'center' })
 
       doc.save(`${stmt.statementNo || 'statement'}.pdf`)
     } catch (err) {

@@ -12,7 +12,8 @@ const navItems = [
   { href: '/statements', icon: '📋', label: 'Statements', section: 'Billing' },
   { href: '/payments', icon: '💳', label: 'Payments', section: 'Billing' },
   { href: '/reports', icon: '📊', label: 'Reports', section: 'Reports' },
-  { href: '/pricing', icon: '⚙', label: 'Pricing', section: 'Admin', adminOnly: true },
+  { href: '/settings', icon: '⚙', label: 'Settings', section: 'Admin', adminOnly: true },
+  { href: '/pricing', icon: '💰', label: 'Pricing', section: 'Admin', adminOnly: true },
   { href: '/users', icon: '👤', label: 'Users', section: 'Admin', adminOnly: true },
 ]
 
