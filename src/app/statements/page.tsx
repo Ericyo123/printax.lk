@@ -95,14 +95,11 @@ export default function StatementsPage() {
 
       // Logo & Header Info
       if (logoBase64) {
-        doc.addImage(logoBase64, 'PNG', 14, 12, 35, 12)
+        doc.addImage(logoBase64, 'PNG', 14, 10, 40, 22)
       } else {
-        doc.setTextColor(accentColor[0], accentColor[1], accentColor[2]); doc.setFontSize(18); doc.setFont('helvetica', 'bold')
-        doc.text('printax.lk', 14, 22)
+        doc.setTextColor(accentColor[0], accentColor[1], accentColor[2]); doc.setFontSize(22); doc.setFont('helvetica', 'bold')
+        doc.text('printax.lk', 14, 25)
       }
-      doc.setTextColor(greyColor[0], greyColor[1], greyColor[2])
-      doc.setFontSize(10); doc.setFont('helvetica', 'normal')
-      doc.text('Print Shop Management System', 14, 30)
 
       doc.setFontSize(22); doc.setFont('helvetica', 'bold'); doc.setTextColor(accentColor[0], accentColor[1], accentColor[2])
       doc.text('MONTHLY STATEMENT', 196, 25, { align: 'right' })
@@ -166,9 +163,18 @@ export default function StatementsPage() {
     doc.setFontSize(10); doc.setTextColor(statusColor[0], statusColor[1], statusColor[2])
     doc.text(stmt.status || '', 195, finalY, { align: 'right' })
 
-    // Footer Note
-    doc.setFontSize(9); doc.setTextColor(greyColor[0], greyColor[1], greyColor[2]); doc.setFont('helvetica', 'italic')
-    doc.text('Please make payment by the due date. Thank you!', 105, 280, { align: 'center' })
+    // Footer Section
+    const footerY = 275
+    doc.setDrawColor(226, 232, 240)
+    doc.setLineWidth(0.5)
+    doc.line(14, footerY - 5, 196, footerY - 5)
+    
+    doc.setFontSize(9); doc.setTextColor(greyColor[0], greyColor[1], greyColor[2]); doc.setFont('helvetica', 'bold')
+    doc.text('132, Kolonnawa Road Demetagoda', 14, footerY)
+    doc.setFont('helvetica', 'normal')
+    doc.text('Phone: 077 123 4567  |  Email: info@printax.lk  |  Web: www.printax.lk', 14, footerY + 5)
+    
+    doc.text('Thank you for your business!', 196, footerY + 2, { align: 'right' })
 
     doc.save(`${stmt.statementNo || 'statement'}.pdf`)
     } catch (err) {
