@@ -61,12 +61,12 @@ a { color: var(--primary-light); text-decoration: none; }
 /* Layout */
 .app-shell { display: flex; min-height: 100vh; }
 .sidebar {
-  width: 240px; min-height: 100vh; position: fixed; left: 0; top: 0;
+  width: 240px; height: 100vh; position: fixed; left: 0; top: 0;
   background: var(--bg-surface);
   border-right: 1px solid var(--border);
   display: flex; flex-direction: column;
   z-index: 100;
-  transition: width var(--transition);
+  transition: width var(--transition), transform 0.3s ease, visibility 0.3s;
 }
 .sidebar-logo {
   padding: 1.5rem 1.25rem;
@@ -429,11 +429,63 @@ tbody td { padding: 0.875rem 1rem; font-size: 0.875rem; color: var(--text-primar
 .tab.active { background: var(--primary); color: white; box-shadow: 0 2px 8px var(--primary-glow); }
 .tab:hover:not(.active) { color: var(--text-secondary); background: var(--bg-card); }
 
-/* Responsive */
+/* Responsive & Mobile Fixes */
+.mobile-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  margin-right: 0.5rem;
+}
+
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 90;
+  animation: fadeIn 0.2s ease;
+}
+
 @media (max-width: 768px) {
-  .sidebar { width: 0; overflow: hidden; }
-  .main-content { margin-left: 0; }
-  .page-content { padding: 1rem; }
-  .stat-grid { grid-template-columns: 1fr 1fr; }
+  .mobile-toggle { display: block; }
+  
+  .sidebar {
+    transform: translateX(-100%);
+    width: 280px;
+    box-shadow: 20px 0 50px rgba(0,0,0,0.5);
+    visibility: hidden;
+  }
+  
+  .sidebar.open {
+    transform: translateX(0);
+    visibility: visible;
+  }
+  
+  .main-content { margin-left: 0; width: 100%; }
+  
+  .topbar { padding: 0 1rem; }
+  .topbar-date { display: none; }
+  
+  .page-content { padding: 1.25rem 1rem; }
+  
+  .stat-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  .stat-card { padding: 1rem; }
+  .stat-value { font-size: 1.25rem; }
+  
   .form-row { grid-template-columns: 1fr; }
+  
+  .page-header { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+  .page-actions { width: 100%; }
+  .page-actions .btn { width: 100%; justify-content: center; }
+
+  .table-wrapper { margin: 0 -1rem; border-radius: 0; border-left: none; border-right: none; }
+}
+
+@media (max-width: 480px) {
+  .stat-grid { grid-template-columns: 1fr; }
+  .tabs { width: 100%; overflow-x: auto; }
 }

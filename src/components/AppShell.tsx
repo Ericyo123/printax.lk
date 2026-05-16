@@ -2,7 +2,7 @@
 import { useSession, signOut } from 'next-auth/react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 const navItems = [
   { href: '/dashboard', icon: '⊞', label: 'Dashboard', section: 'Main' },
@@ -16,14 +16,16 @@ const navItems = [
   { href: '/users', icon: '👤', label: 'Users', section: 'Admin', adminOnly: true },
 ]
 
-export function AppShell({ children }: { children: React.ReactNode }) {
-  const { data: session, status } = useSession()
-  const pathname = usePathname()
-  const router = useRouter()
+  const [mobileOpen, setMobileOpen] = useState(false)
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
   }, [status, router])
+
+  // Close sidebar on navigation
+  useEffect(() => {
+    setMobileOpen(false)
+  }, [pathname])
 
   if (status === 'loading') {
     return (
@@ -39,9 +41,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const sections = Array.from(new Set(visibleItems.map(i => i.section)))
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${mobileOpen ? 'mobile-open' : ''}`}>
+      {/* Mobile Overlay */}
+      {mobileOpen && <div className="sidebar-overlay" onClick={() => setMobileOpen(false)} />}
+
       {/* Sidebar */}
-      <aside className="sidebar">
+      <aside className={`sidebar ${mobileOpen ? 'open' : ''}`}>
         <div className="sidebar-logo" style={{ padding: '1.25rem', background: 'var(--bg-base)', borderBottom: '1px solid var(--border)' }}>
           <div style={{
             background: 'white', borderRadius: '8px', padding: '0.25rem',
@@ -84,7 +89,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Main */}
       <div className="main-content">
         <header className="topbar">
-          <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+          <button className="mobile-toggle" onClick={() => setMobileOpen(true)}>
+            ☰
+          </button>
+          <div className="topbar-date" style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
             {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
