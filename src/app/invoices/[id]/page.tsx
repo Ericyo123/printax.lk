@@ -89,13 +89,13 @@ export default function InvoiceDetailPage() {
 
       // Logo & Header Info
       if (logoBase64) {
-        doc.addImage(logoBase64, 'PNG', 14, 10, 40, 22)
+        doc.addImage(logoBase64, 'PNG', 14, 8, 45, 28)
       } else {
-        doc.setTextColor(accentColor[0], accentColor[1], accentColor[2]); doc.setFontSize(22); doc.setFont('helvetica', 'bold')
+        doc.setTextColor(accentColor[0], accentColor[1], accentColor[2]); doc.setFontSize(24); doc.setFont('helvetica', 'bold')
         doc.text('printax.lk', 14, 25)
       }
 
-      doc.setFontSize(24); doc.setFont('helvetica', 'bold'); doc.setTextColor(accentColor[0], accentColor[1], accentColor[2])
+      doc.setFontSize(26); doc.setFont('helvetica', 'bold'); doc.setTextColor(accentColor[0], accentColor[1], accentColor[2])
       doc.text('INVOICE', 196, 25, { align: 'right' })
       doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(greyColor[0], greyColor[1], greyColor[2])
       doc.text(inv.invoiceNumber || 'invoice', 196, 32, { align: 'right' })
@@ -158,8 +158,10 @@ export default function InvoiceDetailPage() {
     let finalY = ((doc as any).lastAutoTable?.finalY || yPos + 20) + 15
     
     // Summary Box
+    doc.setFillColor(249, 250, 251)
+    doc.roundedRect(130, finalY - 5, 70, 45, 3, 3, 'F')
     doc.setDrawColor(226, 232, 240)
-    doc.rect(130, finalY - 5, 70, 45, 'D')
+    doc.roundedRect(130, finalY - 5, 70, 45, 3, 3, 'D')
 
     const totalDiscount = (inv.jobs || []).reduce((sum: number, job: any) => sum + (job.discount || 0), 0)
     
@@ -189,14 +191,14 @@ export default function InvoiceDetailPage() {
 
     // Footer Section
     const footerY = 275
-    doc.setDrawColor(226, 232, 240)
+    doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2])
     doc.setLineWidth(0.5)
     doc.line(14, footerY - 5, 196, footerY - 5)
     
     doc.setFontSize(9); doc.setTextColor(greyColor[0], greyColor[1], greyColor[2]); doc.setFont('helvetica', 'bold')
     doc.text('132, Kolonnawa Road Demetagoda', 14, footerY)
     doc.setFont('helvetica', 'normal')
-    doc.text('Phone: 077 123 4567  |  Email: info@printax.lk  |  Web: www.printax.lk', 14, footerY + 5)
+    doc.text('Phone: 0727245518  |  Email: mohommadammar826@gmail.com  |  Web: www.printax.lk', 14, footerY + 5)
     
     doc.text('Thank you for your business!', 196, footerY + 2, { align: 'right' })
 
