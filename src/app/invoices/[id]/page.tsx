@@ -177,7 +177,8 @@ export default function InvoiceDetailPage() {
     doc.text(`Rs. ${(inv.totalAmount || 0).toLocaleString()}`, 195, finalY + 2, { align: 'right' })
 
     finalY += 8
-    doc.setFontSize(10); doc.setTextColor(inv.paymentStatus === 'PAID' ? [16, 185, 129] : [245, 158, 11])
+    const statusColor = inv.paymentStatus === 'PAID' ? [16, 185, 129] : [245, 158, 11]
+    doc.setFontSize(10); doc.setTextColor(statusColor[0], statusColor[1], statusColor[2])
     doc.text(inv.paymentStatus || '', 195, finalY + 2, { align: 'right' })
 
     // Footer Note

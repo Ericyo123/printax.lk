@@ -153,7 +153,8 @@ export default function StatementsPage() {
     doc.text(`Rs. ${(stmt.totalAmount || 0).toLocaleString()}`, 195, finalY + 10, { align: 'right' })
 
     finalY += 15
-    doc.setFontSize(10); doc.setTextColor(stmt.status === 'PAID' ? [16, 185, 129] : [245, 158, 11])
+    const statusColor = stmt.status === 'PAID' ? [16, 185, 129] : [245, 158, 11]
+    doc.setFontSize(10); doc.setTextColor(statusColor[0], statusColor[1], statusColor[2])
     doc.text(stmt.status || '', 195, finalY, { align: 'right' })
 
     // Footer Note
