@@ -78,131 +78,127 @@ export default function InvoiceDetailPage() {
 
       const logoBase64 = await getBase64('/logo.png')
 
-      const primaryColor = [21, 94, 150]
-      const accentColor = [19, 37, 73]
+      const purpleColor = [99, 57, 180]
+      const lightPurple = [243, 240, 255]
       const greyColor = [100, 100, 100]
+      const darkText = [30, 30, 30]
 
-      // Header Decorative Line
-      doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2])
-      doc.setLineWidth(1.5)
-      doc.line(14, 38, 196, 38)
+      // Header
+      doc.setTextColor(purpleColor[0], purpleColor[1], purpleColor[2])
+      doc.setFontSize(28); doc.setFont('helvetica', 'bold')
+      doc.text('Invoice', 14, 25)
 
-      // Logo & Header Info
+      // Logo on Top Right
       if (logoBase64) {
-        doc.addImage(logoBase64, 'PNG', 14, 8, 45, 28)
-      } else {
-        doc.setTextColor(accentColor[0], accentColor[1], accentColor[2]); doc.setFontSize(24); doc.setFont('helvetica', 'bold')
-        doc.text('printax.lk', 14, 25)
+        doc.addImage(logoBase64, 'PNG', 160, 12, 36, 18)
       }
 
-      doc.setFontSize(26); doc.setFont('helvetica', 'bold'); doc.setTextColor(accentColor[0], accentColor[1], accentColor[2])
-      doc.text('INVOICE', 196, 25, { align: 'right' })
-      doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(greyColor[0], greyColor[1], greyColor[2])
-      doc.text(inv.invoiceNumber || 'invoice', 196, 32, { align: 'right' })
-
-      // Bill To & Invoice Info
-      let yPos = 55
-      doc.setTextColor(accentColor[0], accentColor[1], accentColor[2])
-      doc.setFontSize(12); doc.setFont('helvetica', 'bold')
-      doc.text('BILL TO', 14, yPos)
+      // Invoice Details
+      doc.setTextColor(darkText[0], darkText[1], darkText[2])
+      doc.setFontSize(10); doc.setFont('helvetica', 'normal')
       
-      doc.text('INVOICE DETAILS', 196, yPos, { align: 'right' })
+      let infoY = 40
+      doc.text('Invoice No #', 14, infoY); doc.setFont('helvetica', 'bold'); doc.text(inv.invoiceNumber || '', 45, infoY)
+      infoY += 6
+      doc.setFont('helvetica', 'normal'); doc.text('Invoice Date', 14, infoY); doc.setFont('helvetica', 'bold'); doc.text(new Date(inv.date).toLocaleDateString(), 45, infoY)
+      infoY += 6
+      if (inv.dueDate) {
+        doc.setFont('helvetica', 'normal'); doc.text('Due Date', 14, infoY); doc.setFont('helvetica', 'bold'); doc.text(new Date(inv.dueDate).toLocaleDateString(), 45, infoY)
+      }
 
-    yPos += 8
-    doc.setTextColor(30, 30, 30); doc.setFontSize(10); doc.setFont('helvetica', 'bold')
-    doc.text(inv.customer?.name || 'Walk-in Customer', 14, yPos)
-    
-    doc.setFont('helvetica', 'normal')
-    doc.text(`Date: ${new Date(inv.date).toLocaleDateString()}`, 196, yPos, { align: 'right' })
+      // Address Boxes
+      let boxY = 60
+      // Billed By
+      doc.setFillColor(lightPurple[0], lightPurple[1], lightPurple[2])
+      doc.roundedRect(14, boxY, 90, 45, 3, 3, 'F')
+      doc.setTextColor(purpleColor[0], purpleColor[1], purpleColor[2])
+      doc.setFontSize(14); doc.setFont('helvetica', 'bold')
+      doc.text('Billed By', 18, boxY + 8)
+      doc.setTextColor(darkText[0], darkText[1], darkText[2])
+      doc.setFontSize(10); doc.setFont('helvetica', 'bold')
+      doc.text('Printax Solutions', 18, boxY + 15)
+      doc.setFont('helvetica', 'normal')
+      doc.text('132, Kolonnawa Road,\nDemetagoda,\nSri Lanka', 18, boxY + 22)
 
-    yPos += 6
-    doc.setTextColor(greyColor[0], greyColor[1], greyColor[2])
-    if (inv.customer?.phone) { doc.text(inv.customer.phone, 14, yPos); yPos += 5 }
-    if (inv.customer?.email) { doc.text(inv.customer.email, 14, yPos); yPos += 5 }
-    
-    if (inv.dueDate) {
-      doc.setTextColor(30, 30, 30)
-      doc.text(`Due Date: ${new Date(inv.dueDate).toLocaleDateString()}`, 196, yPos - (inv.customer?.phone ? 5 : 0), { align: 'right' })
-    }
+      // Billed To
+      doc.setFillColor(lightPurple[0], lightPurple[1], lightPurple[2])
+      doc.roundedRect(106, boxY, 90, 45, 3, 3, 'F')
+      doc.setTextColor(purpleColor[0], purpleColor[1], purpleColor[2])
+      doc.setFontSize(14); doc.setFont('helvetica', 'bold')
+      doc.text('Billed To', 110, boxY + 8)
+      doc.setTextColor(darkText[0], darkText[1], darkText[2])
+      doc.setFontSize(10); doc.setFont('helvetica', 'bold')
+      doc.text(inv.customer?.name || 'Walk-in Customer', 110, boxY + 15)
+      doc.setFont('helvetica', 'normal')
+      if (inv.customer?.address) doc.text(inv.customer.address, 110, boxY + 22)
+      doc.text('Sri Lanka', 110, boxY + (inv.customer?.address ? 32 : 22))
 
-    const rows = (inv.jobs || []).map((job: any) => [
-      job.description || '',
-      `${job.paperSize?.name || ''}\n${job.printType || ''} · ${job.printMode || ''}`,
-      `${job.pages || 0}p × ${job.copies || 0}c`,
-      `Rs. ${(job.baseAmount || 0).toLocaleString()}`,
-      `Rs. ${(job.additionalTotal || 0).toLocaleString()}`,
-      `Rs. ${(job.totalAmount || 0).toLocaleString()}`,
-    ])
+      const rows = (inv.jobs || []).map((job: any, index: number) => [
+        index + 1,
+        job.description || '',
+        job.copies || 0,
+        `LKR ${(job.baseAmount || 0).toLocaleString()}`,
+        `LKR ${(job.totalAmount || 0).toLocaleString()}`,
+      ])
 
-    try {
       autoTable(doc, {
-        startY: yPos + 10,
-        head: [['Description', 'Specification', 'Qty', 'Base', 'Extras', 'Total']],
+        startY: boxY + 55,
+        head: [['#', 'Item', 'Quantity', 'Rate', 'Amount']],
         body: rows,
-        theme: 'grid',
+        theme: 'striped',
+        headStyles: { fillColor: purpleColor, textColor: 255, fontStyle: 'bold' },
         styles: { fontSize: 9, cellPadding: 5 },
-        headStyles: { fillColor: primaryColor, textColor: 255, fontStyle: 'bold' },
         columnStyles: {
+          0: { halign: 'center' },
+          2: { halign: 'center' },
           3: { halign: 'right' },
-          4: { halign: 'right' },
-          5: { halign: 'right', fontStyle: 'bold' },
+          4: { halign: 'right', fontStyle: 'bold' },
         },
         margin: { left: 14, right: 14 },
       })
-    } catch (e) {
-      console.error('autoTable failed', e)
-      // Fallback: just add a text if table fails
-      doc.text('Table generation failed', 14, yPos + 10)
-    }
 
-    let finalY = ((doc as any).lastAutoTable?.finalY || yPos + 20) + 15
-    
-    // Summary Box
-    doc.setFillColor(249, 250, 251)
-    doc.roundedRect(130, finalY - 5, 70, 45, 3, 3, 'F')
-    doc.setDrawColor(226, 232, 240)
-    doc.roundedRect(130, finalY - 5, 70, 45, 3, 3, 'D')
+      let finalY = ((doc as any).lastAutoTable?.finalY || 180) + 15
+      
+      // Bank Details Box
+      doc.setFillColor(lightPurple[0], lightPurple[1], lightPurple[2])
+      doc.roundedRect(14, finalY - 5, 100, 55, 3, 3, 'F')
+      doc.setTextColor(purpleColor[0], purpleColor[1], purpleColor[2])
+      doc.setFontSize(12); doc.setFont('helvetica', 'bold')
+      doc.text('Bank Details', 18, finalY + 3)
+      
+      doc.setTextColor(darkText[0], darkText[1], darkText[2])
+      doc.setFontSize(9); doc.setFont('helvetica', 'normal')
+      let bankY = finalY + 10
+      const details = [
+        ['Account Name', 'Y A Mohammed'],
+        ['Account Number', '250020308604'],
+        ['SWIFT Code', 'HBLILKLX'],
+        ['Bank', 'HNB'],
+        ['Branch', 'Mount Lavinia']
+      ]
+      details.forEach(([label, value]) => {
+        doc.setFont('helvetica', 'bold'); doc.text(label, 18, bankY)
+        doc.setFont('helvetica', 'normal'); doc.text(value, 55, bankY)
+        bankY += 6
+      })
 
-    const totalDiscount = (inv.jobs || []).reduce((sum: number, job: any) => sum + (job.discount || 0), 0)
-    
-    doc.setFontSize(10); doc.setTextColor(greyColor[0], greyColor[1], greyColor[2])
-    doc.text('Subtotal:', 135, finalY)
-    doc.text(`Rs. ${((inv.totalAmount || 0) + totalDiscount).toLocaleString()}`, 195, finalY, { align: 'right' })
+      // Total Section
+      doc.setTextColor(darkText[0], darkText[1], darkText[2])
+      doc.setFontSize(14); doc.setFont('helvetica', 'bold')
+      doc.text('Total (LKR)', 130, finalY + 10)
+      doc.setFontSize(16)
+      doc.text(`LKR ${(inv.totalAmount || 0).toLocaleString()}.00`, 196, finalY + 10, { align: 'right' })
+      
+      doc.setDrawColor(30, 30, 30)
+      doc.setLineWidth(0.5)
+      doc.line(130, finalY + 2, 196, finalY + 2)
+      doc.line(130, finalY + 15, 196, finalY + 15)
 
-    if (totalDiscount > 0) {
-      finalY += 8
-      doc.setTextColor(239, 68, 68)
-      doc.text('Discount:', 135, finalY)
-      doc.text(`- Rs. ${totalDiscount.toLocaleString()}`, 195, finalY, { align: 'right' })
-    }
+      // Footer
+      doc.setFontSize(9); doc.setTextColor(greyColor[0], greyColor[1], greyColor[2]); doc.setFont('helvetica', 'normal')
+      doc.text(`For any enquiry, reach out via call on +94 72 724 5518`, 105, 280, { align: 'center' })
 
-    finalY += 12
-    doc.setDrawColor(226, 232, 240)
-    doc.line(135, finalY - 5, 195, finalY - 5)
-    
-    doc.setFontSize(14); doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]); doc.setFont('helvetica', 'bold')
-    doc.text('TOTAL:', 135, finalY + 2)
-    doc.text(`Rs. ${(inv.totalAmount || 0).toLocaleString()}`, 195, finalY + 2, { align: 'right' })
-
-    finalY += 8
-    const statusColor = inv.paymentStatus === 'PAID' ? [16, 185, 129] : [245, 158, 11]
-    doc.setFontSize(10); doc.setTextColor(statusColor[0], statusColor[1], statusColor[2])
-    doc.text(inv.paymentStatus || '', 195, finalY + 2, { align: 'right' })
-
-    // Footer Section
-    const footerY = 275
-    doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2])
-    doc.setLineWidth(0.5)
-    doc.line(14, footerY - 5, 196, footerY - 5)
-    
-    doc.setFontSize(9); doc.setTextColor(greyColor[0], greyColor[1], greyColor[2]); doc.setFont('helvetica', 'bold')
-    doc.text('132, Kolonnawa Road Demetagoda', 14, footerY)
-    doc.setFont('helvetica', 'normal')
-    doc.text('Phone: 0727245518  |  Email: mohommadammar826@gmail.com  |  Web: www.printax.lk', 14, footerY + 5)
-    
-    doc.text('Thank you for your business!', 196, footerY + 2, { align: 'right' })
-
-    doc.save(`${inv.invoiceNumber || 'invoice'}.pdf`)
+      doc.save(`${inv.invoiceNumber || 'invoice'}.pdf`)
     } catch (err) {
       console.error('PDF error:', err)
       alert('Failed to generate PDF. Please try again or use the Print button.')
