@@ -143,32 +143,34 @@ export default function InvoiceDetailPage() {
         ]
       })
 
+      const tableStartY = boxY + 55
+      const headerHeight = 10
+      doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2])
+      doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2])
+      // Draw rounded header
+      doc.roundedRect(14, tableStartY, 182, headerHeight, 3, 3, 'F')
+      doc.setTextColor(255, 255, 255); doc.setFontSize(9); doc.setFont('helvetica', 'bold')
+      doc.text('Item Description', 19, tableStartY + 7)
+      doc.text('Quantity', 108.5, tableStartY + 7, { align: 'center' })
+      doc.text('Rate', 151, tableStartY + 7, { align: 'right' })
+      doc.text('Amount', 191, tableStartY + 7, { align: 'right' })
+
       autoTable(doc, {
-        startY: boxY + 55,
-        head: [['', '', '', '']],
+        startY: tableStartY + headerHeight,
+        showHead: 'never',
         body: rows,
         theme: 'striped',
-        headStyles: { fillColor: [255, 255, 255], textColor: 0 },
         styles: { fontSize: 9, cellPadding: 5 },
         columnStyles: {
-          1: { halign: 'center' },
-          2: { halign: 'right' },
-          3: { halign: 'right', fontStyle: 'bold' },
+          0: { cellWidth: 82 },
+          1: { cellWidth: 25, halign: 'center' },
+          2: { cellWidth: 35, halign: 'right' },
+          3: { cellWidth: 40, halign: 'right', fontStyle: 'bold' },
         },
         margin: { left: 14, right: 14 },
       })
 
       const tableFinalY = (doc as any).lastAutoTable.finalY
-      const tableStartY = boxY + 55
-      doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2])
-      doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2])
-      doc.roundedRect(14, tableStartY, 182, 10, 3, 3, 'F')
-      doc.setTextColor(255, 255, 255); doc.setFontSize(9); doc.setFont('helvetica', 'bold')
-      doc.text('Item Description', 19, tableStartY + 7)
-      doc.text('Quantity', 105, tableStartY + 7, { align: 'center' })
-      doc.text('Rate', 150, tableStartY + 7, { align: 'right' })
-      doc.text('Amount', 191, tableStartY + 7, { align: 'right' })
-
       let finalY = tableFinalY + 15
       
       if (settings.bankName) {

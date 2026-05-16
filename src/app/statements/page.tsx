@@ -145,17 +145,31 @@ export default function StatementsPage() {
         `Rs. ${(inv.totalAmount || 0).toLocaleString()}`,
       ])
 
+      const tableStartY = boxY + 55
+      const headerHeight = 10
+      doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2])
+      doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2])
+      doc.roundedRect(14, tableStartY, 182, headerHeight, 3, 3, 'F')
+      doc.setTextColor(255, 255, 255); doc.setFontSize(9); doc.setFont('helvetica', 'bold')
+      
+      doc.text('#', 20, tableStartY + 7, { align: 'center' })
+      doc.text('Invoice #', 28, tableStartY + 7)
+      doc.text('Date', 91, tableStartY + 7, { align: 'center' })
+      doc.text('Status', 113, tableStartY + 7)
+      doc.text('Amount', 191, tableStartY + 7, { align: 'right' })
+
       autoTable(doc, {
-        startY: boxY + 55,
-        head: [['#', 'Invoice #', 'Date', 'Status', 'Amount']],
+        startY: tableStartY + headerHeight,
+        showHead: 'never',
         body: rows,
         theme: 'striped',
-        headStyles: { fillColor: primaryColor, textColor: 255, fontStyle: 'bold' },
         styles: { fontSize: 9, cellPadding: 5 },
         columnStyles: {
-          0: { halign: 'center' },
-          2: { halign: 'center' },
-          4: { halign: 'right', fontStyle: 'bold' },
+          0: { cellWidth: 12, halign: 'center' },
+          1: { cellWidth: 45 },
+          2: { cellWidth: 40, halign: 'center' },
+          3: { cellWidth: 35 },
+          4: { cellWidth: 50, halign: 'right', fontStyle: 'bold' },
         },
         margin: { left: 14, right: 14 },
       })
