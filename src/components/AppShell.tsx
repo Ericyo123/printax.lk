@@ -16,6 +16,10 @@ const navItems = [
   { href: '/users', icon: '👤', label: 'Users', section: 'Admin', adminOnly: true },
 ]
 
+export function AppShell({ children }: { children: React.ReactNode }) {
+  const { data: session, status } = useSession()
+  const pathname = usePathname()
+  const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
 
   useEffect(() => {
