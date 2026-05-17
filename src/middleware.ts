@@ -14,6 +14,6 @@ export const config = {
     '/jobs/:path*',
     '/reports/:path*',
     '/statements/:path*',
-    '/api/((?!auth).*)', // Protect all API routes except /api/auth
+    '/api/((?!auth|captcha).*)', // Protect all API routes except /api/auth and /api/captcha
   ],
 }
