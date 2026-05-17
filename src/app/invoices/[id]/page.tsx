@@ -177,13 +177,7 @@ export default function InvoiceDetailPage() {
             const isLastRow = data.row.index === data.table.body.length - 1
             const isFirstCol = data.column.index === 0
             const isLastCol = data.column.index === data.table.columns.length - 1
-            const isEven = data.row.index % 2 === 0
-            
-            if (isEven) {
-              doc.setFillColor(244, 244, 245)
-            } else {
-              doc.setFillColor(255, 255, 255)
-            }
+            doc.setFillColor(244, 244, 245)
             
             const x = data.cell.x
             const y = data.cell.y
