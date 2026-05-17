@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { AppShell } from '@/components/AppShell'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import { Pagination } from '@/components/Pagination'
 
 export default function UsersPage() {
   const { data: session } = useSession()
@@ -12,6 +13,11 @@ export default function UsersPage() {
   const [showModal, setShowModal] = useState(false)
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState({ name: '', email: '', password: '', role: 'STAFF' })
+  
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
+  const paginatedUsers = users.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
   useEffect(() => {
     if (session && session.user?.role !== 'ADMIN') { router.push('/dashboard'); return }
@@ -32,6 +38,18 @@ export default function UsersPage() {
     fetch('/api/users').then(r => r.json()).then(d => setUsers(d))
   }
 
+  async function deleteUser(id: string) {
+    if (window.confirm('Are you sure you want to permanently delete this user?')) {
+      const res = await fetch(`/api/users/${id}`, { method: 'DELETE' })
+      const data = await res.json()
+      if (res.ok) {
+        fetch('/api/users').then(r => r.json()).then(d => setUsers(d))
+      } else {
+        alert(data.error || 'Failed to delete user')
+      }
+    }
+  }
+
   return (
     <AppShell>
       <div className="page-header">
@@ -44,49 +62,64 @@ export default function UsersPage() {
         </div>
       </div>
 
-      <div className="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th>Joined</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr><td colSpan={6} style={{ textAlign: 'center', padding: '3rem' }}><span className="spinner" /></td></tr>
-            ) : users.map(u => (
-              <tr key={u.id}>
-                <td style={{ fontWeight: 600 }}>{u.name}</td>
-                <td style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>{u.email}</td>
-                <td>
-                  <span className={`badge ${u.role === 'ADMIN' ? 'badge-purple' : 'badge-muted'}`}>
-                    {u.role}
-                  </span>
-                </td>
-                <td>
-                  <span className={`badge ${u.active ? 'badge-success' : 'badge-danger'}`}>
-                    {u.active ? 'Active' : 'Disabled'}
-                  </span>
-                </td>
-                <td style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>
-                  {new Date(u.createdAt).toLocaleDateString()}
-                </td>
-                <td>
-                  {u.id !== session?.user?.id && (
-                    <button className="btn btn-ghost btn-sm" onClick={() => toggleActive(u.id, u.active)}>
-                      {u.active ? '🚫 Disable' : '✓ Enable'}
-                    </button>
-                  )}
-                </td>
+      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        <div className="table-wrapper" style={{ margin: 0, border: 'none', borderRadius: 0 }}>
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Joined</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr><td colSpan={6} style={{ textAlign: 'center', padding: '3rem' }}><span className="spinner" /></td></tr>
+              ) : paginatedUsers.map(u => (
+                <tr key={u.id}>
+                  <td style={{ fontWeight: 600 }}>{u.name}</td>
+                  <td style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>{u.email}</td>
+                  <td>
+                    <span className={`badge ${u.role === 'ADMIN' ? 'badge-purple' : 'badge-muted'}`}>
+                      {u.role}
+                    </span>
+                  </td>
+                  <td>
+                    <span className={`badge ${u.active ? 'badge-success' : 'badge-danger'}`}>
+                      {u.active ? 'Active' : 'Disabled'}
+                    </span>
+                  </td>
+                  <td style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>
+                    {new Date(u.createdAt).toLocaleDateString()}
+                  </td>
+                  <td>
+                    {u.id !== session?.user?.id && (
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button className="btn btn-ghost btn-sm" onClick={() => toggleActive(u.id, u.active)}>
+                          {u.active ? '🚫 Disable' : '✓ Enable'}
+                        </button>
+                        <button className="btn btn-ghost btn-sm" style={{ color: 'var(--danger)' }} onClick={() => deleteUser(u.id)}>
+                          🗑 Delete
+                        </button>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {!loading && users.length > itemsPerPage && (
+          <Pagination 
+            currentPage={currentPage} 
+            totalItems={users.length} 
+            itemsPerPage={itemsPerPage} 
+            onPageChange={setCurrentPage} 
+          />
+        )}
       </div>
 
       {showModal && (

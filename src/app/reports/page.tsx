@@ -145,7 +145,7 @@ export default function ReportsPage() {
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={false} />
                 <XAxis type="number" tick={{ fill: '#475569', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `${v}`} />
                 <YAxis type="category" dataKey="name" tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`Rs. ${v.toLocaleString()}`]} />
+                <Tooltip contentStyle={tooltipStyle} formatter={(v: any) => [`Rs. ${(v || 0).toLocaleString()}`, '']} />
                 <Bar dataKey="totalRevenue" fill="#155e96" radius={[0, 4, 4, 0]} name="Total Revenue" />
                 <Bar dataKey="paidAmount" fill="#10b981" radius={[0, 4, 4, 0]} name="Paid" />
               </BarChart>
@@ -157,7 +157,7 @@ export default function ReportsPage() {
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
               <XAxis dataKey={tab === 'daily' ? 'day' : 'month'} tick={{ fill: '#475569', fontSize: 11 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fill: '#475569', fontSize: 11 }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={tooltipStyle} formatter={(v: number, name: string) => [`Rs. ${v.toLocaleString()}`, name === 'revenue' ? 'Revenue' : 'Paid']} />
+              <Tooltip contentStyle={tooltipStyle} formatter={(v: any, name: any) => [`Rs. ${(v || 0).toLocaleString()}`, name === 'revenue' ? 'Revenue' : 'Paid']} />
               <Bar dataKey="revenue" fill="#155e96" radius={[4, 4, 0, 0]} name="revenue" />
               <Bar dataKey="paid" fill="#10b981" radius={[4, 4, 0, 0]} name="paid" />
             </BarChart>

@@ -11,7 +11,7 @@ const navItems = [
   { href: '/customers', icon: '👥', label: 'Customers', section: 'Main' },
   { href: '/statements', icon: '📋', label: 'Statements', section: 'Billing' },
   { href: '/payments', icon: '💳', label: 'Payments', section: 'Billing' },
-  { href: '/reports', icon: '📊', label: 'Reports', section: 'Reports' },
+  { href: '/reports', icon: '📊', label: 'Reports', section: 'Reports', adminOnly: true },
   { href: '/settings', icon: '⚙', label: 'Settings', section: 'Admin', adminOnly: true },
   { href: '/pricing', icon: '💰', label: 'Pricing', section: 'Admin', adminOnly: true },
   { href: '/users', icon: '👤', label: 'Users', section: 'Admin', adminOnly: true },
@@ -85,9 +85,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               {isAdmin ? 'Admin' : 'Staff'}
             </span>
           </div>
-          <button onClick={() => signOut({ callbackUrl: '/login' })} className="btn btn-secondary btn-sm w-full">
+          <button onClick={() => { if (window.confirm('Are you sure you want to sign out?')) signOut({ callbackUrl: '/login' }) }} className="btn btn-secondary btn-sm w-full" style={{ marginBottom: '0.75rem' }}>
             Sign out
           </button>
+          <div style={{ textAlign: 'center', fontSize: '0.65rem', color: 'var(--text-muted)', paddingTop: '0.5rem', borderTop: '1px solid var(--border)' }}>
+            Powered by <strong>bitmosolutions.com</strong>
+          </div>
         </div>
       </aside>
 

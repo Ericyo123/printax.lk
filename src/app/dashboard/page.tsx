@@ -98,7 +98,7 @@ export default function DashboardPage() {
                 <YAxis tick={{ fill: '#475569', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `${v}`} />
                 <Tooltip
                   contentStyle={{ background: '#1a2235', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 13 }}
-                  formatter={(v: number) => [`Rs. ${v.toLocaleString()}`, 'Revenue']}
+                  formatter={(v: any) => [`Rs. ${(v || 0).toLocaleString()}`, 'Revenue']}
                   labelStyle={{ color: '#94a3b8' }}
                 />
                 <Bar dataKey="revenue" fill="#7c3aed" radius={[4, 4, 0, 0]} />

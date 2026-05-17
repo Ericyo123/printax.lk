@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { AppShell } from '@/components/AppShell'
 import Link from 'next/link'
+import { Pagination } from '@/components/Pagination'
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
 
@@ -232,6 +233,23 @@ export default function StatementsPage() {
     }
   }
 
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
+  const paginatedStatements = statements.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+
+  async function markAsPaid(id: string) {
+    if (window.confirm('Are you sure you want to mark this statement and all its invoices as PAID?')) {
+      const res = await fetch(`/api/statements/${id}/pay`, { method: 'POST' })
+      const data = await res.json()
+      if (res.ok) {
+        fetchStatements()
+      } else {
+        alert(data.error || 'Failed to mark as paid')
+      }
+    }
+  }
+
   return (
     <AppShell>
       <div className="page-header">
@@ -244,43 +262,58 @@ export default function StatementsPage() {
         </div>
       </div>
 
-      <div className="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Statement #</th>
-              <th>Customer</th>
-              <th>Period</th>
-              <th>Invoices</th>
-              <th>Total</th>
-              <th>Status</th>
-              <th>Due Date</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr><td colSpan={8} style={{ textAlign: 'center', padding: '3rem' }}><span className="spinner" /></td></tr>
-            ) : statements.length === 0 ? (
-              <tr><td colSpan={8}><div className="empty-state"><div className="empty-state-icon">📋</div><p>No statements generated yet</p></div></td></tr>
-            ) : statements.map(s => (
-              <tr key={s.id}>
-                <td style={{ fontWeight: 700, color: 'var(--primary-light)' }}>{s.statementNo}</td>
-                <td style={{ fontWeight: 600 }}>{s.customer?.name || '—'}</td>
-                <td style={{ color: 'var(--text-secondary)' }}>{MONTHS[s.month - 1]} {s.year}</td>
-                <td style={{ color: 'var(--text-secondary)' }}>{s.invoices?.length} invoices</td>
-                <td style={{ fontWeight: 700 }}>Rs. {s.totalAmount.toLocaleString()}</td>
-                <td><span className={`badge ${s.status === 'PAID' ? 'badge-success' : 'badge-warning'}`}>{s.status}</span></td>
-                <td style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>
-                  {s.dueDate ? new Date(s.dueDate).toLocaleDateString() : '—'}
-                </td>
-                <td>
-                  <button className="btn btn-secondary btn-sm" onClick={() => downloadStatementPDF(s)}>⬇ PDF</button>
-                </td>
+      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        <div className="table-wrapper" style={{ margin: 0, border: 'none', borderRadius: 0 }}>
+          <table>
+            <thead>
+              <tr>
+                <th>Statement #</th>
+                <th>Customer</th>
+                <th>Period</th>
+                <th>Invoices</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Due Date</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr><td colSpan={8} style={{ textAlign: 'center', padding: '3rem' }}><span className="spinner" /></td></tr>
+              ) : statements.length === 0 ? (
+                <tr><td colSpan={8}><div className="empty-state"><div className="empty-state-icon">📋</div><p>No statements generated yet</p></div></td></tr>
+              ) : paginatedStatements.map(s => (
+                <tr key={s.id}>
+                  <td style={{ fontWeight: 700, color: 'var(--primary-light)' }}>{s.statementNo}</td>
+                  <td style={{ fontWeight: 600 }}>{s.customer?.name || '—'}</td>
+                  <td style={{ color: 'var(--text-secondary)' }}>{MONTHS[s.month - 1]} {s.year}</td>
+                  <td style={{ color: 'var(--text-secondary)' }}>{s.invoices?.length} invoices</td>
+                  <td style={{ fontWeight: 700 }}>Rs. {s.totalAmount.toLocaleString()}</td>
+                  <td><span className={`badge ${s.status === 'PAID' ? 'badge-success' : 'badge-warning'}`}>{s.status}</span></td>
+                  <td style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>
+                    {s.dueDate ? new Date(s.dueDate).toLocaleDateString() : '—'}
+                  </td>
+                  <td>
+                    <div style={{ display: 'flex', gap: '0.375rem' }}>
+                      <button className="btn btn-secondary btn-sm" onClick={() => downloadStatementPDF(s)}>⬇ PDF</button>
+                      {s.status !== 'PAID' && (
+                        <button className="btn btn-primary btn-sm" onClick={() => markAsPaid(s.id)}>✓ Mark Paid</button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {!loading && statements.length > itemsPerPage && (
+          <Pagination 
+            currentPage={currentPage} 
+            totalItems={statements.length} 
+            itemsPerPage={itemsPerPage} 
+            onPageChange={setCurrentPage} 
+          />
+        )}
       </div>
 
       {/* Generate Modal */}

@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 
@@ -10,9 +10,32 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [showPass, setShowPass] = useState(false)
+  
+  // Captcha state
+  const [captchaA, setCaptchaA] = useState(0)
+  const [captchaB, setCaptchaB] = useState(0)
+  const [captchaInput, setCaptchaInput] = useState('')
+
+  useEffect(() => {
+    generateCaptcha()
+  }, [])
+
+  function generateCaptcha() {
+    setCaptchaA(Math.floor(Math.random() * 10) + 1)
+    setCaptchaB(Math.floor(Math.random() * 10) + 1)
+    setCaptchaInput('')
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    
+    // Validate Captcha
+    if (parseInt(captchaInput) !== captchaA + captchaB) {
+      setError('Verification failed. Please try again.')
+      generateCaptcha()
+      return
+    }
+
     setLoading(true)
     setError('')
     const res = await signIn('credentials', { 
@@ -22,6 +45,7 @@ export default function LoginPage() {
     })
     if (res?.error) {
       setError('Invalid email or password')
+      generateCaptcha()
       setLoading(false)
     } else {
       router.push('/dashboard')
@@ -97,6 +121,20 @@ export default function LoginPage() {
                 </div>
               </div>
 
+              <div className="form-group">
+                <label className="form-label" htmlFor="captcha">Security Verification</label>
+                <div className="flex gap-2 items-center">
+                  <div className="bg-[var(--bg-elevated)] border border-[var(--border)] rounded-md px-4 py-2 text-lg font-bold min-w-[80px] text-center tracking-widest text-[var(--primary-light)]">
+                    {captchaA} + {captchaB} =
+                  </div>
+                  <input
+                    id="captcha" type="number" className="form-control"
+                    placeholder="?"
+                    value={captchaInput} onChange={e => setCaptchaInput(e.target.value)} required
+                  />
+                </div>
+              </div>
+
               <button type="submit" className="btn btn-primary w-full btn-lg mt-2 justify-center" disabled={loading}>
                 {loading ? <span className="spinner" /> : null}
                 {loading ? 'Signing in…' : 'Sign in'}
@@ -105,7 +143,7 @@ export default function LoginPage() {
           </div>
 
           <p className="text-center text-[var(--text-muted)] text-xs mt-8">
-            © {new Date().getFullYear()} printax.lk · All rights reserved
+            © {new Date().getFullYear()} printax.lk · Powered by bitmosolutions.com
           </p>
         </div>
       </div>

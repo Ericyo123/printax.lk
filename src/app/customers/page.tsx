@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { AppShell } from '@/components/AppShell'
 import Link from 'next/link'
+import { Pagination } from '@/components/Pagination'
 
 export default function CustomersPage() {
   const [customers, setCustomers] = useState<any[]>([])
@@ -13,6 +14,10 @@ export default function CustomersPage() {
   const [saving, setSaving] = useState(false)
   const [editCustomer, setEditCustomer] = useState<any>(null)
 
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
+  
   function fetchCustomers() {
     const params = new URLSearchParams()
     if (typeFilter) params.set('type', typeFilter)
@@ -44,6 +49,8 @@ export default function CustomersPage() {
   }
 
   const filtered = customers.filter(c => !search || c.name.toLowerCase().includes(search.toLowerCase()) || c.phone?.includes(search) || c.email?.toLowerCase().includes(search.toLowerCase()))
+  
+  const paginatedCustomers = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
   return (
     <AppShell>
@@ -71,53 +78,63 @@ export default function CustomersPage() {
         </div>
       </div>
 
-      <div className="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Type</th>
-              <th>Phone</th>
-              <th>Email</th>
-              <th>Invoices</th>
-              <th>Outstanding</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr><td colSpan={7} style={{ textAlign: 'center', padding: '3rem' }}><span className="spinner" /></td></tr>
-            ) : filtered.length === 0 ? (
-              <tr><td colSpan={7}><div className="empty-state"><div className="empty-state-icon">👥</div><p>No customers found</p></div></td></tr>
-            ) : filtered.map(c => (
-              <tr key={c.id}>
-                <td style={{ fontWeight: 600 }}>{c.name}</td>
-                <td>
-                  <span className={`badge ${c.type === 'MONTHLY' ? 'badge-purple' : 'badge-muted'}`}>
-                    {c.type === 'MONTHLY' ? 'Monthly' : 'Walk-in'}
-                  </span>
-                </td>
-                <td style={{ color: 'var(--text-secondary)' }}>{c.phone || '—'}</td>
-                <td style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>{c.email || '—'}</td>
-                <td style={{ color: 'var(--text-secondary)' }}>{c._count?.invoices || 0}</td>
-                <td>
-                  {c.outstandingBalance > 0 ? (
-                    <span style={{ color: 'var(--danger)', fontWeight: 700 }}>Rs. {c.outstandingBalance.toLocaleString()}</span>
-                  ) : (
-                    <span className="badge badge-success">Clear</span>
-                  )}
-                </td>
-                <td>
-                  <div style={{ display: 'flex', gap: '0.375rem' }}>
-                    <Link href={`/customers/${c.id}`} className="btn btn-secondary btn-sm">View</Link>
-                    <button className="btn btn-ghost btn-sm" onClick={() => openEdit(c)}>✏</button>
-                    <button className="btn btn-ghost btn-sm" style={{ color: 'var(--danger)' }} onClick={() => deleteCustomer(c.id)}>🗑</button>
-                  </div>
-                </td>
+      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        <div className="table-wrapper" style={{ margin: 0, border: 'none', borderRadius: 0 }}>
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Invoices</th>
+                <th>Outstanding</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr><td colSpan={7} style={{ textAlign: 'center', padding: '3rem' }}><span className="spinner" /></td></tr>
+              ) : filtered.length === 0 ? (
+                <tr><td colSpan={7}><div className="empty-state"><div className="empty-state-icon">👥</div><p>No customers found</p></div></td></tr>
+              ) : paginatedCustomers.map(c => (
+                <tr key={c.id}>
+                  <td style={{ fontWeight: 600 }}>{c.name}</td>
+                  <td>
+                    <span className={`badge ${c.type === 'MONTHLY' ? 'badge-purple' : 'badge-muted'}`}>
+                      {c.type === 'MONTHLY' ? 'Monthly' : 'Walk-in'}
+                    </span>
+                  </td>
+                  <td style={{ color: 'var(--text-secondary)' }}>{c.phone || '—'}</td>
+                  <td style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>{c.email || '—'}</td>
+                  <td style={{ color: 'var(--text-secondary)' }}>{c._count?.invoices || 0}</td>
+                  <td>
+                    {c.outstandingBalance > 0 ? (
+                      <span style={{ color: 'var(--danger)', fontWeight: 700 }}>Rs. {c.outstandingBalance.toLocaleString()}</span>
+                    ) : (
+                      <span className="badge badge-success">Clear</span>
+                    )}
+                  </td>
+                  <td>
+                    <div style={{ display: 'flex', gap: '0.375rem' }}>
+                      <Link href={`/customers/${c.id}`} className="btn btn-secondary btn-sm">View</Link>
+                      <button className="btn btn-ghost btn-sm" onClick={() => openEdit(c)}>✏</button>
+                      <button className="btn btn-ghost btn-sm" style={{ color: 'var(--danger)' }} onClick={() => deleteCustomer(c.id)}>🗑</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {!loading && filtered.length > itemsPerPage && (
+          <Pagination 
+            currentPage={currentPage} 
+            totalItems={filtered.length} 
+            itemsPerPage={itemsPerPage} 
+            onPageChange={setCurrentPage} 
+          />
+        )}
       </div>
 
       {/* Modal */}

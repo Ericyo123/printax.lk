@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { AppShell } from '@/components/AppShell'
 import Link from 'next/link'
+import { Pagination } from '@/components/Pagination'
 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<any[]>([])
@@ -11,8 +12,12 @@ export default function InvoicesPage() {
   const [statusFilter, setStatusFilter] = useState('')
   const [search, setSearch] = useState('')
 
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
+
   useEffect(() => {
-    const params = new URLSearchParams({ limit: '100' })
+    const params = new URLSearchParams({ limit: '500' }) // Increased limit for client-side pagination buffer
     if (statusFilter) params.set('status', statusFilter)
     fetch(`/api/invoices?${params}`).then(r => r.json()).then(d => {
       setInvoices(d.invoices || [])
@@ -25,6 +30,8 @@ export default function InvoicesPage() {
     !search || inv.invoiceNumber.toLowerCase().includes(search.toLowerCase()) ||
     inv.customer?.name?.toLowerCase().includes(search.toLowerCase())
   )
+
+  const paginatedInvoices = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
   const statusBadge = (s: string) => {
     const map: Record<string, string> = { PAID: 'badge-success', UNPAID: 'badge-warning', PARTIAL: 'badge-info' }
@@ -62,49 +69,59 @@ export default function InvoicesPage() {
         </div>
       </div>
 
-      <div className="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Invoice #</th>
-              <th>Date</th>
-              <th>Customer</th>
-              <th>Jobs</th>
-              <th>Amount</th>
-              <th>Status</th>
-              <th>Payment</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr><td colSpan={8} style={{ textAlign: 'center', padding: '3rem' }}><span className="spinner" /></td></tr>
-            ) : filtered.length === 0 ? (
-              <tr><td colSpan={8}>
-                <div className="empty-state">
-                  <div className="empty-state-icon">🧾</div>
-                  <p>No invoices found</p>
-                  <Link href="/jobs/new" className="btn btn-primary btn-sm">Create first job</Link>
-                </div>
-              </td></tr>
-            ) : filtered.map(inv => (
-              <tr key={inv.id}>
-                <td><span style={{ fontWeight: 700, color: 'var(--primary-light)' }}>{inv.invoiceNumber}</span></td>
-                <td style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>{new Date(inv.date).toLocaleDateString()}</td>
-                <td>{inv.customer?.name || <span style={{ color: 'var(--text-muted)' }}>Walk-in</span>}</td>
-                <td style={{ color: 'var(--text-secondary)' }}>{inv.jobs?.length || 0} item(s)</td>
-                <td style={{ fontWeight: 700 }}>Rs. {inv.totalAmount.toLocaleString()}</td>
-                <td>{statusBadge(inv.paymentStatus)}</td>
-                <td style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>{paymentLabel[inv.paymentMethod] || '—'}</td>
-                <td>
-                  <div style={{ display: 'flex', gap: '0.375rem' }}>
-                    <Link href={`/invoices/${inv.id}`} className="btn btn-secondary btn-sm">View</Link>
-                  </div>
-                </td>
+      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        <div className="table-wrapper" style={{ margin: 0, border: 'none', borderRadius: 0 }}>
+          <table>
+            <thead>
+              <tr>
+                <th>Invoice #</th>
+                <th>Date</th>
+                <th>Customer</th>
+                <th>Jobs</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Payment</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr><td colSpan={8} style={{ textAlign: 'center', padding: '3rem' }}><span className="spinner" /></td></tr>
+              ) : filtered.length === 0 ? (
+                <tr><td colSpan={8}>
+                  <div className="empty-state">
+                    <div className="empty-state-icon">🧾</div>
+                    <p>No invoices found</p>
+                    <Link href="/jobs/new" className="btn btn-primary btn-sm">Create first job</Link>
+                  </div>
+                </td></tr>
+              ) : paginatedInvoices.map(inv => (
+                <tr key={inv.id}>
+                  <td><span style={{ fontWeight: 700, color: 'var(--primary-light)' }}>{inv.invoiceNumber}</span></td>
+                  <td style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>{new Date(inv.date).toLocaleDateString()}</td>
+                  <td>{inv.customer?.name || <span style={{ color: 'var(--text-muted)' }}>Walk-in</span>}</td>
+                  <td style={{ color: 'var(--text-secondary)' }}>{inv.jobs?.length || 0} item(s)</td>
+                  <td style={{ fontWeight: 700 }}>Rs. {inv.totalAmount.toLocaleString()}</td>
+                  <td>{statusBadge(inv.paymentStatus)}</td>
+                  <td style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>{paymentLabel[inv.paymentMethod] || '—'}</td>
+                  <td>
+                    <div style={{ display: 'flex', gap: '0.375rem' }}>
+                      <Link href={`/invoices/${inv.id}`} className="btn btn-secondary btn-sm">View</Link>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {!loading && filtered.length > itemsPerPage && (
+          <Pagination 
+            currentPage={currentPage} 
+            totalItems={filtered.length} 
+            itemsPerPage={itemsPerPage} 
+            onPageChange={setCurrentPage} 
+          />
+        )}
       </div>
     </AppShell>
   )

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { calculateBaseAmount, calculateTotal } from '@/lib/pricing'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '../auth/[...nextauth]/route'
+import { authOptions } from '@/lib/auth'
 import { createJobSchema } from '@/lib/validations'
 
 export async function GET(req: NextRequest) {
