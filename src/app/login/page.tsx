@@ -12,27 +12,31 @@ export default function LoginPage() {
   const [showPass, setShowPass] = useState(false)
   
   // Captcha state
-  const [captchaA, setCaptchaA] = useState(0)
-  const [captchaB, setCaptchaB] = useState(0)
+  const [captchaA, setCaptchaA] = useState<number | null>(null)
+  const [captchaB, setCaptchaB] = useState<number | null>(null)
   const [captchaInput, setCaptchaInput] = useState('')
 
   useEffect(() => {
-    generateCaptcha()
+    fetchCaptcha()
   }, [])
 
-  function generateCaptcha() {
-    setCaptchaA(Math.floor(Math.random() * 10) + 1)
-    setCaptchaB(Math.floor(Math.random() * 10) + 1)
-    setCaptchaInput('')
+  async function fetchCaptcha() {
+    try {
+      const res = await fetch('/api/captcha')
+      const data = await res.json()
+      setCaptchaA(data.a)
+      setCaptchaB(data.b)
+      setCaptchaInput('')
+    } catch (e) {
+      setError('Failed to load captcha. Please refresh.')
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     
-    // Validate Captcha
-    if (parseInt(captchaInput) !== captchaA + captchaB) {
-      setError('Verification failed. Please try again.')
-      generateCaptcha()
+    if (!captchaInput) {
+      setError('Please complete the captcha verification.')
       return
     }
 
@@ -41,11 +45,12 @@ export default function LoginPage() {
     const res = await signIn('credentials', { 
       email: email.trim().toLowerCase(), 
       password, 
+      captchaAnswer: captchaInput,
       redirect: false 
     })
     if (res?.error) {
-      setError('Invalid email or password')
-      generateCaptcha()
+      setError('Invalid email, password, or verification answer')
+      fetchCaptcha()
       setLoading(false)
     } else {
       router.push('/dashboard')
@@ -124,9 +129,18 @@ export default function LoginPage() {
               <div className="form-group">
                 <label className="form-label" htmlFor="captcha">Security Verification</label>
                 <div className="flex gap-2 items-center">
-                  <div className="bg-[var(--bg-elevated)] border border-[var(--border)] rounded-md px-4 py-2 text-lg font-bold min-w-[80px] text-center tracking-widest text-[var(--primary-light)]">
-                    {captchaA} + {captchaB} =
+                  <div className="bg-[var(--bg-elevated)] border border-[var(--border)] rounded-md px-4 py-2 text-lg font-bold min-w-[80px] text-center tracking-widest text-[var(--primary-light)]" style={{ userSelect: 'none' }}>
+                    {captchaA !== null && captchaB !== null ? `${captchaA} + ${captchaB} =` : '...'}
                   </div>
+                  <button 
+                    type="button" 
+                    onClick={fetchCaptcha} 
+                    className="btn btn-secondary" 
+                    style={{ padding: '0.375rem 0.75rem', minHeight: '38px', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    title="Refresh Captcha"
+                  >
+                    🔄
+                  </button>
                   <input
                     id="captcha" type="number" className="form-control"
                     placeholder="?"
