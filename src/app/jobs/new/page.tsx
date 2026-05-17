@@ -150,6 +150,29 @@ export default function NewJobPage() {
         notes,
       }
       finalJobs.push(currentJobItem)
+    } else {
+      // If there are already items in the cart AND the active form has a description, auto-add it too!
+      if (description.trim() && paperSizeId) {
+        const svcList = (pricingData?.services || [])
+          .filter(s => selectedServices[s.id])
+          .map(s => ({ serviceId: s.id, amount: s.price }))
+
+        const currentJobItem = {
+          description,
+          paperSizeId,
+          printType,
+          printMode,
+          pages,
+          copies,
+          pricingType,
+          manualPrice: pricingType === 'MANUAL' ? manualPrice : undefined,
+          services: svcList,
+          customServices,
+          discount,
+          notes,
+        }
+        finalJobs.push(currentJobItem)
+      }
     }
 
     setLoading(true)
@@ -218,12 +241,12 @@ export default function NewJobPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div className="form-group">
                   <label className="form-label">Description *</label>
-                  <input className="form-control" placeholder="e.g. Assignment printing, Report copies..." value={description} onChange={e => setDescription(e.target.value)} required />
+                  <input className="form-control" placeholder="e.g. Assignment printing, Report copies..." value={description} onChange={e => setDescription(e.target.value)} />
                 </div>
                 <div className="form-row">
                   <div className="form-group">
                     <label className="form-label">Paper Size *</label>
-                    <select className="form-control" value={paperSizeId} onChange={e => setPaperSizeId(e.target.value)} required>
+                    <select className="form-control" value={paperSizeId} onChange={e => setPaperSizeId(e.target.value)}>
                       <option value="">Select size</option>
                       {pricingData?.paperSizes.map(ps => <option key={ps.id} value={ps.id}>{ps.name}</option>)}
                     </select>
