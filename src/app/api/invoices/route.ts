@@ -137,6 +137,9 @@ export async function POST(req: NextRequest) {
       }
 
       return createdInvoice
+    }, {
+      maxWait: 15000,
+      timeout: 30000
     })
 
     return NextResponse.json({ invoice: result })
