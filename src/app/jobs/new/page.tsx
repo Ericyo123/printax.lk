@@ -36,7 +36,11 @@ export default function NewJobPage() {
   const [dueDate, setDueDate] = useState('')
   const [discount, setDiscount] = useState(0)
 
-  // Derived
+  // Consolidated Job Cart State
+  const [jobsList, setJobsList] = useState<any[]>([])
+  const [invoiceDiscount, setInvoiceDiscount] = useState(0)
+
+  // Derived (Current active job form)
   const currentRule = pricingData?.rules.find(r => r.paperSizeId === paperSizeId && r.printType === printType)
   const baseAmount = currentRule
     ? calculateBaseAmount(currentRule, pricingType, pages, copies, printMode, manualPrice)
@@ -46,6 +50,12 @@ export default function NewJobPage() {
     .reduce((acc, s) => acc + s.price, 0)
   const customTotal = customServices.reduce((acc, s) => acc + s.amount, 0)
   const total = Math.max(0, baseAmount + servicesTotal + customTotal - discount)
+
+  // Derived (Consolidated invoice)
+  const cartSubtotal = jobsList.reduce((acc, j) => acc + j.totalAmount, 0)
+  const invoiceTotal = jobsList.length > 0 
+    ? Math.max(0, cartSubtotal - invoiceDiscount)
+    : Math.max(0, total - invoiceDiscount)
 
   const selectedCustomer = customers.find(c => c.id === customerId)
   const isMonthly = selectedCustomer?.type === 'MONTHLY'
@@ -67,33 +77,123 @@ export default function NewJobPage() {
     setCustomLabel(''); setCustomAmount(0)
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!paperSizeId) return
-    setLoading(true)
-    const svcList = (pricingData?.services || [])
-      .filter(s => selectedServices[s.id])
-      .map(s => ({ serviceId: s.id, amount: s.price }))
-
-    const body = {
-      description, paperSizeId, printType, printMode, pages, copies, pricingType, notes,
-      services: svcList, customServices,
-      manualPrice: pricingType === 'MANUAL' ? manualPrice : undefined,
-      customerId: customerId || undefined,
-      createInvoice, discount,
-      paymentMethod: (createInvoice && markPaid) ? paymentMethod : undefined,
-      dueDate: (createInvoice && !markPaid) ? dueDate : undefined,
+  function addJobToInvoice() {
+    if (!description.trim() || !paperSizeId) {
+      alert('Please enter a description and select a paper size first.')
+      return
     }
 
-    const res = await fetch('/api/jobs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
-    const data = await res.json()
-    setLoading(false)
-    if (res.ok && data.invoice) {
-      router.push(`/invoices/${data.invoice.id}`)
-    } else if (res.ok) {
-      router.push('/invoices')
-    } else {
-      alert(data.error || 'Failed to create job. The database might be full or offline. Please contact support.')
+    const svcList = (pricingData?.services || [])
+      .filter(s => selectedServices[s.id])
+      .map(s => ({ serviceId: s.id, amount: s.price, name: s.name }))
+
+    const newJobItem = {
+      description,
+      paperSizeId,
+      paperSizeName: pricingData?.paperSizes.find(p => p.id === paperSizeId)?.name || '',
+      printType,
+      printMode,
+      pages,
+      copies,
+      pricingType,
+      manualPrice: pricingType === 'MANUAL' ? manualPrice : undefined,
+      services: svcList,
+      customServices: [...customServices],
+      discount,
+      baseAmount,
+      additionalTotal: servicesTotal + customTotal,
+      totalAmount: total,
+      notes,
+    }
+
+    setJobsList(prev => [...prev, newJobItem])
+
+    // Reset job details form
+    setDescription('')
+    setPages(1)
+    setCopies(1)
+    setNotes('')
+    setDiscount(0)
+    setSelectedServices({})
+    setCustomServices([])
+    setManualPrice(0)
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+
+    let finalJobs = [...jobsList]
+
+    // If cart is empty, auto-add current form inputs if filled
+    if (finalJobs.length === 0) {
+      if (!description.trim() || !paperSizeId) {
+        alert('Please complete the job details form or add at least one job to the invoice cart first.')
+        return
+      }
+      
+      const svcList = (pricingData?.services || [])
+        .filter(s => selectedServices[s.id])
+        .map(s => ({ serviceId: s.id, amount: s.price }))
+
+      const currentJobItem = {
+        description,
+        paperSizeId,
+        printType,
+        printMode,
+        pages,
+        copies,
+        pricingType,
+        manualPrice: pricingType === 'MANUAL' ? manualPrice : undefined,
+        services: svcList,
+        customServices,
+        discount,
+        notes,
+      }
+      finalJobs.push(currentJobItem)
+    }
+
+    setLoading(true)
+
+    // Build consolidated invoice payload
+    const body = {
+      customerId: customerId || undefined,
+      dueDate: (createInvoice && !markPaid && dueDate) ? dueDate : undefined,
+      paymentMethod: (createInvoice && markPaid) ? paymentMethod : undefined,
+      paymentStatus: (createInvoice && markPaid) ? 'PAID' : 'UNPAID',
+      notes: notes || undefined, // or overall invoice notes
+      jobs: finalJobs.map(j => ({
+        description: j.description,
+        paperSizeId: j.paperSizeId,
+        printType: j.printType,
+        printMode: j.printMode,
+        pages: j.pages,
+        copies: j.copies,
+        pricingType: j.pricingType,
+        manualPrice: j.manualPrice,
+        services: j.services.map((s: any) => ({ serviceId: s.serviceId, amount: s.amount })),
+        customServices: j.customServices,
+        discount: j.discount,
+        notes: j.notes
+      })),
+      discount: invoiceDiscount,
+    }
+
+    try {
+      const res = await fetch('/api/invoices', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      })
+      const data = await res.json()
+      setLoading(false)
+      if (res.ok && data.invoice) {
+        router.push(`/invoices/${data.invoice.id}`)
+      } else {
+        alert(data.error || 'Failed to create invoice. The database might be full or offline. Please contact support.')
+      }
+    } catch (err) {
+      setLoading(false)
+      alert('Network error occurred. Failed to submit invoice.')
     }
   }
 
@@ -182,7 +282,12 @@ export default function NewJobPage() {
                 </div>
                 <div className="form-group">
                   <label className="form-label">Notes</label>
-                  <textarea className="form-control" placeholder="Additional notes..." value={notes} onChange={e => setNotes(e.target.value)} rows={2} />
+                  <textarea className="form-control" placeholder="Additional notes for this job..." value={notes} onChange={e => setNotes(e.target.value)} rows={2} />
+                </div>
+                <div style={{ marginTop: '0.5rem' }}>
+                  <button type="button" className="btn btn-secondary w-full" onClick={addJobToInvoice} style={{ justifyContent: 'center', background: 'rgba(21, 94, 160, 0.1)', color: 'var(--primary-light)', border: '1px dashed var(--primary-light)', fontWeight: 600 }}>
+                    ➕ Add Job to Invoice
+                  </button>
                 </div>
               </div>
             </div>
@@ -224,6 +329,59 @@ export default function NewJobPage() {
                 )}
               </div>
             </div>
+
+            {/* Job Cart */}
+            {jobsList.length > 0 && (
+              <div className="card" style={{ borderColor: 'var(--primary)' }}>
+                <h3 style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    🛒 Job Cart <span className="badge badge-info" style={{ fontSize: '0.75rem', padding: '0.125rem 0.5rem', borderRadius: 999 }}>{jobsList.length}</span>
+                  </span>
+                  <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--primary-light)' }}>
+                    Subtotal: Rs. {fmt(cartSubtotal)}
+                  </span>
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {jobsList.map((job, index) => (
+                    <div key={index} style={{ padding: '0.75rem', background: 'var(--bg-elevated)', borderRadius: 8, border: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ flex: 1, paddingRight: '1rem' }}>
+                        <div style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)' }}>{job.description}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem', lineHeight: '1.4' }}>
+                          <span style={{ color: 'var(--primary-light)', fontWeight: 600 }}>{job.paperSizeName}</span> · {job.printType === 'COLOR' ? '🎨 Color' : '⬛ B&W'} · {job.printMode === 'SINGLE' ? '1-Sided' : '2-Sided'}
+                          <br />
+                          {job.pages} pages × {job.copies} copies
+                          {job.services.length > 0 && (
+                            <>
+                              <br />
+                              <span style={{ color: 'var(--text-muted)' }}>Services:</span> {job.services.map((s: any) => s.name).join(', ')}
+                            </>
+                          )}
+                          {job.customServices.length > 0 && (
+                            <>
+                              <br />
+                              <span style={{ color: 'var(--text-muted)' }}>Custom charges:</span> {job.customServices.map((s: any) => s.label).join(', ')}
+                            </>
+                          )}
+                          {job.discount > 0 && (
+                            <>
+                              <br />
+                              <span style={{ color: 'var(--danger)', fontWeight: 600 }}>Discount: -Rs. {job.discount}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--primary-light)' }}>Rs. {fmt(job.totalAmount)}</span>
+                        <button type="button" className="btn btn-ghost" style={{ color: 'var(--danger)', padding: '0.25rem 0.5rem', minWidth: 'auto', fontSize: '1rem' }}
+                          onClick={() => setJobsList(prev => prev.filter((_, i) => i !== index))} title="Remove from Invoice">
+                          🗑️
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Customer */}
             <div className="card">
@@ -292,10 +450,34 @@ export default function NewJobPage() {
           <div style={{ position: 'sticky', top: '80px' }}>
             <div className="calc-panel">
               <h3 style={{ marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span>🧮</span> Price Calculator
+                <span>🧮</span> Invoice Summary
               </h3>
 
-              {currentRule && (
+              {/* Cart Subtotal */}
+              {jobsList.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: 8, padding: '0.75rem', border: '1px solid var(--border)' }}>
+                  <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-primary)' }}>Cart Subtotal ({jobsList.length} jobs)</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', fontWeight: 600 }}>
+                    <span style={{ color: 'var(--text-secondary)' }}>Items sum</span>
+                    <span>Rs. {fmt(cartSubtotal)}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Active editing job */}
+              {description.trim() && paperSizeId && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem', background: 'rgba(21, 94, 160, 0.05)', borderRadius: 8, padding: '0.75rem', border: '1px dashed var(--primary-light)' }}>
+                  <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--primary-light)', display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Active Item (Form)</span>
+                    <span>Rs. {fmt(total)}</span>
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                    {description} ({printMode === 'DOUBLE' ? `${Math.ceil(pages/2)} eff. pgs` : `${pages} pgs`} × {copies} cpy)
+                  </div>
+                </div>
+              )}
+
+              {!description.trim() && jobsList.length === 0 && currentRule && (
                 <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginBottom: '1rem', background: 'rgba(255,255,255,0.04)', borderRadius: 8, padding: '0.75rem' }}>
                   <div style={{ fontWeight: 600, marginBottom: '0.25rem', color: 'var(--text-primary)' }}>Rate Card</div>
                   <div>Per page: <strong style={{ color: 'var(--primary-light)' }}>Rs. {currentRule.pricePerPage}</strong></div>
@@ -306,44 +488,30 @@ export default function NewJobPage() {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem', marginBottom: '1.25rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
-                  <span style={{ color: 'var(--text-secondary)' }}>
-                    {printMode === 'DOUBLE' ? `${Math.ceil(pages/2)} eff. pages` : `${pages} pages`} × {copies} copies
-                  </span>
-                  <span style={{ fontWeight: 600 }}>Rs. {fmt(baseAmount)}</span>
+                  <span style={{ color: 'var(--text-secondary)' }}>Invoice Subtotal</span>
+                  <span style={{ fontWeight: 600 }}>Rs. {fmt(jobsList.length > 0 ? (cartSubtotal + (description.trim() ? total : 0)) : total)}</span>
                 </div>
-                {servicesTotal > 0 && (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
-                    <span style={{ color: 'var(--text-secondary)' }}>Services</span>
-                    <span style={{ fontWeight: 600 }}>Rs. {fmt(servicesTotal)}</span>
-                  </div>
-                )}
-                {customTotal > 0 && (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
-                    <span style={{ color: 'var(--text-secondary)' }}>Custom charges</span>
-                    <span style={{ fontWeight: 600 }}>Rs. {fmt(customTotal)}</span>
-                  </div>
-                )}
-                
+
                 <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem', background: 'rgba(239, 68, 68, 0.05)', borderRadius: 8 }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--danger)' }}>DISCOUNT</span>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--danger)' }}>INVOICE DISCOUNT</span>
                   <input type="number" min={0} step="0.5" className="form-control" 
                     style={{ height: 32, padding: '0 0.5rem', textAlign: 'right', fontWeight: 700, color: 'var(--danger)' }}
-                    value={discount || ''} onChange={e => setDiscount(+e.target.value)} placeholder="0.00" />
+                    value={invoiceDiscount || ''} onChange={e => setInvoiceDiscount(+e.target.value)} placeholder="0.00" />
                 </div>
 
                 <hr className="divider" />
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontWeight: 700, fontSize: '1rem' }}>TOTAL</span>
+                  <span style={{ fontWeight: 700, fontSize: '1rem' }}>GRAND TOTAL</span>
                   <div className="price-display">
-                    <span className="currency">Rs. </span>{fmt(total)}
+                    <span className="currency">Rs. </span>{fmt(jobsList.length > 0 ? Math.max(0, cartSubtotal + (description.trim() ? total : 0) - invoiceDiscount) : invoiceTotal)}
                   </div>
                 </div>
               </div>
 
-              <button type="submit" className="btn btn-primary w-full btn-lg" disabled={loading || !paperSizeId || !description}
+              <button type="submit" className="btn btn-primary w-full btn-lg" disabled={loading || (jobsList.length === 0 && (!paperSizeId || !description.trim()))}
                 style={{ justifyContent: 'center', marginBottom: '0.75rem' }}>
-                {loading ? <span className="spinner" /> : '🖨'}
-                {loading ? 'Saving…' : createInvoice ? 'Save & Generate Invoice' : 'Save Job'}
+                {loading ? <span className="spinner" /> : '💾'}
+                {loading ? 'Creating Invoice…' : 'Save & Generate Invoice'}
               </button>
               <button type="button" className="btn btn-secondary w-full" onClick={() => router.back()}>
                 Cancel
