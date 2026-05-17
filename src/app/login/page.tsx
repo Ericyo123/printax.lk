@@ -29,82 +29,85 @@ export default function LoginPage() {
   }
 
   return (
-    <div style={{
-      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'radial-gradient(ellipse at 30% 20%, rgba(21,94,150,0.15) 0%, transparent 60%), radial-gradient(ellipse at 80% 80%, rgba(102,150,176,0.08) 0%, transparent 60%), var(--bg-base)',
-      padding: '1.5rem',
-    }}>
-      <div style={{ width: '100%', maxWidth: '420px' }}>
-        {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-          <div style={{
-            background: 'white', borderRadius: '16px', padding: '0.5rem',
-            display: 'inline-flex', justifyContent: 'center', alignItems: 'center', marginBottom: '1rem',
-            boxShadow: '0 8px 32px rgba(21,94,150,0.25)', width: '180px'
-          }}>
-            <img src="/logo.png" alt="printax.lk" style={{ width: '100%', height: 'auto', display: 'block' }} />
+    <div className="flex min-h-screen">
+      {/* Left Column: Image Background */}
+      <div 
+        className="hidden lg:flex flex-1 relative bg-cover bg-center"
+        style={{ backgroundImage: 'url(/login-bg.png)' }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0f1e]/40 to-[#0a0f1e]/90" />
+        <div className="relative z-10 flex flex-col items-center justify-center w-full h-full text-white p-12">
+          <div className="bg-white rounded-2xl p-4 mb-8 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+            <img src="/logo.png" alt="printax.lk" className="w-64 h-auto block" />
           </div>
-          <p style={{ color: 'var(--text-muted)', marginTop: '0.25rem', fontSize: '0.875rem' }}>
-            Print Shop Management System
-          </p>
+          <h1 className="text-4xl font-bold mb-2">printax.lk</h1>
+          <p className="text-lg text-slate-300">Professional Print Shop Management</p>
         </div>
+      </div>
 
-        {/* Card */}
-        <div className="card" style={{ padding: '2rem' }}>
-          <h2 style={{ marginBottom: '0.25rem', fontSize: '1.25rem' }}>Sign in</h2>
-          <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1.75rem' }}>
-            Enter your credentials to continue
-          </p>
-
-          {error && (
-            <div className="alert alert-danger" style={{ marginBottom: '1.25rem' }}>
-              <span>⚠</span> {error}
+      {/* Right Column: Login Form */}
+      <div className="flex-1 flex items-center justify-center bg-[var(--bg-base)] p-6">
+        <div className="w-full max-w-[400px]">
+          {/* Mobile Logo */}
+          <div className="lg:hidden text-center mb-8">
+            <div className="bg-white rounded-xl p-3 inline-flex items-center justify-center shadow-[0_4px_16px_rgba(21,94,150,0.2)]">
+              <img src="/logo.png" alt="printax.lk" className="w-40 h-auto block" />
             </div>
-          )}
+            <p className="text-[var(--text-muted)] mt-2 text-sm">
+              Print Shop Management System
+            </p>
+          </div>
 
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.125rem' }}>
-            <div className="form-group">
-              <label className="form-label" htmlFor="email">Email address</label>
-              <input
-                id="email" type="email" className="form-control"
-                placeholder="you@printax.com"
-                value={email} onChange={e => setEmail(e.target.value)} required
-              />
-            </div>
+          {/* Card */}
+          <div className="card p-8">
+            <h2 className="text-2xl font-bold mb-1">Sign in</h2>
+            <p className="text-sm text-[var(--text-muted)] mb-6">
+              Enter your credentials to continue
+            </p>
 
-            <div className="form-group">
-              <label className="form-label" htmlFor="password">Password</label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  id="password" type={showPass ? 'text' : 'password'} className="form-control"
-                  placeholder="••••••••"
-                  value={password} onChange={e => setPassword(e.target.value)} required
-                  style={{ paddingRight: '2.75rem' }}
-                />
-                <button type="button" onClick={() => setShowPass(!showPass)}
-                  style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.875rem' }}>
-                  {showPass ? '🙈' : '👁'}
-                </button>
+            {error && (
+              <div className="alert alert-danger mb-5">
+                <span>⚠</span> {error}
               </div>
-            </div>
+            )}
 
-            <button type="submit" className="btn btn-primary w-full btn-lg" disabled={loading}
-              style={{ marginTop: '0.5rem', justifyContent: 'center' }}>
-              {loading ? <span className="spinner" /> : null}
-              {loading ? 'Signing in…' : 'Sign in'}
-            </button>
-          </form>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              <div className="form-group">
+                <label className="form-label" htmlFor="email">Email address</label>
+                <input
+                  id="email" type="email" className="form-control"
+                  placeholder="you@printax.com"
+                  value={email} onChange={e => setEmail(e.target.value)} required
+                />
+              </div>
 
-          <hr className="divider" />
-          <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', textAlign: 'center' }}>
-            <p><strong style={{ color: 'var(--text-secondary)' }}>Admin:</strong> mohommadammar826@gmail.com / admin123</p>
-            <p style={{ marginTop: '0.25rem' }}><strong style={{ color: 'var(--text-secondary)' }}>Staff:</strong> staff@printax.com / staff123</p>
+              <div className="form-group">
+                <label className="form-label" htmlFor="password">Password</label>
+                <div className="relative">
+                  <input
+                    id="password" type={showPass ? 'text' : 'password'} className="form-control"
+                    placeholder="••••••••"
+                    value={password} onChange={e => setPassword(e.target.value)} required
+                    style={{ paddingRight: '2.75rem' }}
+                  />
+                  <button type="button" onClick={() => setShowPass(!showPass)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none text-[var(--text-muted)] cursor-pointer text-sm">
+                    {showPass ? '🙈' : '👁'}
+                  </button>
+                </div>
+              </div>
+
+              <button type="submit" className="btn btn-primary w-full btn-lg mt-2 justify-center" disabled={loading}>
+                {loading ? <span className="spinner" /> : null}
+                {loading ? 'Signing in…' : 'Sign in'}
+              </button>
+            </form>
           </div>
-        </div>
 
-        <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '1.5rem' }}>
-          © {new Date().getFullYear()} printax.lk · Print Shop Management
-        </p>
+          <p className="text-center text-[var(--text-muted)] text-xs mt-8">
+            © {new Date().getFullYear()} printax.lk · All rights reserved
+          </p>
+        </div>
       </div>
     </div>
   )
