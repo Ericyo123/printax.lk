@@ -32,27 +32,52 @@ export default function PricingPage() {
         [field]: value,
       },
     }
-    await fetch('/api/pricing', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-    fetchData()
+    const res = await fetch('/api/pricing', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+    const resData = await res.json()
+    if (res.ok) {
+      fetchData()
+    } else {
+      alert(resData.error || 'Failed to update pricing rule.')
+    }
   }
 
   async function addPaperSize() {
     if (!newSize.trim()) return
     setSaving(true)
-    await fetch('/api/pricing', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'add_paper_size', data: { name: newSize } }) })
-    setNewSize(''); setSaving(false); fetchData()
+    const res = await fetch('/api/pricing', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'add_paper_size', data: { name: newSize } }) })
+    const resData = await res.json()
+    setSaving(false)
+    if (res.ok) {
+      setNewSize('')
+      fetchData()
+    } else {
+      alert(resData.error || 'Failed to add paper size.')
+    }
   }
 
   async function addService() {
     if (!newSvcName.trim()) return
     setSaving(true)
-    await fetch('/api/pricing', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'add_service', data: { name: newSvcName, price: newSvcPrice } }) })
-    setNewSvcName(''); setNewSvcPrice(0); setSaving(false); fetchData()
+    const res = await fetch('/api/pricing', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'add_service', data: { name: newSvcName, price: newSvcPrice } }) })
+    const resData = await res.json()
+    setSaving(false)
+    if (res.ok) {
+      setNewSvcName('')
+      setNewSvcPrice(0)
+      fetchData()
+    } else {
+      alert(resData.error || 'Failed to add service.')
+    }
   }
 
   async function updateService(name: string, price: number, active: boolean) {
-    await fetch('/api/pricing', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'update_service', data: { name, price, active } }) })
-    fetchData()
+    const res = await fetch('/api/pricing', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'update_service', data: { name, price, active } }) })
+    const resData = await res.json()
+    if (res.ok) {
+      fetchData()
+    } else {
+      alert(resData.error || 'Failed to update service.')
+    }
   }
 
   function getRule(paperSizeId: string, printType: string) {

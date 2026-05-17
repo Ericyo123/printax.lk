@@ -92,6 +92,8 @@ export default function NewJobPage() {
       router.push(`/invoices/${data.invoice.id}`)
     } else if (res.ok) {
       router.push('/invoices')
+    } else {
+      alert(data.error || 'Failed to create job. The database might be full or offline. Please contact support.')
     }
   }
 

@@ -30,10 +30,17 @@ export default function CustomersPage() {
     setSaving(true)
     const url = editCustomer ? `/api/customers/${editCustomer.id}` : '/api/customers'
     const method = editCustomer ? 'PATCH' : 'POST'
-    await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
-    setSaving(false); setShowModal(false); setEditCustomer(null)
-    setForm({ name: '', phone: '', email: '', address: '', notes: '', type: 'WALK_IN' })
-    fetchCustomers()
+    const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
+    const data = await res.json()
+    setSaving(false)
+    if (res.ok) {
+      setShowModal(false)
+      setEditCustomer(null)
+      setForm({ name: '', phone: '', email: '', address: '', notes: '', type: 'WALK_IN' })
+      fetchCustomers()
+    } else {
+      alert(data.error || 'Failed to save customer. The database might be full or offline.')
+    }
   }
 
   function openEdit(c: any) {
@@ -44,8 +51,13 @@ export default function CustomersPage() {
 
   async function deleteCustomer(id: string) {
     if (!confirm('Delete this customer?')) return
-    await fetch(`/api/customers/${id}`, { method: 'DELETE' })
-    fetchCustomers()
+    const res = await fetch(`/api/customers/${id}`, { method: 'DELETE' })
+    const data = await res.json()
+    if (res.ok) {
+      fetchCustomers()
+    } else {
+      alert(data.error || 'Failed to delete customer.')
+    }
   }
 
   const filtered = customers.filter(c => !search || c.name.toLowerCase().includes(search.toLowerCase()) || c.phone?.includes(search) || c.email?.toLowerCase().includes(search.toLowerCase()))

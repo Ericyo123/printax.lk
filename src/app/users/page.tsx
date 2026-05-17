@@ -27,15 +27,26 @@ export default function UsersPage() {
   async function createUser() {
     if (!form.name || !form.email || !form.password) return
     setSaving(true)
-    await fetch('/api/users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
-    setSaving(false); setShowModal(false)
-    setForm({ name: '', email: '', password: '', role: 'STAFF' })
-    fetch('/api/users').then(r => r.json()).then(d => setUsers(d))
+    const res = await fetch('/api/users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
+    const data = await res.json()
+    setSaving(false)
+    if (res.ok) {
+      setShowModal(false)
+      setForm({ name: '', email: '', password: '', role: 'STAFF' })
+      fetch('/api/users').then(r => r.json()).then(d => setUsers(d))
+    } else {
+      alert(data.error || 'Failed to create user. The database might be full or offline.')
+    }
   }
 
   async function toggleActive(id: string, active: boolean) {
-    await fetch(`/api/users/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ active: !active }) })
-    fetch('/api/users').then(r => r.json()).then(d => setUsers(d))
+    const res = await fetch(`/api/users/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ active: !active }) })
+    const data = await res.json()
+    if (res.ok) {
+      fetch('/api/users').then(r => r.json()).then(d => setUsers(d))
+    } else {
+      alert(data.error || 'Failed to update user status.')
+    }
   }
 
   async function deleteUser(id: string) {
