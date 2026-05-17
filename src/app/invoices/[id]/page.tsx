@@ -28,6 +28,7 @@ export default function InvoiceDetailPage() {
   }
 
   async function markUnpaid() {
+    if (!window.confirm('Are you sure you want to mark this invoice as UNPAID?')) return
     setSaving(true)
     const res = await fetch(`/api/invoices/${id}`, {
       method: 'PATCH',
