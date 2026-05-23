@@ -11,3 +11,8 @@ export const prisma =
   })
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+
+// Ensure the Prisma client is connected immediately.
+prisma.$connect().catch((e) => {
+  console.error('Prisma connection error:', e)
+})

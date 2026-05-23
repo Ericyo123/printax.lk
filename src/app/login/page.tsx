@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 
@@ -10,47 +10,18 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [showPass, setShowPass] = useState(false)
-  
-  // Captcha state
-  const [captchaA, setCaptchaA] = useState<number | null>(null)
-  const [captchaB, setCaptchaB] = useState<number | null>(null)
-  const [captchaInput, setCaptchaInput] = useState('')
-
-  useEffect(() => {
-    fetchCaptcha()
-  }, [])
-
-  async function fetchCaptcha() {
-    try {
-      const res = await fetch('/api/captcha')
-      const data = await res.json()
-      setCaptchaA(data.a)
-      setCaptchaB(data.b)
-      setCaptchaInput('')
-    } catch (e) {
-      setError('Failed to load captcha. Please refresh.')
-    }
-  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    
-    if (!captchaInput) {
-      setError('Please complete the captcha verification.')
-      return
-    }
-
     setLoading(true)
     setError('')
     const res = await signIn('credentials', { 
       email: email.trim().toLowerCase(), 
       password, 
-      captchaAnswer: captchaInput,
       redirect: false 
     })
     if (res?.error) {
-      setError('Invalid email, password, or verification answer')
-      fetchCaptcha()
+      setError('Invalid email or password')
       setLoading(false)
     } else {
       router.push('/dashboard')
@@ -123,29 +94,6 @@ export default function LoginPage() {
                     className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none text-[var(--text-muted)] cursor-pointer text-sm">
                     {showPass ? '🙈' : '👁'}
                   </button>
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label" htmlFor="captcha">Security Verification</label>
-                <div className="flex gap-2 items-center">
-                  <div className="bg-[var(--bg-elevated)] border border-[var(--border)] rounded-md px-4 py-2 text-lg font-bold min-w-[80px] text-center tracking-widest text-[var(--primary-light)]" style={{ userSelect: 'none' }}>
-                    {captchaA !== null && captchaB !== null ? `${captchaA} + ${captchaB} =` : '...'}
-                  </div>
-                  <button 
-                    type="button" 
-                    onClick={fetchCaptcha} 
-                    className="btn btn-secondary" 
-                    style={{ padding: '0.375rem 0.75rem', minHeight: '38px', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                    title="Refresh Captcha"
-                  >
-                    🔄
-                  </button>
-                  <input
-                    id="captcha" type="number" className="form-control"
-                    placeholder="?"
-                    value={captchaInput} onChange={e => setCaptchaInput(e.target.value)} required
-                  />
                 </div>
               </div>
 
