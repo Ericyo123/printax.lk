@@ -12,6 +12,7 @@ export default function NewJobPage() {
   const [paperSizes, setPaperSizes] = useState<PaperSize[]>([])
   const [customers, setCustomers] = useState<Customer[]>([])
   const [customerSearch, setCustomerSearch] = useState('')
+  const [showCustomerDropdown, setShowCustomerDropdown] = useState(false)
   const [isWalkIn, setIsWalkIn] = useState(true)
   const [loading, setLoading] = useState(false)
 
@@ -315,36 +316,58 @@ export default function NewJobPage() {
               </div>
 
               {!isWalkIn && (
-                <div className="form-group" style={{ padding: '1rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
-                  <label className="form-label">Search & Select Customer</label>
-                  <div className="search-bar mb-3">
+                <div className="form-group" style={{ position: 'relative' }}>
+                  <label className="form-label">Search Monthly Customer</label>
+                  <div className="search-bar mb-1">
                     <Search size={18} color="var(--text-muted)" />
                     <input 
                       type="text" 
-                      placeholder="Search customer by name..." 
+                      placeholder="Type customer name..." 
                       value={customerSearch} 
-                      onChange={e => setCustomerSearch(e.target.value)} 
+                      onChange={e => {
+                        setCustomerSearch(e.target.value)
+                        setShowCustomerDropdown(true)
+                        if (customerId) setCustomerId('')
+                      }} 
+                      onFocus={() => setShowCustomerDropdown(true)}
                     />
                   </div>
-                  <select className="form-control" value={customerId} onChange={e => setCustomerId(e.target.value)}>
-                    <option value="" disabled>-- Select a customer --</option>
-                    
-                    {customers.filter(c => c.name.toLowerCase().includes(customerSearch.toLowerCase()) && c.type === 'MONTHLY').length > 0 && (
-                      <optgroup label="Monthly Customers">
-                        {customers.filter(c => c.name.toLowerCase().includes(customerSearch.toLowerCase()) && c.type === 'MONTHLY').map(c => (
-                          <option key={c.id} value={c.id}>{c.name}</option>
-                        ))}
-                      </optgroup>
-                    )}
-                    
-                    {customers.filter(c => c.name.toLowerCase().includes(customerSearch.toLowerCase()) && c.type === 'CASH').length > 0 && (
-                      <optgroup label="Cash Customers">
-                        {customers.filter(c => c.name.toLowerCase().includes(customerSearch.toLowerCase()) && c.type === 'CASH').map(c => (
-                          <option key={c.id} value={c.id}>{c.name}</option>
-                        ))}
-                      </optgroup>
-                    )}
-                  </select>
+                  
+                  {showCustomerDropdown && (
+                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#fff', border: '1px solid var(--border)', borderRadius: '8px', zIndex: 10, maxHeight: '200px', overflowY: 'auto', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}>
+                      {customers.filter(c => c.type === 'MONTHLY' && c.name.toLowerCase().includes(customerSearch.toLowerCase())).length === 0 ? (
+                        <div style={{ padding: '0.75rem', color: 'var(--text-muted)', fontSize: '0.875rem' }}>No monthly customers found.</div>
+                      ) : (
+                        customers.filter(c => c.type === 'MONTHLY' && c.name.toLowerCase().includes(customerSearch.toLowerCase())).map(c => (
+                          <div 
+                            key={c.id} 
+                            onClick={() => {
+                              setCustomerId(c.id)
+                              setCustomerSearch(c.name)
+                              setShowCustomerDropdown(false)
+                            }}
+                            style={{ 
+                              padding: '0.75rem 1rem', 
+                              cursor: 'pointer',
+                              fontSize: '0.875rem',
+                              borderBottom: '1px solid #f1f5f9',
+                              background: customerId === c.id ? '#f0fdf4' : '#fff'
+                            }}
+                          >
+                            {c.name}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
+
+                  {/* Backdrop to close dropdown when clicking outside */}
+                  {showCustomerDropdown && (
+                    <div 
+                      style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9 }} 
+                      onClick={() => setShowCustomerDropdown(false)} 
+                    />
+                  )}
                 </div>
               )}
               {isMonthly && (
