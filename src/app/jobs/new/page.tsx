@@ -11,6 +11,7 @@ export default function NewJobPage() {
   const router = useRouter()
   const [paperSizes, setPaperSizes] = useState<PaperSize[]>([])
   const [customers, setCustomers] = useState<Customer[]>([])
+  const [customerSearch, setCustomerSearch] = useState('')
   const [loading, setLoading] = useState(false)
 
   // Form state
@@ -252,16 +253,23 @@ export default function NewJobPage() {
               <h3 style={{ marginBottom: '1.25rem' }}>Customer</h3>
               <div className="form-group">
                 <label className="form-label">Select Customer (optional for walk-in)</label>
+                <input 
+                  type="text" 
+                  className="form-control mb-2" 
+                  placeholder="Search customer by name..." 
+                  value={customerSearch} 
+                  onChange={e => setCustomerSearch(e.target.value)} 
+                />
                 <select className="form-control" value={customerId} onChange={e => setCustomerId(e.target.value)}>
                   <option value="">Walk-in Customer</option>
-                  {customers.filter(c => c.type === 'MONTHLY').length > 0 && (
+                  {customers.filter(c => c.name.toLowerCase().includes(customerSearch.toLowerCase()) && c.type === 'MONTHLY').length > 0 && (
                     <optgroup label="Monthly Customers">
-                      {customers.filter(c => c.type === 'MONTHLY').map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                      {customers.filter(c => c.name.toLowerCase().includes(customerSearch.toLowerCase()) && c.type === 'MONTHLY').map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                     </optgroup>
                   )}
-                  {customers.filter(c => c.type === 'WALK_IN').length > 0 && (
+                  {customers.filter(c => c.name.toLowerCase().includes(customerSearch.toLowerCase()) && c.type === 'WALK_IN').length > 0 && (
                     <optgroup label="Walk-in Customers">
-                      {customers.filter(c => c.type === 'WALK_IN').map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                      {customers.filter(c => c.name.toLowerCase().includes(customerSearch.toLowerCase()) && c.type === 'WALK_IN').map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                     </optgroup>
                   )}
                 </select>

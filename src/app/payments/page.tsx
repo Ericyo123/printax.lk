@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { AppShell } from '@/components/AppShell'
 import { CreditCard } from 'lucide-react'
+import { Pagination } from '@/components/Pagination'
 import Link from 'next/link'
 
 export default function PaymentsPage() {
@@ -9,6 +10,8 @@ export default function PaymentsPage() {
   const [loading, setLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState('UNPAID')
   const [showPayModal, setShowPayModal] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
   const [selected, setSelected] = useState<any>(null)
   const [payMethod, setPayMethod] = useState('CASH')
   const [saving, setSaving] = useState(false)
@@ -34,12 +37,24 @@ export default function PaymentsPage() {
 
   const paymentLabel: Record<string, string> = { CASH: 'Cash', BANK_TRANSFER: 'Bank Transfer', CARD: 'Card', ONLINE: 'Online Transfer', OTHER: 'Other' }
 
+  const itemsPerPage = 10
+  const filteredInvoices = invoices.filter(i => 
+    i.invoiceNumber.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    (i.customer?.name || '').toLowerCase().includes(searchQuery.toLowerCase())
+  )
+  const paginatedInvoices = filteredInvoices.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+
+  useEffect(() => { setCurrentPage(1) }, [searchQuery, statusFilter])
+
   return (
     <AppShell>
       <div className="page-header">
         <div className="page-title-group">
           <h1 className="page-title">Payments</h1>
           <p className="page-subtitle">Track and record invoice payments</p>
+        </div>
+        <div className="page-actions">
+          <input type="text" className="form-control" placeholder="Search invoices..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} style={{ width: 250 }} />
         </div>
       </div>
 
@@ -79,9 +94,9 @@ export default function PaymentsPage() {
           <tbody>
             {loading ? (
               <tr><td colSpan={8} style={{ textAlign: 'center', padding: '3rem' }}><span className="spinner" /></td></tr>
-            ) : invoices.length === 0 ? (
+            ) : filteredInvoices.length === 0 ? (
               <tr><td colSpan={8}><div className="empty-state"><div className="empty-state-icon"><CreditCard size={40} /></div><p>No invoices match this filter</p></div></td></tr>
-            ) : invoices.map(inv => (
+            ) : paginatedInvoices.map(inv => (
               <tr key={inv.id}>
                 <td><Link href={`/invoices/${inv.id}`} style={{ fontWeight: 700, color: 'var(--primary-light)' }}>{inv.invoiceNumber}</Link></td>
                 <td style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>{new Date(inv.date).toLocaleDateString()}</td>
@@ -106,6 +121,14 @@ export default function PaymentsPage() {
           </tbody>
         </table>
       </div>
+      {!loading && filteredInvoices.length > itemsPerPage && (
+        <Pagination 
+          currentPage={currentPage} 
+          totalItems={filteredInvoices.length} 
+          itemsPerPage={itemsPerPage} 
+          onPageChange={setCurrentPage} 
+        />
+      )}
 
       {/* Pay Modal */}
       {showPayModal && selected && (

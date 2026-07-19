@@ -11,6 +11,7 @@ export default function StatementsPage() {
   const [statements, setStatements] = useState<any[]>([])
   const [customers, setCustomers] = useState<any[]>([])
   const [invoices, setInvoices] = useState<any[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -237,7 +238,14 @@ export default function StatementsPage() {
   // Pagination
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
-  const paginatedStatements = statements.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+
+  const filteredStatements = statements.filter(s => 
+    s.statementNo.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    (s.customer?.name || '').toLowerCase().includes(searchQuery.toLowerCase())
+  )
+  const paginatedStatements = filteredStatements.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+
+  useEffect(() => { setCurrentPage(1) }, [searchQuery])
 
   async function markAsPaid(id: string) {
     if (window.confirm('Are you sure you want to mark this statement and all its invoices as PAID?')) {
@@ -258,7 +266,8 @@ export default function StatementsPage() {
           <h1 className="page-title">Monthly Statements</h1>
           <p className="page-subtitle">Generate consolidated billing for monthly customers</p>
         </div>
-        <div className="page-actions">
+        <div className="page-actions" style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <input type="text" className="form-control" placeholder="Search statements..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} style={{ width: 250 }} />
           <button className="btn btn-primary" onClick={() => setShowModal(true)}>+ Generate Statement</button>
         </div>
       </div>
@@ -307,10 +316,10 @@ export default function StatementsPage() {
             </tbody>
           </table>
         </div>
-        {!loading && statements.length > itemsPerPage && (
+        {!loading && filteredStatements.length > itemsPerPage && (
           <Pagination 
             currentPage={currentPage} 
-            totalItems={statements.length} 
+            totalItems={filteredStatements.length} 
             itemsPerPage={itemsPerPage} 
             onPageChange={setCurrentPage} 
           />
