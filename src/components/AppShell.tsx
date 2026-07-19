@@ -14,7 +14,8 @@ import {
   BarChart3, 
   Settings, 
   UserCircle,
-  Menu
+  Menu,
+  LogOut
 } from 'lucide-react'
 
 const navItems = [
