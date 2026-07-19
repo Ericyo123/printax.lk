@@ -266,12 +266,12 @@ tbody td { padding: 0.875rem 1rem; font-size: 0.875rem; color: var(--text-primar
   border-radius: 999px; font-size: 0.6875rem; font-weight: 700;
   text-transform: uppercase; letter-spacing: 0.05em;
 }
-.badge-success { background: rgba(16,185,129,0.15); color: #059669; border: 1px solid rgba(16,185,129,0.25); }
-.badge-warning { background: rgba(245,158,11,0.15); color: #b45309; border: 1px solid rgba(245,158,11,0.25); }
-.badge-danger { background: rgba(239,68,68,0.15); color: #dc2626; border: 1px solid rgba(239,68,68,0.25); }
-.badge-info { background: rgba(59,130,246,0.15); color: #2563eb; border: 1px solid rgba(59,130,246,0.25); }
-.badge-purple { background: rgba(124,58,237,0.15); color: #7c3aed; border: 1px solid rgba(124,58,237,0.25); }
-.badge-muted { background: rgba(0,0,0,0.04); color: var(--text-secondary); border: 1px solid var(--border); }
+.badge-success { background: rgba(16,185,129,0.15); color: #000; border: 1px solid rgba(16,185,129,0.25); }
+.badge-warning { background: rgba(245,158,11,0.15); color: #000; border: 1px solid rgba(245,158,11,0.25); }
+.badge-danger { background: rgba(239,68,68,0.15); color: #000; border: 1px solid rgba(239,68,68,0.25); }
+.badge-info { background: rgba(59,130,246,0.15); color: #000; border: 1px solid rgba(59,130,246,0.25); }
+.badge-purple { background: rgba(124,58,237,0.15); color: #000; border: 1px solid rgba(124,58,237,0.25); }
+.badge-muted { background: rgba(0,0,0,0.04); color: #000; border: 1px solid var(--border); }
 
 /* Modal */
 .modal-overlay {

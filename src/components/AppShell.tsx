@@ -106,7 +106,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <button className="mobile-toggle" onClick={() => setMobileOpen(true)}>
             <Menu size={24} />
           </button>
-          <div className="topbar-date" style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+          <div className="topbar-date" style={{ fontSize: '0.875rem', color: '#000', fontWeight: 500 }}>
             {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
