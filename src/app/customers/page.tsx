@@ -74,6 +74,16 @@ export default function CustomersPage() {
     }
   }
 
+  async function settleCustomerBalance(id: string) {
+    if (!confirm('Are you sure you want to mark all outstanding invoices for this customer as PAID?')) return
+    const res = await fetch(`/api/customers/${id}/clear`, { method: 'POST' })
+    if (res.ok) {
+      fetchCustomers()
+    } else {
+      alert('Failed to settle balance.')
+    }
+  }
+
   const filtered = customers.filter(c => !search || c.name?.toLowerCase().includes(search.toLowerCase()) || c.phone?.includes(search) || c.email?.toLowerCase().includes(search.toLowerCase()))
   
   const paginatedCustomers = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
@@ -139,6 +149,9 @@ export default function CustomersPage() {
                   <td>
                     <div style={{ display: 'flex', gap: '0.375rem' }}>
                       <Link href={`/customers/${c.id}`} className="btn btn-secondary btn-sm">View</Link>
+                      {c.outstandingBalance > 0 && (
+                        <button className="btn btn-success btn-sm" onClick={() => settleCustomerBalance(c.id)}>✓ Settle</button>
+                      )}
                       <button className="btn btn-ghost btn-sm" onClick={() => openEdit(c)}>✏</button>
                       <button className="btn btn-ghost btn-sm" style={{ color: 'var(--danger)' }} onClick={() => deleteCustomer(c.id)}>🗑</button>
                     </div>

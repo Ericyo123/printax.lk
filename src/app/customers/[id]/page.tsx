@@ -10,9 +10,26 @@ export default function CustomerDetailPage() {
   const [customer, setCustomer] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
+  async function fetchCustomer() {
+    const r = await fetch(`/api/customers/${id}`)
+    const d = await r.json()
+    setCustomer(d)
+    setLoading(false)
+  }
+
   useEffect(() => {
-    fetch(`/api/customers/${id}`).then(r => r.json()).then(d => { setCustomer(d); setLoading(false) })
+    fetchCustomer()
   }, [id])
+
+  async function settleCustomerBalance() {
+    if (!window.confirm('Are you sure you want to mark all outstanding invoices for this customer as PAID?')) return
+    const res = await fetch(`/api/customers/${id}/clear`, { method: 'POST' })
+    if (res.ok) {
+      fetchCustomer()
+    } else {
+      alert('Failed to settle balance.')
+    }
+  }
 
   if (loading) return <AppShell><div className="empty-state"><span className="spinner" style={{ width: 36, height: 36 }} /></div></AppShell>
   if (!customer) return <AppShell><div className="empty-state"><p>Customer not found</p></div></AppShell>
@@ -66,8 +83,14 @@ export default function CustomerDetailPage() {
           </div>
 
           {customer.outstandingBalance > 0 && (
-            <div className="alert alert-warning mb-6" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <AlertCircle size={18} /> This customer has an outstanding balance of Rs. {customer.outstandingBalance.toLocaleString()}
+            <div className="alert alert-danger mb-6" style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: '#000', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <AlertCircle size={18} color="var(--danger)" /> 
+                <span style={{ fontWeight: 500 }}>
+                  This customer has an outstanding balance of <strong>Rs. {customer.outstandingBalance.toLocaleString()}</strong>
+                </span>
+              </div>
+              <button className="btn btn-success btn-sm" onClick={settleCustomerBalance}>✓ Settle All</button>
             </div>
           )}
         </div>
