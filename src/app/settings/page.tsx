@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 
-import { ArrowLeft, Building2, Landmark } from 'lucide-react'
+import { Building2, Landmark } from 'lucide-react'
+import { AppShell } from '@/components/AppShell'
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<any>({
@@ -62,28 +63,24 @@ export default function SettingsPage() {
     }
   }
 
-  if (loading) return <div className="p-8">Loading settings...</div>
+  if (loading) return <AppShell><div className="p-8">Loading settings...</div></AppShell>
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '2rem' }}>
-      <button 
-        onClick={() => router.back()} 
-        className="btn btn-ghost" 
-        style={{ marginBottom: '1rem', padding: '0.5rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
-      >
-        <ArrowLeft size={16} /> Back
-      </button>
-      
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--text-primary)' }}>System Settings</h1>
-        <button 
-          onClick={handleSave} 
-          className="btn btn-primary"
-          disabled={saving}
-          style={{ padding: '0.75rem 2rem' }}
-        >
-          {saving ? 'Saving...' : 'Save All Changes'}
-        </button>
+    <AppShell>
+      <div className="page-header">
+        <div className="page-title-group">
+          <h1 className="page-title">System Settings</h1>
+          <p className="page-subtitle">Manage business details and bank information</p>
+        </div>
+        <div className="page-actions">
+          <button 
+            onClick={handleSave} 
+            className="btn btn-primary"
+            disabled={saving}
+          >
+            {saving ? 'Saving...' : 'Save All Changes'}
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -190,6 +187,6 @@ export default function SettingsPage() {
       <div style={{ marginTop: '2rem', padding: '1rem', background: 'var(--bg-elevated)', borderRadius: '8px', border: '1px solid var(--border)', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
         <strong style={{ color: 'var(--text-primary)' }}>Note:</strong> These details will be automatically included in all generated Invoices and Monthly Statements.
       </div>
-    </div>
+    </AppShell>
   )
 }
