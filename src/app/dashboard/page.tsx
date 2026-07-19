@@ -22,16 +22,18 @@ export default function DashboardPage() {
   const now = new Date()
 
   useEffect(() => {
-    Promise.all([
-      fetch('/api/reports?type=summary').then(r => r.json()),
-      fetch(`/api/reports?type=daily&year=${now.getFullYear()}&month=${now.getMonth() + 1}`).then(r => r.json()),
-      fetch('/api/invoices?limit=6').then(r => r.json()),
-    ]).then(([s, c, inv]) => {
-      setSummary(s)
-      setChartData(c.data || [])
-      setRecentInvoices(inv.invoices || [])
-      setLoading(false)
-    })
+    fetch('/api/dashboard')
+      .then(r => r.json())
+      .then(data => {
+        setSummary(data.summary)
+        setChartData(data.chartData || [])
+        setRecentInvoices(data.recentInvoices || [])
+        setLoading(false)
+      })
+      .catch(e => {
+        console.error(e)
+        setLoading(false)
+      })
   }, [])
 
   const fmt = (n: number) => `Rs. ${n.toLocaleString('en-LK', { minimumFractionDigits: 2 })}`
