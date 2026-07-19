@@ -110,9 +110,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <Link href="/jobs/new" className="btn btn-primary btn-sm">
-              + New Job
-            </Link>
+            <button onClick={() => signOut()} className="btn btn-ghost" title="Logout"><LogOut size={20} /></button>
           </div>
         </header>
         <main className="page-content">
