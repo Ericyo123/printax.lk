@@ -376,7 +376,7 @@ export default function InvoiceDetailPage() {
           <tfoot>
             {invoice.jobs.some((j: any) => j.discount > 0) && (
               <tr style={{ background: '#fff' }}>
-                <td colSpan={4} style={{ padding: '0.5rem 1rem', textAlign: 'right', color: '#ef4444', fontSize: '0.875rem', fontWeight: 600 }}>
+                <td colSpan={3} style={{ padding: '0.5rem 1rem', textAlign: 'right', color: '#ef4444', fontSize: '0.875rem', fontWeight: 600 }}>
                   TOTAL DISCOUNT
                 </td>
                 <td style={{ padding: '0.5rem 1rem', textAlign: 'right', color: '#ef4444', fontWeight: 700 }}>
@@ -385,7 +385,7 @@ export default function InvoiceDetailPage() {
               </tr>
             )}
             <tr style={{ background: '#f9fafb' }}>
-              <td colSpan={4} style={{ padding: '1rem', textAlign: 'right', fontWeight: 700, fontSize: '1rem', color: '#1a1a1a' }}>TOTAL</td>
+              <td colSpan={3} style={{ padding: '1rem', textAlign: 'right', fontWeight: 700, fontSize: '1rem', color: '#1a1a1a' }}>TOTAL</td>
               <td style={{ padding: '1rem', textAlign: 'right', fontWeight: 800, fontSize: '1.125rem', color: '#132549' }}>Rs. {invoice.totalAmount.toLocaleString()}</td>
             </tr>
           </tfoot>
