@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { AppShell } from '@/components/AppShell'
-import { CreditCard } from 'lucide-react'
+import { CreditCard, AlertCircle } from 'lucide-react'
 import { Pagination } from '@/components/Pagination'
 import Link from 'next/link'
 
@@ -68,8 +68,8 @@ export default function PaymentsPage() {
 
       {/* Summary */}
       {!loading && statusFilter === 'UNPAID' && invoices.length > 0 && (
-        <div className="alert alert-warning mb-4">
-          <span>⚠</span>
+        <div className="alert alert-warning mb-4" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <AlertCircle size={20} />
           <span>
             <strong>{invoices.length}</strong> unpaid invoice(s) totalling{' '}
             <strong>Rs. {invoices.reduce((s, i) => s + i.totalAmount, 0).toLocaleString()}</strong>

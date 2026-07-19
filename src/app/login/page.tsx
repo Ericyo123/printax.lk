@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import { Eye, EyeOff, AlertCircle } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -66,8 +67,8 @@ export default function LoginPage() {
             </p>
 
             {error && (
-              <div className="alert alert-danger mb-5">
-                <span>⚠</span> {error}
+              <div className="alert alert-danger mb-5 flex items-center gap-2">
+                <AlertCircle size={18} /> {error}
               </div>
             )}
 
@@ -91,8 +92,8 @@ export default function LoginPage() {
                     style={{ paddingRight: '2.75rem' }}
                   />
                   <button type="button" onClick={() => setShowPass(!showPass)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none text-[var(--text-muted)] cursor-pointer text-sm">
-                    {showPass ? '🙈' : '👁'}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none text-[var(--text-muted)] cursor-pointer text-sm flex items-center justify-center">
+                    {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
               </div>

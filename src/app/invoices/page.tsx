@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { AppShell } from '@/components/AppShell'
 import Link from 'next/link'
 import { Pagination } from '@/components/Pagination'
-import { Receipt } from 'lucide-react'
+import { Receipt, Search } from 'lucide-react'
 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<any[]>([])
@@ -58,7 +58,7 @@ export default function InvoicesPage() {
       {/* Filters */}
       <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
         <div className="search-bar" style={{ flex: '1 1 280px' }}>
-          <span style={{ color: 'var(--text-muted)' }}>🔍</span>
+          <Search size={18} color="var(--text-muted)" />
           <input placeholder="Search by invoice # or customer..." value={search} onChange={e => setSearch(e.target.value)} />
         </div>
         <div className="tabs">

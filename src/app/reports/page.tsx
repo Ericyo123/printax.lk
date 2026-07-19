@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { AppShell } from '@/components/AppShell'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, LineChart, Line } from 'recharts'
-import { Users } from 'lucide-react'
+import { Users, FileSpreadsheet, FileText } from 'lucide-react'
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 
@@ -71,8 +71,8 @@ export default function ReportsPage() {
           <p className="page-subtitle">Sales, revenue and customer analytics</p>
         </div>
         <div className="page-actions">
-          <button className="btn btn-secondary" onClick={exportExcel}>📊 Export Excel</button>
-          <button className="btn btn-secondary" onClick={exportPDF}>📄 Export PDF</button>
+          <button className="btn btn-secondary" onClick={exportExcel} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><FileSpreadsheet size={16} /> Export Excel</button>
+          <button className="btn btn-secondary" onClick={exportPDF} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><FileText size={16} /> Export PDF</button>
         </div>
       </div>
 

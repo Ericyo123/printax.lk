@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { AppShell } from '@/components/AppShell'
-import { Receipt } from 'lucide-react'
+import { Receipt, AlertCircle } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 
@@ -66,8 +66,8 @@ export default function CustomerDetailPage() {
           </div>
 
           {customer.outstandingBalance > 0 && (
-            <div className="alert alert-warning">
-              <span>⚠</span> This customer has an outstanding balance of Rs. {customer.outstandingBalance.toLocaleString()}
+            <div className="alert alert-warning mb-6" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <AlertCircle size={18} /> This customer has an outstanding balance of Rs. {customer.outstandingBalance.toLocaleString()}
             </div>
           )}
         </div>

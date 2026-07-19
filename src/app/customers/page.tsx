@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { AppShell } from '@/components/AppShell'
 import Link from 'next/link'
 import { Pagination } from '@/components/Pagination'
-import { Users } from 'lucide-react'
+import { Users, Search } from 'lucide-react'
 
 export default function CustomersPage() {
   const [customers, setCustomers] = useState<any[]>([])
@@ -94,7 +94,7 @@ export default function CustomersPage() {
 
       <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
         <div className="search-bar" style={{ flex: '1 1 280px' }}>
-          <span style={{ color: 'var(--text-muted)' }}>🔍</span>
+          <Search size={18} color="var(--text-muted)" />
           <input placeholder="Search name, phone, email..." value={search} onChange={e => setSearch(e.target.value)} />
         </div>
       </div>
