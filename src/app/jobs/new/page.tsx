@@ -24,6 +24,42 @@ export default function NewJobPage() {
   const [jobsList, setJobsList] = useState<any[]>([])
   const [invoiceDiscount, setInvoiceDiscount] = useState(0)
 
+  // Local storage caching for form state
+  const CACHE_KEY = 'printax_new_invoice_cache'
+  const [isLoaded, setIsLoaded] = useState(false)
+
+  useEffect(() => {
+    try {
+      const cached = localStorage.getItem(CACHE_KEY)
+      if (cached) {
+        const data = JSON.parse(cached)
+        setDescription(data.description ?? '')
+        setQuantity(data.quantity ?? 1)
+        setAmount(data.amount ?? '')
+        setCustomerId(data.customerId ?? '')
+        setCustomerSearch(data.customerSearch ?? '')
+        setJobsList(data.jobsList ?? [])
+        setInvoiceDiscount(data.invoiceDiscount ?? 0)
+      }
+    } catch (e) {
+      console.error('Failed to load invoice cache', e)
+    }
+    setIsLoaded(true)
+  }, [])
+
+  useEffect(() => {
+    if (!isLoaded) return
+    localStorage.setItem(CACHE_KEY, JSON.stringify({
+      description,
+      quantity,
+      amount,
+      customerId,
+      customerSearch,
+      jobsList,
+      invoiceDiscount
+    }))
+  }, [description, quantity, amount, customerId, customerSearch, jobsList, invoiceDiscount, isLoaded])
+
   // Derived
   const validQty = typeof quantity === 'number' ? quantity : 1
   const validAmount = typeof amount === 'number' ? amount : 0
@@ -170,6 +206,7 @@ export default function NewJobPage() {
       const data = await res.json()
       setLoading(false)
       if (res.ok && data.invoice) {
+        localStorage.removeItem(CACHE_KEY)
         router.push(`/invoices/${data.invoice.id}`)
       } else {
         alert(data.error || 'Failed to create invoice. Please try again.')
