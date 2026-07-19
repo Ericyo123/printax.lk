@@ -48,16 +48,17 @@ export default function InvoiceDetailPage() {
       const inv = invoice
 
       // Load logo as base64 - Optional
-      const getBase64 = (url: string): Promise<string> => {
-        return new Promise((resolve) => {
+      const getBase64 = (url: string) => {
+        return new Promise<{url: string, width: number, height: number} | null>((resolve) => {
           const img = new Image()
+          img.crossOrigin = 'Anonymous'
           img.onload = () => {
             try {
               const canvas = document.createElement('canvas')
               canvas.width = img.width
               canvas.height = img.height
               const ctx = canvas.getContext('2d')
-              if (!ctx) return resolve('')
+              if (!ctx) return resolve(null)
               ctx.drawImage(img, 0, 0)
               
               // Remove white background
@@ -68,15 +69,15 @@ export default function InvoiceDetailPage() {
                 if (r > 240 && g > 240 && b > 240) data[i+3] = 0
               }
               ctx.putImageData(imageData, 0, 0)
-              resolve(canvas.toDataURL('image/png'))
-            } catch (e) { resolve('') }
+              resolve({ url: canvas.toDataURL('image/png'), width: img.width, height: img.height })
+            } catch (e) { resolve(null) }
           }
-          img.onerror = () => resolve('')
+          img.onerror = () => resolve(null)
           img.src = url
         })
       }
 
-      const logoBase64 = await getBase64('/logo.png')
+      const logoData = await getBase64('/logo.png')
 
       const settings = await fetch('/api/settings').then(res => res.json()).catch(() => ({}))
       
@@ -90,8 +91,11 @@ export default function InvoiceDetailPage() {
       doc.text('Invoice', 14, 25)
 
       // Logo on Top Right
-      if (logoBase64) {
-        doc.addImage(logoBase64, 'PNG', 150, 8, 45, 15)
+      if (logoData) {
+        const aspect = logoData.width / logoData.height
+        const logoWidth = 45
+        const logoHeight = logoWidth / aspect
+        doc.addImage(logoData.url, 'PNG', 190 - logoWidth, 8, logoWidth, logoHeight)
       }
 
       doc.setTextColor(darkText[0], darkText[1], darkText[2])
