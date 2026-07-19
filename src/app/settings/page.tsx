@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 
+import { ArrowLeft, Building2, Landmark } from 'lucide-react'
+
 export default function SettingsPage() {
   const [settings, setSettings] = useState<any>({
     businessName: '',
@@ -64,6 +66,14 @@ export default function SettingsPage() {
 
   return (
     <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '2rem' }}>
+      <button 
+        onClick={() => router.back()} 
+        className="btn btn-ghost" 
+        style={{ marginBottom: '1rem', padding: '0.5rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
+      >
+        <ArrowLeft size={16} /> Back
+      </button>
+      
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <h1 style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--text-primary)' }}>System Settings</h1>
         <button 
@@ -80,7 +90,7 @@ export default function SettingsPage() {
         {/* Business Info */}
         <div className="card" style={{ padding: '1.5rem' }}>
           <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            🏢 Business Information
+            <Building2 size={20} className="text-primary-light" /> Business Information
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div className="form-group">
@@ -127,7 +137,7 @@ export default function SettingsPage() {
         {/* Bank Details */}
         <div className="card" style={{ padding: '1.5rem' }}>
           <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            🏦 Bank Details (For Invoices)
+            <Landmark size={20} className="text-primary-light" /> Bank Details (For Invoices)
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div className="form-group">
