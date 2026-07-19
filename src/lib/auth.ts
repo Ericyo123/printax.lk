@@ -35,7 +35,7 @@ export const authOptions: AuthOptions = {
             userId: user.id,
             userAgent,
             ipAddress,
-            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
+            expiresAt: new Date(Date.now() + 4 * 60 * 60 * 1000) // 4 hours
           }
         })
 
@@ -82,7 +82,7 @@ export const authOptions: AuthOptions = {
   },
   session: { 
     strategy: 'jwt',
-    maxAge: 24 * 60 * 60, // 24 hours
+    maxAge: 4 * 60 * 60, // 4 hours
   },
   secret: process.env.NEXTAUTH_SECRET,
 }
