@@ -103,9 +103,15 @@ export default function StatementsPage() {
       // Logo on Top Right
       if (logoData) {
         const aspect = logoData.width / logoData.height
-        const logoWidth = 45
-        const logoHeight = logoWidth / aspect
-        doc.addImage(logoData.url, 'PNG', 190 - logoWidth, 8, logoWidth, logoHeight)
+        let logoHeight = 25
+        let logoWidth = logoHeight * aspect
+
+        if (logoWidth > 55) {
+          logoWidth = 55
+          logoHeight = logoWidth / aspect
+        }
+        
+        doc.addImage(logoData.url, 'PNG', 196 - logoWidth, 10, logoWidth, logoHeight)
       }
 
       // Statement Details
