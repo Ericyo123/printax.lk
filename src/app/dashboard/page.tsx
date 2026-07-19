@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { AppShell } from '@/components/AppShell'
 import Link from 'next/link'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
+import { Banknote, CheckCircle, Clock, Users, Receipt, Printer, FileText, BarChart3 } from 'lucide-react'
 
 interface Summary {
   totalRevenue: number; totalInvoices: number
@@ -56,25 +57,25 @@ export default function DashboardPage() {
       ) : (
         <div className="stat-grid mb-6">
           <div className="stat-card">
-            <div className="stat-icon" style={{ background: 'rgba(124,58,237,0.15)', color: 'var(--primary-light)' }}>💰</div>
+            <div className="stat-icon" style={{ background: 'rgba(124,58,237,0.15)', color: 'var(--primary-light)' }}><Banknote size={22} /></div>
             <div className="stat-label">Total Revenue</div>
             <div className="stat-value">{fmt(summary?.totalRevenue || 0)}</div>
             <div className="stat-sub">{summary?.totalInvoices || 0} invoices</div>
           </div>
           <div className="stat-card">
-            <div className="stat-icon" style={{ background: 'rgba(16,185,129,0.15)', color: 'var(--success)' }}>✓</div>
+            <div className="stat-icon" style={{ background: 'rgba(16,185,129,0.15)', color: 'var(--success)' }}><CheckCircle size={22} /></div>
             <div className="stat-label">Paid</div>
             <div className="stat-value">{fmt(summary?.paidRevenue || 0)}</div>
             <div className="stat-sub">{summary?.paidCount || 0} invoices paid</div>
           </div>
           <div className="stat-card">
-            <div className="stat-icon" style={{ background: 'rgba(239,68,68,0.15)', color: 'var(--danger)' }}>⏳</div>
+            <div className="stat-icon" style={{ background: 'rgba(239,68,68,0.15)', color: 'var(--danger)' }}><Clock size={22} /></div>
             <div className="stat-label">Outstanding</div>
             <div className="stat-value">{fmt(summary?.unpaidRevenue || 0)}</div>
             <div className="stat-sub">{summary?.unpaidCount || 0} unpaid</div>
           </div>
           <div className="stat-card">
-            <div className="stat-icon" style={{ background: 'rgba(59,130,246,0.15)', color: 'var(--info)' }}>👥</div>
+            <div className="stat-icon" style={{ background: 'rgba(59,130,246,0.15)', color: 'var(--info)' }}><Users size={22} /></div>
             <div className="stat-label">Customers</div>
             <div className="stat-value">{summary?.customerCount || 0}</div>
             <div className="stat-sub">registered customers</div>
@@ -116,7 +117,7 @@ export default function DashboardPage() {
           {loading ? <div className="empty-state"><span className="spinner" /></div> : (
             recentInvoices.length === 0 ? (
               <div className="empty-state" style={{ padding: '2rem' }}>
-                <div className="empty-state-icon">🧾</div>
+                <div className="empty-state-icon"><Receipt size={40} /></div>
                 <p>No invoices yet</p>
                 <Link href="/jobs/new" className="btn btn-primary btn-sm">Create first job</Link>
               </div>
@@ -156,10 +157,10 @@ export default function DashboardPage() {
       {/* Quick actions */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginTop: '1.5rem' }}>
         {[
-          { href: '/jobs/new', icon: '🖨', label: 'New Print Job', desc: 'Enter a new job', color: 'var(--primary-glow)' },
-          { href: '/customers', icon: '👥', label: 'Customers', desc: 'Manage accounts', color: 'rgba(16,185,129,0.2)' },
-          { href: '/statements', icon: '📋', label: 'Statements', desc: 'Monthly billing', color: 'rgba(245,158,11,0.2)' },
-          { href: '/reports', icon: '📊', label: 'Reports', desc: 'Sales analytics', color: 'rgba(59,130,246,0.2)' },
+          { href: '/jobs/new', icon: <Printer size={24} />, label: 'New Print Job', desc: 'Enter a new job', color: 'var(--primary-glow)' },
+          { href: '/customers', icon: <Users size={24} />, label: 'Customers', desc: 'Manage accounts', color: 'rgba(16,185,129,0.2)' },
+          { href: '/statements', icon: <FileText size={24} />, label: 'Statements', desc: 'Monthly billing', color: 'rgba(245,158,11,0.2)' },
+          { href: '/reports', icon: <BarChart3 size={24} />, label: 'Reports', desc: 'Sales analytics', color: 'rgba(59,130,246,0.2)' },
         ].map(qa => (
           <Link key={qa.href} href={qa.href} style={{ textDecoration: 'none' }}>
             <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', transition: 'all 0.2s' }}>
