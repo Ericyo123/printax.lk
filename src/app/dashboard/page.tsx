@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
 import { AppShell } from '@/components/AppShell'
 import Link from 'next/link'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
@@ -13,6 +14,7 @@ interface Summary {
 }
 
 export default function DashboardPage() {
+  const { data: session } = useSession()
   const [summary, setSummary] = useState<Summary | null>(null)
   const [chartData, setChartData] = useState<any[]>([])
   const [recentInvoices, setRecentInvoices] = useState<any[]>([])
@@ -39,7 +41,7 @@ export default function DashboardPage() {
       <div className="page-header">
         <div className="page-title-group">
           <h1 className="page-title">Dashboard</h1>
-          <p className="page-subtitle">Welcome back! Here's what's happening today.</p>
+          <p className="page-subtitle">Welcome back, {session?.user?.name || 'User'}! Here's what's happening today.</p>
         </div>
         <div className="page-actions">
           <Link href="/jobs/new" className="btn btn-primary">+ New Job</Link>
