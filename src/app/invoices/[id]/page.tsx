@@ -132,15 +132,11 @@ export default function InvoiceDetailPage() {
       doc.text('Sri Lanka', 110, boxY + (inv.customer?.address ? 32 : 22))
 
       const rows = (inv.jobs || []).map((job: any) => {
-        const specs = `${job.paperSize?.name || ''}, ${job.printType || ''}, ${job.printMode || ''}`
-        const services = (job.services || []).map((s: any) => s.customLabel || s.service?.name).join(', ')
-        const description = `${job.description || ''}\n(${specs}${services ? ` + ${services}` : ''})`
-        
         return [
-          description,
+          job.description || '',
           `${job.copies || 0}`,
-          `Rs. ${((job.baseAmount + job.additionalTotal) / (job.copies || 1)).toLocaleString()}`,
-          `Rs. ${(job.baseAmount + job.additionalTotal).toLocaleString()}`,
+          `Rs. ${((job.totalAmount || job.baseAmount) / (job.copies || 1)).toLocaleString()}`,
+          `Rs. ${(job.totalAmount || job.baseAmount).toLocaleString()}`,
         ]
       })
 
@@ -359,26 +355,21 @@ export default function InvoiceDetailPage() {
           <thead>
             <tr style={{ background: '#f3f4f6' }}>
               <th style={{ padding: '0.75rem 1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#6b7280' }}>Description</th>
-              <th style={{ padding: '0.75rem 1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#6b7280' }}>Specification</th>
-              <th style={{ padding: '0.75rem 1rem', textAlign: 'right', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#6b7280' }}>Base</th>
-              <th style={{ padding: '0.75rem 1rem', textAlign: 'right', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#6b7280' }}>Extras</th>
+              <th style={{ padding: '0.75rem 1rem', textAlign: 'right', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#6b7280' }}>Unit Price</th>
+              <th style={{ padding: '0.75rem 1rem', textAlign: 'right', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#6b7280' }}>Qty</th>
               <th style={{ padding: '0.75rem 1rem', textAlign: 'right', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#6b7280' }}>Total</th>
             </tr>
           </thead>
           <tbody>
             {invoice.jobs.map((job: any) => (
               <tr key={job.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                <td style={{ padding: '0.875rem 1rem', color: '#1a1a1a', fontWeight: 500 }}>{job.description}</td>
-                <td style={{ padding: '0.875rem 1rem', color: '#6b7280', fontSize: '0.875rem' }}>
-                  {job.paperSize?.name} · {job.printType === 'COLOR' ? 'Color' : 'B&W'} · {job.printMode === 'SINGLE' ? '1-Sided' : '2-Sided'}
-                  <br/>{job.pages} pages × {job.copies} copies
-                  {job.discount > 0 && <div style={{ color: '#ef4444', fontWeight: 600 }}>Discount: -Rs. {job.discount.toLocaleString()}</div>}
+                <td style={{ padding: '0.875rem 1rem', color: '#1a1a1a', fontWeight: 500 }}>
+                  {job.description}
+                  {job.discount > 0 && <div style={{ color: '#ef4444', fontWeight: 600, fontSize: '0.75rem', marginTop: '0.25rem' }}>Discount: -Rs. {job.discount.toLocaleString()}</div>}
                 </td>
-                <td style={{ padding: '0.875rem 1rem', textAlign: 'right', color: '#1a1a1a' }}>Rs. {job.baseAmount.toLocaleString()}</td>
-                <td style={{ padding: '0.875rem 1rem', textAlign: 'right', color: '#6b7280' }}>
-                  {job.additionalTotal > 0 ? `Rs. ${job.additionalTotal.toLocaleString()}` : '—'}
-                </td>
-                <td style={{ padding: '0.875rem 1rem', textAlign: 'right', fontWeight: 700, color: '#1a1a1a' }}>Rs. {job.totalAmount.toLocaleString()}</td>
+                <td style={{ padding: '0.875rem 1rem', textAlign: 'right', color: '#6b7280' }}>Rs. {((job.totalAmount || job.baseAmount) / (job.copies || 1)).toLocaleString()}</td>
+                <td style={{ padding: '0.875rem 1rem', textAlign: 'right', color: '#6b7280' }}>{job.copies}</td>
+                <td style={{ padding: '0.875rem 1rem', textAlign: 'right', fontWeight: 700, color: '#1a1a1a' }}>Rs. {(job.totalAmount || job.baseAmount).toLocaleString()}</td>
               </tr>
             ))}
           </tbody>

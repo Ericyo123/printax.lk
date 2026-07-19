@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { AppShell } from '@/components/AppShell'
 import Link from 'next/link'
 import { Pagination } from '@/components/Pagination'
+import { FileText, Info } from 'lucide-react'
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
 
@@ -281,7 +282,7 @@ export default function StatementsPage() {
               {loading ? (
                 <tr><td colSpan={8} style={{ textAlign: 'center', padding: '3rem' }}><span className="spinner" /></td></tr>
               ) : statements.length === 0 ? (
-                <tr><td colSpan={8}><div className="empty-state"><div className="empty-state-icon">📋</div><p>No statements generated yet</p></div></td></tr>
+                <tr><td colSpan={8}><div className="empty-state"><div className="empty-state-icon"><FileText size={40} /></div><p>No statements generated yet</p></div></td></tr>
               ) : paginatedStatements.map(s => (
                 <tr key={s.id}>
                   <td style={{ fontWeight: 700, color: 'var(--primary-light)' }}>{s.statementNo}</td>
@@ -387,7 +388,7 @@ export default function StatementsPage() {
 
                 {form.customerId && availableInvoices.length === 0 && (
                   <div className="alert alert-info">
-                    <span>ℹ</span> No unpaid invoices found for this customer.
+                    <Info size={16} /> No unpaid invoices found for this customer.
                   </div>
                 )}
               </div>
@@ -395,7 +396,7 @@ export default function StatementsPage() {
             <div className="modal-footer">
               <button className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
               <button className="btn btn-primary" onClick={generateStatement} disabled={saving || !form.customerId || selectedInvoices.length === 0}>
-                {saving ? <span className="spinner" /> : '📋'} Generate Statement
+                {saving ? <span className="spinner" /> : <FileText size={16} />} Generate Statement
               </button>
             </div>
           </div>
