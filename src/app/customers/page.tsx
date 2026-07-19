@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { AppShell } from '@/components/AppShell'
 import Link from 'next/link'
 import { Pagination } from '@/components/Pagination'
-import { Users, Search } from 'lucide-react'
+import { Users, Search, Pencil, Trash2 } from 'lucide-react'
 
 export default function CustomersPage() {
   const [customers, setCustomers] = useState<any[]>([])
@@ -141,19 +141,19 @@ export default function CustomersPage() {
                   <td style={{ color: 'var(--text-secondary)' }}>{c._count?.invoices || 0}</td>
                   <td>
                     {c.outstandingBalance > 0 ? (
-                      <span style={{ color: 'var(--danger)', fontWeight: 700 }}>Rs. {c.outstandingBalance.toLocaleString()}</span>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem', alignItems: 'flex-start' }}>
+                        <span style={{ color: 'var(--danger)', fontWeight: 700 }}>Rs. {c.outstandingBalance.toLocaleString()}</span>
+                        <button className="btn btn-success btn-sm" style={{ padding: '0.125rem 0.5rem', fontSize: '0.75rem', height: 'auto' }} onClick={() => settleCustomerBalance(c.id)}>✓ Settle</button>
+                      </div>
                     ) : (
                       <span className="badge badge-success">Clear</span>
                     )}
                   </td>
                   <td>
-                    <div style={{ display: 'flex', gap: '0.375rem' }}>
-                      <Link href={`/customers/${c.id}`} className="btn btn-secondary btn-sm">View</Link>
-                      {c.outstandingBalance > 0 && (
-                        <button className="btn btn-success btn-sm" onClick={() => settleCustomerBalance(c.id)}>✓ Settle</button>
-                      )}
-                      <button className="btn btn-ghost btn-sm" onClick={() => openEdit(c)}>✏</button>
-                      <button className="btn btn-ghost btn-sm" style={{ color: 'var(--danger)' }} onClick={() => deleteCustomer(c.id)}>🗑</button>
+                    <div style={{ display: 'flex', gap: '0.25rem' }}>
+                      <Link href={`/customers/${c.id}`} className="btn btn-secondary btn-sm" style={{ padding: '0.375rem 0.5rem', height: 'auto' }}>View</Link>
+                      <button className="btn btn-ghost btn-sm" style={{ padding: '0.375rem', height: 'auto', color: 'var(--text-secondary)' }} onClick={() => openEdit(c)} title="Edit"><Pencil size={16} /></button>
+                      <button className="btn btn-ghost btn-sm" style={{ padding: '0.375rem', height: 'auto', color: 'var(--danger)' }} onClick={() => deleteCustomer(c.id)} title="Delete"><Trash2 size={16} /></button>
                     </div>
                   </td>
                 </tr>

@@ -4,9 +4,6 @@ import { getServerSession } from 'next-auth'
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   try {
-    const session = await getServerSession()
-    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
     const { id } = params
     
     // Find all unpaid or partial invoices for this customer
