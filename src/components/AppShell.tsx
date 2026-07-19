@@ -110,9 +110,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="topbar-date" style={{ fontSize: '0.875rem', color: '#000', fontWeight: 500 }}>
             {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <button onClick={() => signOut()} className="btn btn-ghost" title="Logout"><LogOut size={20} /></button>
-          </div>
         </header>
         <main className="page-content">
           {children}
