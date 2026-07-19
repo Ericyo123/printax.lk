@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { AppShell } from '@/components/AppShell'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, LineChart, Line } from 'recharts'
+import { Users } from 'lucide-react'
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 
@@ -60,7 +61,7 @@ export default function ReportsPage() {
   }
 
   const fmt = (n: number) => `Rs. ${(n || 0).toLocaleString()}`
-  const tooltipStyle = { background: '#1a2235', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 12 }
+  const tooltipStyle = { background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '13px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)', color: '#0f172a' }
 
   return (
     <AppShell>
@@ -135,7 +136,7 @@ export default function ReportsPage() {
         ) : tab === 'customer' ? (
           data.length === 0 ? (
             <div style={{ height: 300, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
-              <span style={{ fontSize: '2rem', marginBottom: '1rem' }}>👥</span>
+              <div style={{ marginBottom: '1rem', opacity: 0.4 }}><Users size={40} /></div>
               <p>No customer data found.</p>
               <p style={{ fontSize: '0.875rem' }}>Create customers and assign invoices to them to see analytics here.</p>
             </div>
