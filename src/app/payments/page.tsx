@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { AppShell } from '@/components/AppShell'
+import { CreditCard } from 'lucide-react'
 import Link from 'next/link'
 
 export default function PaymentsPage() {
@@ -79,7 +80,7 @@ export default function PaymentsPage() {
             {loading ? (
               <tr><td colSpan={8} style={{ textAlign: 'center', padding: '3rem' }}><span className="spinner" /></td></tr>
             ) : invoices.length === 0 ? (
-              <tr><td colSpan={8}><div className="empty-state"><div className="empty-state-icon">💳</div><p>No invoices match this filter</p></div></td></tr>
+              <tr><td colSpan={8}><div className="empty-state"><div className="empty-state-icon"><CreditCard size={40} /></div><p>No invoices match this filter</p></div></td></tr>
             ) : invoices.map(inv => (
               <tr key={inv.id}>
                 <td><Link href={`/invoices/${inv.id}`} style={{ fontWeight: 700, color: 'var(--primary-light)' }}>{inv.invoiceNumber}</Link></td>

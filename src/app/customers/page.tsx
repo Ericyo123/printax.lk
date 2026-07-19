@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { AppShell } from '@/components/AppShell'
 import Link from 'next/link'
 import { Pagination } from '@/components/Pagination'
+import { Users } from 'lucide-react'
 
 export default function CustomersPage() {
   const [customers, setCustomers] = useState<any[]>([])
@@ -121,7 +122,7 @@ export default function CustomersPage() {
               {loading ? (
                 <tr><td colSpan={7} style={{ textAlign: 'center', padding: '3rem' }}><span className="spinner" /></td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={7}><div className="empty-state"><div className="empty-state-icon">👥</div><p>No customers found</p></div></td></tr>
+                <tr><td colSpan={7}><div className="empty-state"><div className="empty-state-icon"><Users size={40} /></div><p>No customers found</p></div></td></tr>
               ) : paginatedCustomers.map(c => (
                 <tr key={c.id}>
                   <td style={{ fontWeight: 600 }}>{c.name}</td>

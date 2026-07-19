@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { AppShell } from '@/components/AppShell'
 import Link from 'next/link'
 import { Pagination } from '@/components/Pagination'
+import { Receipt } from 'lucide-react'
 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<any[]>([])
@@ -90,7 +91,7 @@ export default function InvoicesPage() {
               ) : filtered.length === 0 ? (
                 <tr><td colSpan={8}>
                   <div className="empty-state">
-                    <div className="empty-state-icon">🧾</div>
+                    <div className="empty-state-icon"><Receipt size={40} /></div>
                     <p>No invoices found</p>
                     <Link href="/jobs/new" className="btn btn-primary btn-sm">Create first job</Link>
                   </div>

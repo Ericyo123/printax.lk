@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { AppShell } from '@/components/AppShell'
+import { Receipt } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 
@@ -76,7 +77,7 @@ export default function CustomerDetailPage() {
           <h3 style={{ marginBottom: '1.25rem' }}>Invoice History</h3>
           {customer.invoices.length === 0 ? (
             <div className="empty-state" style={{ padding: '2rem' }}>
-              <div className="empty-state-icon">🧾</div>
+              <div className="empty-state-icon"><Receipt size={40} /></div>
               <p>No invoices yet</p>
             </div>
           ) : (
