@@ -68,11 +68,11 @@ export default function NewJobPage() {
       pages: 1,
       copies: validQty, // quantity mapped to copies
       pricingType: 'MANUAL',
-      manualPrice: validAmount, // unit price
+      manualPrice: total, // qty * unit price
       services: [],
       customServices: [],
       discount: 0,
-      baseAmount: validAmount, // used for single unit
+      baseAmount: total, // used for total base price
       additionalTotal: 0,
       totalAmount: total, // qty * unit price
       notes: '',
@@ -106,11 +106,11 @@ export default function NewJobPage() {
         pages: 1,
         copies: validQty,
         pricingType: 'MANUAL',
-        manualPrice: validAmount,
+        manualPrice: total,
         services: [],
         customServices: [],
         discount: 0,
-        baseAmount: validAmount,
+        baseAmount: total,
         additionalTotal: 0,
         totalAmount: total,
         notes: '',
@@ -125,11 +125,11 @@ export default function NewJobPage() {
           pages: 1,
           copies: validQty,
           pricingType: 'MANUAL',
-          manualPrice: validAmount,
+          manualPrice: total,
           services: [],
           customServices: [],
           discount: 0,
-          baseAmount: validAmount,
+          baseAmount: total,
           additionalTotal: 0,
           totalAmount: total,
           notes: '',
