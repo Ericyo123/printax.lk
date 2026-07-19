@@ -59,6 +59,12 @@ export const authOptions: AuthOptions = {
             console.error('Error parsing headers:', e)
           }
 
+          // SINGLE SESSION ENFORCEMENT
+          // Kick out any other devices currently logged into this account
+          await prisma.loginSession.deleteMany({
+            where: { userId: user.id }
+          })
+
           // Create Database Session
           const loginSession = await prisma.loginSession.create({
             data: {
