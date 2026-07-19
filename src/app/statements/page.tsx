@@ -99,9 +99,9 @@ export default function StatementsPage() {
       doc.setFontSize(28); doc.setFont('helvetica', 'bold')
       doc.text('Statement', 14, 25)
 
-      // Logo on Top Right - REDUCED AGAIN
+      // Logo on Top Right
       if (logoBase64) {
-        doc.addImage(logoBase64, 'PNG', 150, 8, 40, 35)
+        doc.addImage(logoBase64, 'PNG', 150, 8, 45, 15)
       }
 
       // Statement Details
