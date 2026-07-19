@@ -15,7 +15,8 @@ import {
   Settings, 
   UserCircle,
   Menu,
-  LogOut
+  LogOut,
+  ShieldCheck
 } from 'lucide-react'
 
 const navItems = [
@@ -27,6 +28,7 @@ const navItems = [
   { href: '/payments', icon: <CreditCard size={18} />, label: 'Payments', section: 'Billing' },
   { href: '/reports', icon: <BarChart3 size={18} />, label: 'Reports', section: 'Reports', adminOnly: true },
   { href: '/settings', icon: <Settings size={18} />, label: 'Settings', section: 'Admin', adminOnly: true },
+  { href: '/settings/security', icon: <ShieldCheck size={18} />, label: 'Security', section: 'Admin', adminOnly: true },
   { href: '/users', icon: <UserCircle size={18} />, label: 'Users', section: 'Admin', adminOnly: true },
 ]
 
