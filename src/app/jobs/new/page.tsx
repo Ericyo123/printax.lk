@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { AppShell } from '@/components/AppShell'
 import { useRouter } from 'next/navigation'
-import { Plus, ShoppingCart, Pencil, Trash2, Info, Calculator, Save } from 'lucide-react'
+import { Plus, ShoppingCart, Pencil, Trash2, Info, Calculator, Save, Search } from 'lucide-react'
 
 interface PaperSize { id: string; name: string }
 interface Customer { id: string; name: string; type: string }
@@ -253,13 +253,15 @@ export default function NewJobPage() {
               <h3 style={{ marginBottom: '1.25rem' }}>Customer</h3>
               <div className="form-group">
                 <label className="form-label">Select Customer (optional for walk-in)</label>
-                <input 
-                  type="text" 
-                  className="form-control mb-2" 
-                  placeholder="Search customer by name..." 
-                  value={customerSearch} 
-                  onChange={e => setCustomerSearch(e.target.value)} 
-                />
+                <div className="search-bar mb-2">
+                  <Search size={18} color="var(--text-muted)" />
+                  <input 
+                    type="text" 
+                    placeholder="Search customer by name..." 
+                    value={customerSearch} 
+                    onChange={e => setCustomerSearch(e.target.value)} 
+                  />
+                </div>
                 <select className="form-control" value={customerId} onChange={e => setCustomerId(e.target.value)}>
                   <option value="">Walk-in Customer</option>
                   {customers.filter(c => c.name.toLowerCase().includes(customerSearch.toLowerCase()) && c.type === 'MONTHLY').length > 0 && (
