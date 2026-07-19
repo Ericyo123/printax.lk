@@ -3,7 +3,7 @@ import './globals.css'
 import { Providers } from '@/components/Providers'
 
 export const metadata: Metadata = {
-  title: 'PrintAx — Print Shop Management System',
+  title: 'PrintAx - Print Shop Management System',
   description: 'Cloud-based print shop management: jobs, invoices, customers, billing, and reports.',
 }
 

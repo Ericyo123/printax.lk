@@ -86,7 +86,7 @@ export default function DashboardPage() {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: '1.5rem' }}>
         {/* Chart */}
         <div className="card">
-          <h3 style={{ marginBottom: '1.5rem' }}>Daily Sales — {now.toLocaleString('default', { month: 'long', year: 'numeric' })}</h3>
+          <h3 style={{ marginBottom: '1.5rem' }}>Daily Sales - {now.toLocaleString('default', { month: 'long', year: 'numeric' })}</h3>
           {loading ? (
             <div style={{ height: 260, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <span className="spinner" style={{ width: 32, height: 32 }} />

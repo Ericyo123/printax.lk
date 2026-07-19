@@ -36,7 +36,7 @@ export default function ReportsPage() {
     const { default: autoTable } = await import('jspdf-autotable')
     const doc = new jsPDF()
     doc.setFontSize(18); doc.setTextColor(21, 94, 150)
-    doc.text('printax.lk — Sales Report', 14, 20)
+    doc.text('printax.lk - Sales Report', 14, 20)
     doc.setFontSize(10); doc.setTextColor(100)
     doc.text(`Type: ${tab.toUpperCase()} · Period: ${MONTHS[month-1]} ${year}`, 14, 28)
 
@@ -127,7 +127,7 @@ export default function ReportsPage() {
       {/* Chart */}
       <div className="card" style={{ marginBottom: '1.5rem' }}>
         <h3 style={{ marginBottom: '1.5rem' }}>
-          {tab === 'monthly' ? `Monthly Revenue — ${year}` : tab === 'daily' ? `Daily Revenue — ${MONTHS[month-1]} ${year}` : 'Customer Revenue'}
+          {tab === 'monthly' ? `Monthly Revenue - ${year}` : tab === 'daily' ? `Daily Revenue - ${MONTHS[month-1]} ${year}` : 'Customer Revenue'}
         </h3>
         {loading ? (
           <div style={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

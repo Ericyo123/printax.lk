@@ -103,9 +103,9 @@ export default function PaymentsPage() {
                 <td>{inv.customer?.name || <span style={{ color: 'var(--text-muted)' }}>Walk-in</span>}</td>
                 <td style={{ fontWeight: 700 }}>Rs. {inv.totalAmount.toLocaleString()}</td>
                 <td><span className={`badge ${inv.paymentStatus === 'PAID' ? 'badge-success' : 'badge-warning'}`}>{inv.paymentStatus}</span></td>
-                <td style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>{paymentLabel[inv.paymentMethod] || '—'}</td>
+                <td style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>{paymentLabel[inv.paymentMethod] || '-'}</td>
                 <td style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>
-                  {inv.paymentDate ? new Date(inv.paymentDate).toLocaleDateString() : '—'}
+                  {inv.paymentDate ? new Date(inv.paymentDate).toLocaleDateString() : '-'}
                 </td>
                 <td>
                   {inv.paymentStatus !== 'PAID' ? (
@@ -135,7 +135,7 @@ export default function PaymentsPage() {
         <div className="modal-overlay" onClick={() => setShowPayModal(false)}>
           <div className="modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>Record Payment — {selected.invoiceNumber}</h3>
+              <h3>Record Payment - {selected.invoiceNumber}</h3>
               <button className="btn btn-ghost" onClick={() => setShowPayModal(false)}>✕</button>
             </div>
             <div className="modal-body">

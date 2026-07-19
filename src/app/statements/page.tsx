@@ -295,13 +295,13 @@ export default function StatementsPage() {
               ) : paginatedStatements.map(s => (
                 <tr key={s.id}>
                   <td style={{ fontWeight: 700, color: 'var(--primary-light)' }}>{s.statementNo}</td>
-                  <td style={{ fontWeight: 600 }}>{s.customer?.name || '—'}</td>
+                  <td style={{ fontWeight: 600 }}>{s.customer?.name || '-'}</td>
                   <td style={{ color: 'var(--text-secondary)' }}>{MONTHS[s.month - 1]} {s.year}</td>
                   <td style={{ color: 'var(--text-secondary)' }}>{s.invoices?.length} invoices</td>
                   <td style={{ fontWeight: 700 }}>Rs. {s.totalAmount.toLocaleString()}</td>
                   <td><span className={`badge ${s.status === 'PAID' ? 'badge-success' : 'badge-warning'}`}>{s.status}</span></td>
                   <td style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>
-                    {s.dueDate ? new Date(s.dueDate).toLocaleDateString() : '—'}
+                    {s.dueDate ? new Date(s.dueDate).toLocaleDateString() : '-'}
                   </td>
                   <td>
                     <div style={{ display: 'flex', gap: '0.375rem' }}>
