@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { AppShell } from '@/components/AppShell'
-import { ShieldCheck, Monitor, Smartphone, Globe, Trash2, Clock } from 'lucide-react'
+import { ShieldCheck, Monitor, Smartphone, Globe, Trash2, Clock, MapPin } from 'lucide-react'
 
 export default function SecurityPage() {
   const [sessions, setSessions] = useState<any[]>([])
@@ -92,6 +92,12 @@ export default function SecurityPage() {
                       <Globe size={16} color="var(--text-muted)" />
                       {session.ipAddress || 'Unknown'}
                     </div>
+                    {session.location && session.location !== 'Unknown Location' && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
+                        <MapPin size={12} color="var(--text-muted)" />
+                        {session.location}
+                      </div>
+                    )}
                   </td>
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>

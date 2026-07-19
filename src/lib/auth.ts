@@ -2,6 +2,7 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 import { AuthOptions } from 'next-auth'
+import { headers } from 'next/headers'
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -27,19 +28,33 @@ export const authOptions: AuthOptions = {
           // Capture Device & IP Info
           let userAgent = 'Unknown Device'
           let ipAddress = 'Unknown IP'
+          let location = 'Unknown Location'
           try {
-            const getHeader = (key: string) => {
-              if (req?.headers) {
-                if (typeof (req.headers as any).get === 'function') return (req.headers as any).get(key)
-                return (req.headers as any)[key]
-              }
-              return null
-            }
-            userAgent = getHeader('user-agent') || 'Unknown Device'
-            let ipRaw = getHeader('x-forwarded-for') || getHeader('x-real-ip') || 'Unknown IP'
-            if (Array.isArray(ipRaw)) ipRaw = ipRaw[0]
-            if (typeof ipRaw === 'string' && ipRaw.includes(',')) ipRaw = ipRaw.split(',')[0]
+            const headersList = headers()
+            userAgent = headersList.get('user-agent') || 'Unknown Device'
+            
+            // Try different headers for Vercel/proxies
+            const forwardedFor = headersList.get('x-forwarded-for')
+            const realIp = headersList.get('x-real-ip')
+            let ipRaw = forwardedFor || realIp || 'Unknown IP'
+            
+            if (typeof ipRaw === 'string' && ipRaw.includes(',')) ipRaw = ipRaw.split(',')[0].trim()
             ipAddress = ipRaw
+
+            // Fetch geolocation data
+            if (ipAddress !== 'Unknown IP' && ipAddress !== '::1' && ipAddress !== '127.0.0.1') {
+              try {
+                const geoRes = await fetch(`http://ip-api.com/json/${ipAddress}?fields=city,country`, { cache: 'no-store' })
+                if (geoRes.ok) {
+                  const geoData = await geoRes.json()
+                  if (geoData.city && geoData.country) {
+                    location = `${geoData.city}, ${geoData.country}`
+                  }
+                }
+              } catch (geoErr) {
+                console.error('Geo fetch error:', geoErr)
+              }
+            }
           } catch (e) {
             console.error('Error parsing headers:', e)
           }
@@ -50,6 +65,7 @@ export const authOptions: AuthOptions = {
               userId: user.id,
               userAgent,
               ipAddress,
+              location,
               expiresAt: new Date(Date.now() + 4 * 60 * 60 * 1000) // 4 hours
             }
           })

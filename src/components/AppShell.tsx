@@ -77,7 +77,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <div className="nav-section-label">{section}</div>
               {visibleItems.filter(i => i.section === section).map(item => (
                 <Link key={item.href} href={item.href}
-                  className={`nav-item ${pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href)) ? 'active' : ''}`}>
+                  className={`nav-item ${pathname === item.href || (item.href !== '/dashboard' && item.href !== '/settings' && pathname.startsWith(item.href)) ? 'active' : ''}`}>
                   <span className="nav-icon" style={{ fontSize: '1rem' }}>{item.icon}</span>
                   {item.label}
                 </Link>

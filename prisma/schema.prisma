@@ -25,6 +25,7 @@ model LoginSession {
   userId    String
   ipAddress String?
   userAgent String?
+  location  String?
   createdAt DateTime @default(now())
   expiresAt DateTime
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
