@@ -9,11 +9,8 @@ export default function PaymentsPage() {
   const [invoices, setInvoices] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState('UNPAID')
-  const [showPayModal, setShowPayModal] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
-  const [selected, setSelected] = useState<any>(null)
-  const [payMethod, setPayMethod] = useState('CASH')
   const [saving, setSaving] = useState(false)
 
   function fetchInvoices() {
@@ -25,14 +22,15 @@ export default function PaymentsPage() {
 
   useEffect(() => { setLoading(true); fetchInvoices() }, [statusFilter])
 
-  async function markPaid() {
+  async function markPaid(id: string) {
+    if (!window.confirm('Are you sure you want to mark this invoice as PAID?')) return;
     setSaving(true)
-    await fetch(`/api/invoices/${selected.id}`, {
+    await fetch(`/api/invoices/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ paymentStatus: 'PAID', paymentMethod: payMethod }),
+      body: JSON.stringify({ paymentStatus: 'PAID', paymentMethod: 'CASH' }),
     })
-    setSaving(false); setShowPayModal(false); setSelected(null); fetchInvoices()
+    setSaving(false); fetchInvoices()
   }
 
   const paymentLabel: Record<string, string> = { CASH: 'Cash', BANK_TRANSFER: 'Bank Transfer', CARD: 'Card', ONLINE: 'Online Transfer', OTHER: 'Other' }
@@ -113,7 +111,7 @@ export default function PaymentsPage() {
                 </td>
                 <td>
                   {inv.paymentStatus !== 'PAID' ? (
-                    <button className="btn btn-success btn-sm" onClick={() => { setSelected(inv); setShowPayModal(true) }}>
+                    <button className="btn btn-success btn-sm" onClick={() => markPaid(inv.id)} disabled={saving}>
                       ✓ Mark Paid
                     </button>
                   ) : (
@@ -134,39 +132,6 @@ export default function PaymentsPage() {
         />
       )}
 
-      {/* Pay Modal */}
-      {showPayModal && selected && (
-        <div className="modal-overlay" onClick={() => setShowPayModal(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>Record Payment - {selected.invoiceNumber}</h3>
-              <button className="btn btn-ghost" onClick={() => setShowPayModal(false)}>✕</button>
-            </div>
-            <div className="modal-body">
-              <div className="form-group">
-                <label className="form-label">Payment Method *</label>
-                <select className="form-control" value={payMethod} onChange={e => setPayMethod(e.target.value)}>
-                  <option value="CASH">Cash</option>
-                  <option value="BANK_TRANSFER">Bank Transfer</option>
-                  <option value="CARD">Card</option>
-                  <option value="ONLINE">Online Transfer</option>
-                  <option value="OTHER">Other</option>
-                </select>
-              </div>
-              <div style={{ marginTop: '1rem', padding: '1rem', background: 'var(--bg-elevated)', borderRadius: 8, display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--text-secondary)' }}>Amount</span>
-                <span style={{ fontWeight: 700, color: '#000', fontSize: '1.125rem' }}>Rs. {selected.totalAmount.toLocaleString()}</span>
-              </div>
-            </div>
-            <div className="modal-footer">
-              <button className="btn btn-secondary" onClick={() => setShowPayModal(false)}>Cancel</button>
-              <button className="btn btn-success" onClick={markPaid} disabled={saving}>
-                {saving ? <span className="spinner" /> : '✓'} Confirm Payment
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </AppShell>
   )
 }
