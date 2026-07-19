@@ -98,9 +98,11 @@ export default function DashboardPage() {
                 <XAxis dataKey="day" tick={{ fill: '#475569', fontSize: 11 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fill: '#475569', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `${v}`} />
                 <Tooltip
-                  contentStyle={{ background: '#1a2235', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 13 }}
-                  formatter={(v: any) => [`Rs. ${(v || 0).toLocaleString()}`, 'Revenue']}
-                  labelStyle={{ color: '#94a3b8' }}
+                  cursor={{ fill: 'rgba(0,0,0,0.03)' }}
+                  contentStyle={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '13px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}
+                  itemStyle={{ color: '#0f172a', fontWeight: 600 }}
+                  formatter={(v: any) => [`Rs. ${(v || 0).toLocaleString('en-LK', { minimumFractionDigits: 2 })}`, 'Daily Revenue']}
+                  labelStyle={{ color: '#64748b', marginBottom: '4px', fontWeight: 500 }}
                 />
                 <Bar dataKey="revenue" fill="#7c3aed" radius={[4, 4, 0, 0]} />
               </BarChart>
