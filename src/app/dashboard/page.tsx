@@ -87,7 +87,7 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: '1.5rem' }}>
+      <div className="grid-dashboard">
         {/* Chart */}
         <div className="card">
           <h3 style={{ marginBottom: '1.5rem' }}>Daily Sales - {now.toLocaleString('default', { month: 'long', year: 'numeric' })}</h3>

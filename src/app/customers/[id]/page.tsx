@@ -54,7 +54,7 @@ export default function CustomerDetailPage() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: '1.5rem', alignItems: 'start' }}>
+      <div className="grid-customer-detail">
         {/* Profile */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div className="card">

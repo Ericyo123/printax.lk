@@ -385,6 +385,11 @@ tbody td { padding: 0.875rem 1rem; font-size: 0.875rem; color: var(--text-primar
   box-shadow: 0 20px 60px rgba(0,0,0,0.5);
   max-width: 800px;
 }
+@media (max-width: 768px) {
+  .invoice-paper {
+    padding: 1.5rem 1rem;
+  }
+}
 .invoice-paper h1, .invoice-paper h2, .invoice-paper h3,
 .invoice-paper p, .invoice-paper td, .invoice-paper th { color: #1a1a1a !important; }
 .invoice-paper table thead th { background: #f8f8f8 !important; }
@@ -496,3 +501,66 @@ tbody td { padding: 0.875rem 1rem; font-size: 0.875rem; color: var(--text-primar
   .stat-grid { grid-template-columns: 1fr; }
   .tabs { width: 100%; overflow-x: auto; }
 }
+
+/* Responsive Layout Utilities */
+.grid-dashboard {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 1.5rem;
+}
+@media (max-width: 1024px) {
+  .grid-dashboard {
+    grid-template-columns: 1fr;
+  }
+}
+
+.grid-job-new {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 1.5rem;
+  align-items: start;
+}
+@media (max-width: 1024px) {
+  .grid-job-new {
+    grid-template-columns: 1fr;
+  }
+}
+
+.grid-customer-detail {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+@media (max-width: 768px) {
+  .grid-customer-detail {
+    grid-template-columns: 1fr;
+  }
+}
+
+.grid-invoice-detail {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+@media screen and (max-width: 768px) {
+  .grid-invoice-detail {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+.flex-row-responsive {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+@media (max-width: 600px) {
+  .flex-row-responsive {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+}
+

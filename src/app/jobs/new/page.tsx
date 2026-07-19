@@ -240,14 +240,14 @@ export default function NewJobPage() {
       </div>
 
       <form onSubmit={handleSubmit}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: '1.5rem', alignItems: 'start' }}>
+        <div className="grid-job-new">
           {/* Left: Job Details */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             
             {/* Quick Add Item */}
             <div className="card">
               <h3 style={{ marginBottom: '1.25rem' }}>Add Item</h3>
-              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end' }}>
+              <div className="flex-row-responsive">
                 <div className="form-group" style={{ flex: 3, marginBottom: 0 }}>
                   <label className="form-label">Description *</label>
                   <input className="form-control" placeholder="e.g. Spiral Binding" value={description} onChange={e => setDescription(e.target.value)} />

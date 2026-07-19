@@ -323,7 +323,7 @@ export default function InvoiceDetailPage() {
         </div>
 
         {/* Meta row */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
+        <div className="grid-invoice-detail">
           <div>
             <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#888', marginBottom: '0.25rem' }}>Bill To</div>
             {invoice.customer ? (
