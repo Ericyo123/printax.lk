@@ -84,22 +84,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           ))}
         </nav>
 
-        <div className="sidebar-footer" style={{ padding: '1.5rem', borderTop: '1px solid var(--border)', background: 'var(--bg-base)' }}>
-          <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>
-            <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '1rem', marginBottom: '0.25rem' }}>{session.user?.name}</div>
+        <div className="sidebar-footer" style={{ padding: '1.25rem', borderTop: '1px solid var(--border)', background: 'var(--bg-base)' }}>
+          <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
+            <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '1rem', marginBottom: '0.15rem' }}>{session.user?.name}</div>
             <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>{session.user?.email}</div>
-            <span className={`badge ${isAdmin ? 'badge-purple' : 'badge-muted'}`} style={{ marginTop: '0.5rem' }}>
+            <span className={`badge ${isAdmin ? 'badge-purple' : 'badge-muted'}`} style={{ marginTop: '0.35rem' }}>
               {isAdmin ? 'Admin' : 'Staff'}
             </span>
           </div>
           <button 
             onClick={() => { if (window.confirm('Are you sure you want to sign out?')) signOut({ callbackUrl: '/login' }) }} 
             className="btn btn-danger w-full" 
-            style={{ marginBottom: '1rem', padding: '0.625rem 1rem', fontSize: '0.9rem' }}
+            style={{ marginBottom: '0.5rem', padding: '0.5rem 1rem', fontSize: '0.875rem' }}
           >
             Sign out
           </button>
-          <div style={{ textAlign: 'center', fontSize: '0.7rem', color: 'var(--text-muted)', paddingTop: '0.75rem' }}>
+          <div style={{ textAlign: 'center', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
             Powered by <strong>bitmosolutions.com</strong>
           </div>
         </div>
