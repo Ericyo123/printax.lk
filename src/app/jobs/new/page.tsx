@@ -12,6 +12,7 @@ export default function NewJobPage() {
   const [paperSizes, setPaperSizes] = useState<PaperSize[]>([])
   const [customers, setCustomers] = useState<Customer[]>([])
   const [customerSearch, setCustomerSearch] = useState('')
+  const [isWalkIn, setIsWalkIn] = useState(true)
   const [loading, setLoading] = useState(false)
 
   // Form state
@@ -36,7 +37,12 @@ export default function NewJobPage() {
         setDescription(data.description ?? '')
         setQuantity(data.quantity ?? 1)
         setAmount(data.amount ?? '')
-        setCustomerId(data.customerId ?? '')
+        if (data.customerId) {
+          setCustomerId(data.customerId)
+          setIsWalkIn(false)
+        } else {
+          setIsWalkIn(true)
+        }
         setCustomerSearch(data.customerSearch ?? '')
         setJobsList(data.jobsList ?? [])
         setInvoiceDiscount(data.invoiceDiscount ?? 0)
@@ -53,12 +59,12 @@ export default function NewJobPage() {
       description,
       quantity,
       amount,
-      customerId,
+      customerId: isWalkIn ? '' : customerId,
       customerSearch,
       jobsList,
       invoiceDiscount
     }))
-  }, [description, quantity, amount, customerId, customerSearch, jobsList, invoiceDiscount, isLoaded])
+  }, [description, quantity, amount, customerId, customerSearch, jobsList, invoiceDiscount, isLoaded, isWalkIn])
 
   // Derived
   const validQty = typeof quantity === 'number' ? quantity : 1
@@ -176,8 +182,12 @@ export default function NewJobPage() {
 
     setLoading(true)
 
+    if (isWalkIn) {
+      setCustomerId('')
+    }
+
     const body = {
-      customerId: customerId || undefined,
+      customerId: isWalkIn ? null : customerId || null,
       paymentStatus: 'UNPAID',
       notes: undefined,
       jobs: finalJobs.map(j => ({
@@ -288,26 +298,55 @@ export default function NewJobPage() {
             {/* Customer */}
             <div className="card">
               <h3 style={{ marginBottom: '1.25rem' }}>Customer</h3>
-              <div className="form-group">
-                <label className="form-label">Select Customer (optional for walk-in)</label>
-                <div className="search-bar mb-2">
-                  <Search size={18} color="var(--text-muted)" />
+              
+              <div className="form-group mb-4">
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: 600 }}>
                   <input 
-                    type="text" 
-                    placeholder="Search customer by name..." 
-                    value={customerSearch} 
-                    onChange={e => setCustomerSearch(e.target.value)} 
+                    type="checkbox" 
+                    checked={isWalkIn} 
+                    onChange={e => {
+                      setIsWalkIn(e.target.checked)
+                      if (e.target.checked) setCustomerId('')
+                    }}
+                    style={{ width: '18px', height: '18px' }}
                   />
-                </div>
-                <select className="form-control" value={customerId} onChange={e => setCustomerId(e.target.value)}>
-                  <option value="">Walk-in Customer</option>
-                  {customers.filter(c => c.name.toLowerCase().includes(customerSearch.toLowerCase()) && c.type === 'MONTHLY').length > 0 && (
-                    <optgroup label="Monthly Customers">
-                      {customers.filter(c => c.name.toLowerCase().includes(customerSearch.toLowerCase()) && c.type === 'MONTHLY').map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                    </optgroup>
-                  )}
-                </select>
+                  Walk-in Customer (No account required)
+                </label>
               </div>
+
+              {!isWalkIn && (
+                <div className="form-group" style={{ padding: '1rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
+                  <label className="form-label">Search & Select Customer</label>
+                  <div className="search-bar mb-3">
+                    <Search size={18} color="var(--text-muted)" />
+                    <input 
+                      type="text" 
+                      placeholder="Search customer by name..." 
+                      value={customerSearch} 
+                      onChange={e => setCustomerSearch(e.target.value)} 
+                    />
+                  </div>
+                  <select className="form-control" value={customerId} onChange={e => setCustomerId(e.target.value)}>
+                    <option value="" disabled>-- Select a customer --</option>
+                    
+                    {customers.filter(c => c.name.toLowerCase().includes(customerSearch.toLowerCase()) && c.type === 'MONTHLY').length > 0 && (
+                      <optgroup label="Monthly Customers">
+                        {customers.filter(c => c.name.toLowerCase().includes(customerSearch.toLowerCase()) && c.type === 'MONTHLY').map(c => (
+                          <option key={c.id} value={c.id}>{c.name}</option>
+                        ))}
+                      </optgroup>
+                    )}
+                    
+                    {customers.filter(c => c.name.toLowerCase().includes(customerSearch.toLowerCase()) && c.type === 'CASH').length > 0 && (
+                      <optgroup label="Cash Customers">
+                        {customers.filter(c => c.name.toLowerCase().includes(customerSearch.toLowerCase()) && c.type === 'CASH').map(c => (
+                          <option key={c.id} value={c.id}>{c.name}</option>
+                        ))}
+                      </optgroup>
+                    )}
+                  </select>
+                </div>
+              )}
               {isMonthly && (
                 <div className="alert alert-info mt-2">
                   <Info size={16} /> Monthly customer — invoice will be added to their account for end-of-month billing.
