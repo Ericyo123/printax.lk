@@ -65,13 +65,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Sidebar */}
       <aside className={`sidebar ${mobileOpen ? 'open' : ''}`}>
         <div className="sidebar-logo" style={{ padding: '1.25rem', background: 'var(--bg-base)', borderBottom: '1px solid var(--border)' }}>
-          <div style={{
-            background: 'white', borderRadius: '8px', padding: '0.25rem',
-            width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
-          }}>
-            <img src="/logo.png" alt="printax.lk" style={{ width: '100%', height: 'auto', maxHeight: '90px', objectFit: 'contain', display: 'block' }} />
-          </div>
+          <img src="/logo.png" alt="printax.lk" style={{ width: '100%', height: 'auto', maxHeight: '100px', objectFit: 'contain', display: 'block' }} />
         </div>
 
         <nav className="sidebar-nav">

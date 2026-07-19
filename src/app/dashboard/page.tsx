@@ -38,7 +38,7 @@ export default function DashboardPage() {
     <AppShell>
       <div className="page-header">
         <div className="page-title-group">
-          <h1 className="page-title gradient-text">Dashboard</h1>
+          <h1 className="page-title">Dashboard</h1>
           <p className="page-subtitle">Welcome back! Here's what's happening today.</p>
         </div>
         <div className="page-actions">
@@ -159,19 +159,19 @@ export default function DashboardPage() {
       {/* Quick actions */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginTop: '1.5rem' }}>
         {[
-          { href: '/jobs/new', icon: <Printer size={24} />, label: 'New Print Job', desc: 'Enter a new job', color: 'var(--primary-glow)' },
-          { href: '/customers', icon: <Users size={24} />, label: 'Customers', desc: 'Manage accounts', color: 'rgba(16,185,129,0.2)' },
-          { href: '/statements', icon: <FileText size={24} />, label: 'Statements', desc: 'Monthly billing', color: 'rgba(245,158,11,0.2)' },
-          { href: '/reports', icon: <BarChart3 size={24} />, label: 'Reports', desc: 'Sales analytics', color: 'rgba(59,130,246,0.2)' },
+          { href: '/jobs/new', icon: <Printer size={24} />, label: 'New Print Job', desc: 'Enter a new job' },
+          { href: '/customers', icon: <Users size={24} />, label: 'Customers', desc: 'Manage accounts' },
+          { href: '/statements', icon: <FileText size={24} />, label: 'Statements', desc: 'Monthly billing' },
+          { href: '/reports', icon: <BarChart3 size={24} />, label: 'Reports', desc: 'Sales analytics' },
         ].map(qa => (
           <Link key={qa.href} href={qa.href} style={{ textDecoration: 'none' }}>
-            <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', transition: 'all 0.2s' }}>
-              <div style={{ width: 44, height: 44, borderRadius: 10, background: qa.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem', flexShrink: 0 }}>
+            <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', transition: 'all 0.2s', color: '#000' }}>
+              <div style={{ width: 44, height: 44, borderRadius: 10, background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem', flexShrink: 0, color: '#000' }}>
                 {qa.icon}
               </div>
               <div>
-                <div style={{ fontWeight: 600, fontSize: '0.9375rem' }}>{qa.label}</div>
-                <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>{qa.desc}</div>
+                <div style={{ fontWeight: 600, fontSize: '0.9375rem', color: '#000' }}>{qa.label}</div>
+                <div style={{ fontSize: '0.8125rem', color: '#000' }}>{qa.desc}</div>
               </div>
             </div>
           </Link>

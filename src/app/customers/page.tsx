@@ -11,7 +11,7 @@ export default function CustomersPage() {
   const [showModal, setShowModal] = useState(false)
   const [search, setSearch] = useState('')
   const [typeFilter, setTypeFilter] = useState('')
-  const [form, setForm] = useState({ name: '', phone: '', email: '', address: '', notes: '', type: 'WALK_IN' })
+  const [form, setForm] = useState({ name: '', phone: '', email: '', address: '', notes: '', type: 'MONTHLY' })
   const [saving, setSaving] = useState(false)
   const [editCustomer, setEditCustomer] = useState<any>(null)
 
@@ -50,7 +50,7 @@ export default function CustomersPage() {
     if (res.ok) {
       setShowModal(false)
       setEditCustomer(null)
-      setForm({ name: '', phone: '', email: '', address: '', notes: '', type: 'WALK_IN' })
+      setForm({ name: '', phone: '', email: '', address: '', notes: '', type: 'MONTHLY' })
       fetchCustomers()
     } else {
       alert(data.error || 'Failed to save customer. The database might be full or offline.')
@@ -86,7 +86,7 @@ export default function CustomersPage() {
           <p className="page-subtitle">{customers.length} registered customers</p>
         </div>
         <div className="page-actions">
-          <button className="btn btn-primary" onClick={() => { setEditCustomer(null); setForm({ name: '', phone: '', email: '', address: '', notes: '', type: 'WALK_IN' }); setShowModal(true) }}>
+          <button className="btn btn-primary" onClick={() => { setEditCustomer(null); setForm({ name: '', phone: '', email: '', address: '', notes: '', type: 'MONTHLY' }); setShowModal(true) }}>
             + New Customer
           </button>
         </div>
@@ -96,11 +96,6 @@ export default function CustomersPage() {
         <div className="search-bar" style={{ flex: '1 1 280px' }}>
           <span style={{ color: 'var(--text-muted)' }}>🔍</span>
           <input placeholder="Search name, phone, email..." value={search} onChange={e => setSearch(e.target.value)} />
-        </div>
-        <div className="tabs">
-          {[['', 'All'], ['WALK_IN', 'Walk-in'], ['MONTHLY', 'Monthly']].map(([val, label]) => (
-            <button key={val} className={`tab ${typeFilter === val ? 'active' : ''}`} onClick={() => setTypeFilter(val)}>{label}</button>
-          ))}
         </div>
       </div>
 
@@ -176,17 +171,6 @@ export default function CustomersPage() {
                 <div className="form-group">
                   <label className="form-label">Name *</label>
                   <input className="form-control" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Type</label>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    {[['WALK_IN', 'Walk-in'], ['MONTHLY', 'Monthly']].map(([val, label]) => (
-                      <button key={val} type="button" className={`btn ${form.type === val ? 'btn-primary' : 'btn-secondary'}`} style={{ flex: 1, justifyContent: 'center' }}
-                        onClick={() => setForm(f => ({ ...f, type: val }))}>
-                        {label}
-                      </button>
-                    ))}
-                  </div>
                 </div>
                 <div className="form-row">
                   <div className="form-group">

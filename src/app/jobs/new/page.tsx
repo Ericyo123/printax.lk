@@ -267,11 +267,6 @@ export default function NewJobPage() {
                       {customers.filter(c => c.name.toLowerCase().includes(customerSearch.toLowerCase()) && c.type === 'MONTHLY').map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                     </optgroup>
                   )}
-                  {customers.filter(c => c.name.toLowerCase().includes(customerSearch.toLowerCase()) && c.type === 'WALK_IN').length > 0 && (
-                    <optgroup label="Walk-in Customers">
-                      {customers.filter(c => c.name.toLowerCase().includes(customerSearch.toLowerCase()) && c.type === 'WALK_IN').map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                    </optgroup>
-                  )}
                 </select>
               </div>
               {isMonthly && (
