@@ -12,34 +12,53 @@ export const authOptions: AuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials, req) {
-        if (!credentials?.email || !credentials?.password) return null
+        try {
+          if (!credentials?.email || !credentials?.password) return null
 
-        await prisma.$connect()
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email.trim().toLowerCase() },
-        })
-        if (!user || !user.active) return null
+          await prisma.$connect()
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email.trim().toLowerCase() },
+          })
+          if (!user || !user.active) return null
 
-        const isValid = await bcrypt.compare(credentials.password, user.password)
-        if (!isValid) return null
+          const isValid = await bcrypt.compare(credentials.password, user.password)
+          if (!isValid) return null
 
-        // Capture Device & IP Info
-        const userAgent = req?.headers?.['user-agent'] || 'Unknown Device'
-        let ipAddress = req?.headers?.['x-forwarded-for'] || req?.headers?.['x-real-ip'] || 'Unknown IP'
-        if (Array.isArray(ipAddress)) ipAddress = ipAddress[0]
-        if (typeof ipAddress === 'string' && ipAddress.includes(',')) ipAddress = ipAddress.split(',')[0]
-
-        // Create Database Session
-        const loginSession = await prisma.loginSession.create({
-          data: {
-            userId: user.id,
-            userAgent,
-            ipAddress,
-            expiresAt: new Date(Date.now() + 4 * 60 * 60 * 1000) // 4 hours
+          // Capture Device & IP Info
+          let userAgent = 'Unknown Device'
+          let ipAddress = 'Unknown IP'
+          try {
+            const getHeader = (key: string) => {
+              if (req?.headers) {
+                if (typeof (req.headers as any).get === 'function') return (req.headers as any).get(key)
+                return (req.headers as any)[key]
+              }
+              return null
+            }
+            userAgent = getHeader('user-agent') || 'Unknown Device'
+            let ipRaw = getHeader('x-forwarded-for') || getHeader('x-real-ip') || 'Unknown IP'
+            if (Array.isArray(ipRaw)) ipRaw = ipRaw[0]
+            if (typeof ipRaw === 'string' && ipRaw.includes(',')) ipRaw = ipRaw.split(',')[0]
+            ipAddress = ipRaw
+          } catch (e) {
+            console.error('Error parsing headers:', e)
           }
-        })
 
-        return { id: user.id, name: user.name, email: user.email, role: user.role, sessionId: loginSession.id }
+          // Create Database Session
+          const loginSession = await prisma.loginSession.create({
+            data: {
+              userId: user.id,
+              userAgent,
+              ipAddress,
+              expiresAt: new Date(Date.now() + 4 * 60 * 60 * 1000) // 4 hours
+            }
+          })
+
+          return { id: user.id, name: user.name, email: user.email, role: user.role, sessionId: loginSession.id }
+        } catch (error) {
+          console.error('Authorize error:', error)
+          return null
+        }
       },
     }),
   ],
@@ -53,12 +72,16 @@ export const authOptions: AuthOptions = {
       } else {
         // Subsequent requests: verify session is still active
         if (token.sessionId) {
-          const activeSession = await prisma.loginSession.findUnique({
-            where: { id: token.sessionId }
-          })
-          // If session was revoked/deleted by admin, kill the token
-          if (!activeSession) {
-            return { ...token, revoked: true }
+          try {
+            const activeSession = await prisma.loginSession.findUnique({
+              where: { id: token.sessionId }
+            })
+            // If session was revoked/deleted by admin, kill the token
+            if (!activeSession) {
+              return { ...token, revoked: true }
+            }
+          } catch (error) {
+            console.error('JWT Session check error:', error)
           }
         }
       }
