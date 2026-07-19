@@ -66,7 +66,7 @@ export default function PaymentsPage() {
 
       {/* Summary */}
       {!loading && statusFilter === 'UNPAID' && invoices.length > 0 && (
-        <div className="alert alert-warning mb-4" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <div className="alert alert-danger mb-4" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <AlertCircle size={20} />
           <span>
             <strong>{invoices.length}</strong> unpaid invoice(s) totalling{' '}
