@@ -230,7 +230,7 @@ export default function NewJobPage() {
                         <div style={{ flex: 1, fontWeight: 500, fontSize: '0.9rem' }}>{job.description}</div>
                         <div style={{ width: '60px', textAlign: 'right', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{job.copies} ×</div>
                         <div style={{ width: '90px', textAlign: 'right', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Rs. {fmt(job.baseAmount)}</div>
-                        <div style={{ width: '100px', textAlign: 'right', fontWeight: 600, color: 'var(--primary-light)', fontSize: '0.9rem' }}>Rs. {fmt(job.totalAmount)}</div>
+                        <div style={{ width: '100px', textAlign: 'right', fontWeight: 600, color: '#000', fontSize: '0.9rem' }}>Rs. {fmt(job.totalAmount)}</div>
                         <div style={{ display: 'flex', gap: '0.25rem', marginLeft: '1rem' }}>
                           <button type="button" className="btn btn-ghost" style={{ padding: '0.25rem', fontSize: '1rem' }}
                             onClick={() => editJob(index)} title="Edit">
@@ -287,8 +287,8 @@ export default function NewJobPage() {
 
               {/* Active editing item */}
               {description.trim() && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem', background: 'rgba(21, 94, 160, 0.05)', borderRadius: 8, padding: '0.75rem', border: '1px dashed var(--primary-light)' }}>
-                  <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--primary-light)', display: 'flex', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem', background: '#f8fafc', borderRadius: 8, padding: '0.75rem', border: '1px dashed #cbd5e1' }}>
+                  <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#000', display: 'flex', justifyContent: 'space-between' }}>
                     <span>Draft Item</span>
                     <span>Rs. {fmt(total)}</span>
                   </div>

@@ -56,7 +56,7 @@ h2 { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.01em; }
 h3 { font-size: 1.125rem; font-weight: 600; }
 h4 { font-size: 0.9375rem; font-weight: 600; }
 p { color: var(--text-secondary); }
-a { color: var(--primary-light); text-decoration: none; }
+a { color: #000; text-decoration: none; }
 
 /* Layout */
 .app-shell { display: flex; min-height: 100vh; }
@@ -81,7 +81,7 @@ a { color: var(--primary-light); text-decoration: none; }
   box-shadow: 0 4px 12px var(--primary-glow);
 }
 .sidebar-logo-text { font-weight: 700; font-size: 1.125rem; color: var(--text-primary); }
-.sidebar-logo-text span { color: var(--primary-light); }
+.sidebar-logo-text span { color: #000; }
 .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 0.25rem; overflow-y: auto; }
 .nav-section-label {
   font-size: 0.6875rem; font-weight: 600; text-transform: uppercase;
@@ -316,7 +316,7 @@ tbody td { padding: 0.875rem 1rem; font-size: 0.875rem; color: var(--text-primar
 
 /* Price display */
 .price-display {
-  font-size: 2rem; font-weight: 800; color: var(--primary-light);
+  font-size: 2rem; font-weight: 800; color: #000;
   letter-spacing: -0.03em;
 }
 .currency { font-size: 1rem; font-weight: 600; color: var(--text-secondary); vertical-align: super; }
@@ -361,7 +361,7 @@ tbody td { padding: 0.875rem 1rem; font-size: 0.875rem; color: var(--text-primar
 .text-xs { font-size: 0.75rem; }
 .text-muted { color: var(--text-muted); }
 .text-secondary { color: var(--text-secondary); }
-.text-primary-light { color: var(--primary-light); }
+.text-primary-light { color: #000; }
 .text-success { color: var(--success); }
 .text-danger { color: var(--danger); }
 .text-warning { color: var(--warning); }

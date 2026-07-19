@@ -96,7 +96,7 @@ export default function CustomerDetailPage() {
                 <tbody>
                   {customer.invoices.map((inv: any) => (
                     <tr key={inv.id}>
-                      <td style={{ fontWeight: 600, color: 'var(--primary-light)' }}>{inv.invoiceNumber}</td>
+                      <td style={{ fontWeight: 600, color: '#000' }}>{inv.invoiceNumber}</td>
                       <td style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>{new Date(inv.date).toLocaleDateString()}</td>
                       <td style={{ color: 'var(--text-secondary)' }}>{inv.jobs?.length || 0}</td>
                       <td style={{ fontWeight: 700 }}>Rs. {inv.totalAmount.toLocaleString()}</td>

@@ -84,6 +84,7 @@ export default function PaymentsPage() {
               <th>Invoice #</th>
               <th>Date</th>
               <th>Customer</th>
+              <th>Description</th>
               <th>Amount</th>
               <th>Status</th>
               <th>Method</th>
@@ -93,14 +94,17 @@ export default function PaymentsPage() {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={8} style={{ textAlign: 'center', padding: '3rem' }}><span className="spinner" /></td></tr>
+              <tr><td colSpan={9} style={{ textAlign: 'center', padding: '3rem' }}><span className="spinner" /></td></tr>
             ) : filteredInvoices.length === 0 ? (
-              <tr><td colSpan={8}><div className="empty-state"><div className="empty-state-icon"><CreditCard size={40} /></div><p>No invoices match this filter</p></div></td></tr>
+              <tr><td colSpan={9}><div className="empty-state"><div className="empty-state-icon"><CreditCard size={40} /></div><p>No invoices match this filter</p></div></td></tr>
             ) : paginatedInvoices.map(inv => (
               <tr key={inv.id}>
-                <td><Link href={`/invoices/${inv.id}`} style={{ fontWeight: 700, color: 'var(--primary-light)' }}>{inv.invoiceNumber}</Link></td>
+                <td><Link href={`/invoices/${inv.id}`} style={{ fontWeight: 700, color: '#000' }}>{inv.invoiceNumber}</Link></td>
                 <td style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>{new Date(inv.date).toLocaleDateString()}</td>
                 <td>{inv.customer?.name || <span style={{ color: 'var(--text-muted)' }}>Walk-in</span>}</td>
+                <td style={{ maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '0.8125rem' }}>
+                  {inv.jobs?.map((j: any) => j.description).filter(Boolean).join(', ') || '-'}
+                </td>
                 <td style={{ fontWeight: 700 }}>Rs. {inv.totalAmount.toLocaleString()}</td>
                 <td><span className={`badge ${inv.paymentStatus === 'PAID' ? 'badge-success' : 'badge-warning'}`}>{inv.paymentStatus}</span></td>
                 <td style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>{paymentLabel[inv.paymentMethod] || '-'}</td>
@@ -151,7 +155,7 @@ export default function PaymentsPage() {
               </div>
               <div style={{ marginTop: '1rem', padding: '1rem', background: 'var(--bg-elevated)', borderRadius: 8, display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ color: 'var(--text-secondary)' }}>Amount</span>
-                <span style={{ fontWeight: 700, color: 'var(--primary-light)', fontSize: '1.125rem' }}>Rs. {selected.totalAmount.toLocaleString()}</span>
+                <span style={{ fontWeight: 700, color: '#000', fontSize: '1.125rem' }}>Rs. {selected.totalAmount.toLocaleString()}</span>
               </div>
             </div>
             <div className="modal-footer">

@@ -424,7 +424,7 @@ export default function InvoiceDetailPage() {
               </div>
               <div style={{ marginTop: '1rem', padding: '1rem', background: 'var(--bg-elevated)', borderRadius: 8, display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ color: 'var(--text-secondary)' }}>Amount</span>
-                <span style={{ fontWeight: 700, color: 'var(--primary-light)' }}>Rs. {invoice.totalAmount.toLocaleString()}</span>
+                <span style={{ fontWeight: 700, color: '#000' }}>Rs. {invoice.totalAmount.toLocaleString()}</span>
               </div>
             </div>
             <div className="modal-footer">

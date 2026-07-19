@@ -294,7 +294,7 @@ export default function StatementsPage() {
                 <tr><td colSpan={8}><div className="empty-state"><div className="empty-state-icon"><FileText size={40} /></div><p>No statements generated yet</p></div></td></tr>
               ) : paginatedStatements.map(s => (
                 <tr key={s.id}>
-                  <td style={{ fontWeight: 700, color: 'var(--primary-light)' }}>{s.statementNo}</td>
+                  <td style={{ fontWeight: 700, color: '#000' }}>{s.statementNo}</td>
                   <td style={{ fontWeight: 600 }}>{s.customer?.name || '-'}</td>
                   <td style={{ color: 'var(--text-secondary)' }}>{MONTHS[s.month - 1]} {s.year}</td>
                   <td style={{ color: 'var(--text-secondary)' }}>{s.invoices?.length} invoices</td>
@@ -381,7 +381,7 @@ export default function StatementsPage() {
                                 <input type="checkbox" checked={selectedInvoices.includes(inv.id)}
                                   onChange={e => setSelectedInvoices(prev => e.target.checked ? [...prev, inv.id] : prev.filter(id => id !== inv.id))} />
                               </td>
-                              <td style={{ padding: '0.5rem 0.75rem', fontSize: '0.875rem', fontWeight: 600, color: 'var(--primary-light)' }}>{inv.invoiceNumber}</td>
+                              <td style={{ padding: '0.5rem 0.75rem', fontSize: '0.875rem', fontWeight: 600, color: '#000' }}>{inv.invoiceNumber}</td>
                               <td style={{ padding: '0.5rem 0.75rem', fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>{new Date(inv.date).toLocaleDateString()}</td>
                               <td style={{ padding: '0.5rem 0.75rem', fontSize: '0.875rem', fontWeight: 600 }}>Rs. {inv.totalAmount.toLocaleString()}</td>
                             </tr>
@@ -389,7 +389,7 @@ export default function StatementsPage() {
                         </tbody>
                       </table>
                     </div>
-                    <div style={{ marginTop: '0.75rem', textAlign: 'right', fontWeight: 700, color: 'var(--primary-light)' }}>
+                    <div style={{ marginTop: '0.75rem', textAlign: 'right', fontWeight: 700, color: '#000' }}>
                       Total: Rs. {availableInvoices.filter(i => selectedInvoices.includes(i.id)).reduce((s: number, i: any) => s + i.totalAmount, 0).toLocaleString()}
                     </div>
                   </div>

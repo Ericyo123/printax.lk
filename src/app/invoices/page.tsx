@@ -78,6 +78,7 @@ export default function InvoicesPage() {
                 <th>Invoice #</th>
                 <th>Date</th>
                 <th>Customer</th>
+                <th>Description</th>
                 <th>Jobs</th>
                 <th>Amount</th>
                 <th>Status</th>
@@ -87,9 +88,9 @@ export default function InvoicesPage() {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={8} style={{ textAlign: 'center', padding: '3rem' }}><span className="spinner" /></td></tr>
+                <tr><td colSpan={9} style={{ textAlign: 'center', padding: '3rem' }}><span className="spinner" /></td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={8}>
+                <tr><td colSpan={9}>
                   <div className="empty-state">
                     <div className="empty-state-icon"><Receipt size={40} /></div>
                     <p>No invoices found</p>
@@ -98,9 +99,12 @@ export default function InvoicesPage() {
                 </td></tr>
               ) : paginatedInvoices.map(inv => (
                 <tr key={inv.id}>
-                  <td><span style={{ fontWeight: 700, color: 'var(--primary-light)' }}>{inv.invoiceNumber}</span></td>
+                  <td><span style={{ fontWeight: 700, color: '#000' }}>{inv.invoiceNumber}</span></td>
                   <td style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>{new Date(inv.date).toLocaleDateString()}</td>
                   <td>{inv.customer?.name || <span style={{ color: 'var(--text-muted)' }}>Walk-in</span>}</td>
+                  <td style={{ maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '0.8125rem' }}>
+                    {inv.jobs?.map((j: any) => j.description).filter(Boolean).join(', ') || '-'}
+                  </td>
                   <td style={{ color: 'var(--text-secondary)' }}>{inv.jobs?.length || 0} item(s)</td>
                   <td style={{ fontWeight: 700 }}>Rs. {inv.totalAmount.toLocaleString()}</td>
                   <td>{statusBadge(inv.paymentStatus)}</td>

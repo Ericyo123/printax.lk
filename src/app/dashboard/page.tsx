@@ -59,7 +59,7 @@ export default function DashboardPage() {
       ) : (
         <div className="stat-grid mb-6">
           <div className="stat-card">
-            <div className="stat-icon" style={{ background: 'rgba(124,58,237,0.15)', color: 'var(--primary-light)' }}><Banknote size={22} /></div>
+            <div className="stat-icon" style={{ background: 'rgba(124,58,237,0.15)', color: '#000' }}><Banknote size={22} /></div>
             <div className="stat-label">Total Revenue</div>
             <div className="stat-value">{fmt(summary?.totalRevenue || 0)}</div>
             <div className="stat-sub">{summary?.totalInvoices || 0} invoices</div>
