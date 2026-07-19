@@ -21,7 +21,20 @@ export default function CustomersPage() {
   function fetchCustomers() {
     const params = new URLSearchParams()
     if (typeFilter) params.set('type', typeFilter)
-    fetch(`/api/customers?${params}`).then(r => r.json()).then(d => { setCustomers(d); setLoading(false) })
+    fetch(`/api/customers?${params}`)
+      .then(r => r.json())
+      .then(d => { 
+        if (Array.isArray(d)) {
+          setCustomers(d)
+        } else {
+          console.error('Failed to fetch customers:', d)
+        }
+        setLoading(false) 
+      })
+      .catch(e => {
+        console.error('Error fetching customers:', e)
+        setLoading(false)
+      })
   }
 
   useEffect(() => { fetchCustomers() }, [typeFilter])
@@ -60,7 +73,7 @@ export default function CustomersPage() {
     }
   }
 
-  const filtered = customers.filter(c => !search || c.name.toLowerCase().includes(search.toLowerCase()) || c.phone?.includes(search) || c.email?.toLowerCase().includes(search.toLowerCase()))
+  const filtered = customers.filter(c => !search || c.name?.toLowerCase().includes(search.toLowerCase()) || c.phone?.includes(search) || c.email?.toLowerCase().includes(search.toLowerCase()))
   
   const paginatedCustomers = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 

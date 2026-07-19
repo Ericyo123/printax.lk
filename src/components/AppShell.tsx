@@ -4,17 +4,29 @@ import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
+import { 
+  LayoutDashboard, 
+  PlusSquare, 
+  Receipt, 
+  Users, 
+  FileText, 
+  CreditCard, 
+  BarChart3, 
+  Settings, 
+  UserCircle,
+  Menu
+} from 'lucide-react'
+
 const navItems = [
-  { href: '/dashboard', icon: '⊞', label: 'Dashboard', section: 'Main' },
-  { href: '/jobs/new', icon: '＋', label: 'New Job', section: 'Main' },
-  { href: '/invoices', icon: '🧾', label: 'Invoices', section: 'Main' },
-  { href: '/customers', icon: '👥', label: 'Customers', section: 'Main' },
-  { href: '/statements', icon: '📋', label: 'Statements', section: 'Billing' },
-  { href: '/payments', icon: '💳', label: 'Payments', section: 'Billing' },
-  { href: '/reports', icon: '📊', label: 'Reports', section: 'Reports', adminOnly: true },
-  { href: '/settings', icon: '⚙', label: 'Settings', section: 'Admin', adminOnly: true },
-  { href: '/pricing', icon: '💰', label: 'Pricing', section: 'Admin', adminOnly: true },
-  { href: '/users', icon: '👤', label: 'Users', section: 'Admin', adminOnly: true },
+  { href: '/dashboard', icon: <LayoutDashboard size={18} />, label: 'Dashboard', section: 'Main' },
+  { href: '/jobs/new', icon: <PlusSquare size={18} />, label: 'New Job', section: 'Main' },
+  { href: '/invoices', icon: <Receipt size={18} />, label: 'Invoices', section: 'Main' },
+  { href: '/customers', icon: <Users size={18} />, label: 'Customers', section: 'Main' },
+  { href: '/statements', icon: <FileText size={18} />, label: 'Statements', section: 'Billing' },
+  { href: '/payments', icon: <CreditCard size={18} />, label: 'Payments', section: 'Billing' },
+  { href: '/reports', icon: <BarChart3 size={18} />, label: 'Reports', section: 'Reports', adminOnly: true },
+  { href: '/settings', icon: <Settings size={18} />, label: 'Settings', section: 'Admin', adminOnly: true },
+  { href: '/users', icon: <UserCircle size={18} />, label: 'Users', section: 'Admin', adminOnly: true },
 ]
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -98,7 +110,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="main-content">
         <header className="topbar">
           <button className="mobile-toggle" onClick={() => setMobileOpen(true)}>
-            ☰
+            <Menu size={24} />
           </button>
           <div className="topbar-date" style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
             {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}

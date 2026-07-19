@@ -59,12 +59,17 @@ export async function POST(req: NextRequest) {
     let totalJobsAmount = 0
 
     for (const job of jobs) {
-      const rule = await prisma.pricingRule.findUnique({
-        where: { paperSizeId_printType: { paperSizeId: job.paperSizeId, printType: job.printType } },
-      })
-      if (!rule) return NextResponse.json({ error: `Pricing rule not found for paper size: ${job.paperSizeId}` }, { status: 400 })
+      let rule = null;
+      if (job.pricingType !== 'MANUAL') {
+        rule = await prisma.pricingRule.findUnique({
+          where: { paperSizeId_printType: { paperSizeId: job.paperSizeId, printType: job.printType } },
+        })
+        if (!rule) return NextResponse.json({ error: `Pricing rule not found for paper size: ${job.paperSizeId}` }, { status: 400 })
+      }
 
-      const baseAmount = calculateBaseAmount(rule, job.pricingType, job.pages, job.copies, job.printMode, job.manualPrice)
+      const baseAmount = job.pricingType === 'MANUAL' 
+        ? (job.manualPrice || 0)
+        : calculateBaseAmount(rule!, job.pricingType, job.pages, job.copies, job.printMode, job.manualPrice)
       const serviceAmounts = (job.services || []).map((s: any) => s.amount)
       const customServiceAmounts = (job.customServices || []).map((s: any) => s.amount)
       

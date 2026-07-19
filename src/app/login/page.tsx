@@ -35,7 +35,7 @@ export default function LoginPage() {
         className="hidden lg:flex flex-1 relative bg-cover bg-center"
         style={{ backgroundImage: 'url(/login-bg.png)' }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0f1e]/40 to-[#0a0f1e]/90" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[var(--primary-dark)]/40 to-[var(--primary-dark)]/90" />
         <div className="relative z-10 flex flex-col items-center justify-center w-full h-full text-white p-12">
           <div className="bg-white rounded-2xl p-4 mb-8 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
             <img src="/logo.png" alt="printax.lk" className="w-64 h-auto block" />
