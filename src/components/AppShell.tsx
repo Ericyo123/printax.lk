@@ -92,7 +92,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               {isAdmin ? 'Admin' : 'Staff'}
             </span>
           </div>
-          <button onClick={() => { if (window.confirm('Are you sure you want to sign out?')) signOut({ callbackUrl: '/login' }) }} className="btn btn-secondary btn-sm w-full" style={{ marginBottom: '0.75rem' }}>
+          <button onClick={() => { if (window.confirm('Are you sure you want to sign out?')) signOut({ callbackUrl: '/login' }) }} className="btn btn-danger btn-sm w-full" style={{ marginBottom: '0.75rem' }}>
             Sign out
           </button>
           <div style={{ textAlign: 'center', fontSize: '0.65rem', color: 'var(--text-muted)', paddingTop: '0.5rem', borderTop: '1px solid var(--border)' }}>
