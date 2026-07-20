@@ -89,8 +89,19 @@ export async function POST(req: NextRequest) {
     const finalInvoiceTotal = Math.max(0, totalJobsAmount - bodyDiscount)
 
     const result = await prisma.$transaction(async (tx) => {
-      const count = await tx.invoice.count()
-      const invoiceNumber = `INV-${new Date().getFullYear()}-${String(count + 1).padStart(5, '0')}`
+      const currentYear = new Date().getFullYear()
+      const lastInvoice = await tx.invoice.findFirst({
+        where: { invoiceNumber: { startsWith: `INV-${currentYear}-` } },
+        orderBy: { invoiceNumber: 'desc' },
+        select: { invoiceNumber: true }
+      })
+      let nextNum = 1
+      if (lastInvoice) {
+        const parts = lastInvoice.invoiceNumber.split('-')
+        const lastNum = parseInt(parts[parts.length - 1], 10)
+        nextNum = isNaN(lastNum) ? 1 : lastNum + 1
+      }
+      const invoiceNumber = `INV-${currentYear}-${String(nextNum).padStart(5, '0')}`
 
       const createdInvoice = await tx.invoice.create({
         data: {
