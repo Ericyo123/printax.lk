@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import { AppShell } from '@/components/AppShell'
 import Link from 'next/link'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
@@ -15,6 +16,7 @@ interface Summary {
 
 export default function DashboardPage() {
   const { data: session } = useSession()
+  const router = useRouter()
   const [summary, setSummary] = useState<Summary | null>(null)
   const [chartData, setChartData] = useState<any[]>([])
   const [recentInvoices, setRecentInvoices] = useState<any[]>([])
@@ -22,6 +24,13 @@ export default function DashboardPage() {
   const now = new Date()
 
   useEffect(() => {
+    if (session && session.user?.role !== 'ADMIN') {
+      router.push('/jobs/new')
+    }
+  }, [session, router])
+
+  useEffect(() => {
+    if (!session || session.user?.role !== 'ADMIN') return
     fetch('/api/dashboard')
       .then(r => r.json())
       .then(data => {
@@ -34,7 +43,7 @@ export default function DashboardPage() {
         console.error(e)
         setLoading(false)
       })
-  }, [])
+  }, [session])
 
   const fmt = (n: number) => `Rs. ${n.toLocaleString('en-LK', { minimumFractionDigits: 2 })}`
 

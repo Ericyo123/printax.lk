@@ -1,12 +1,16 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { AppShell } from '@/components/AppShell'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, LineChart, Line } from 'recharts'
 import { Users, FileSpreadsheet, FileText } from 'lucide-react'
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 
 export default function ReportsPage() {
+  const { data: session } = useSession()
+  const router = useRouter()
   const now = new Date()
   const [tab, setTab] = useState<'daily' | 'monthly' | 'customer'>('monthly')
   const [year, setYear] = useState(now.getFullYear())
@@ -16,12 +20,19 @@ export default function ReportsPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    if (session && session.user?.role !== 'ADMIN') {
+      router.push('/jobs/new')
+    }
+  }, [session, router])
+
+  useEffect(() => {
+    if (!session || session.user?.role !== 'ADMIN') return
     setLoading(true)
     Promise.all([
       fetch(`/api/reports?type=${tab}&year=${year}&month=${month}`).then(r => r.json()),
       fetch('/api/reports?type=summary').then(r => r.json()),
     ]).then(([d, s]) => { setData(d.data || []); setSummary(s); setLoading(false) })
-  }, [tab, year, month])
+  }, [tab, year, month, session])
 
   async function exportExcel() {
     const { utils, writeFile } = await import('xlsx')

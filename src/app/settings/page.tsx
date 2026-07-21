@@ -27,7 +27,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (session && session.user?.role !== 'ADMIN') {
-      router.push('/dashboard')
+      router.push('/jobs/new')
       return
     }
     fetchSettings()

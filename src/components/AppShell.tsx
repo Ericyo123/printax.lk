@@ -19,7 +19,7 @@ import {
 } from 'lucide-react'
 
 const navItems = [
-  { href: '/dashboard', icon: <LayoutDashboard size={18} />, label: 'Dashboard', section: 'Main' },
+  { href: '/dashboard', icon: <LayoutDashboard size={18} />, label: 'Dashboard', section: 'Main', adminOnly: true },
   { href: '/jobs/new', icon: <PlusSquare size={18} />, label: 'New Job', section: 'Main' },
   { href: '/invoices', icon: <Receipt size={18} />, label: 'Invoices', section: 'Main' },
   { href: '/customers', icon: <Users size={18} />, label: 'Customers', section: 'Main' },

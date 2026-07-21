@@ -11,8 +11,11 @@ export default function UsersPage() {
   const [users, setUsers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editingUser, setEditingUser] = useState<any | null>(null)
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState({ name: '', email: '', password: '', role: 'STAFF' })
+  const [editForm, setEditForm] = useState({ name: '', password: '', role: 'STAFF' })
   
   // Pagination
   const [currentPage, setCurrentPage] = useState(1)
@@ -20,7 +23,7 @@ export default function UsersPage() {
   const paginatedUsers = users.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
   useEffect(() => {
-    if (session && session.user?.role !== 'ADMIN') { router.push('/dashboard'); return }
+    if (session && session.user?.role !== 'ADMIN') { router.push('/jobs/new'); return }
     fetch('/api/users').then(r => r.json()).then(d => { setUsers(d); setLoading(false) })
   }, [session])
 
@@ -36,6 +39,32 @@ export default function UsersPage() {
       fetch('/api/users').then(r => r.json()).then(d => setUsers(d))
     } else {
       alert(data.error || 'Failed to create user. The database might be full or offline.')
+    }
+  }
+
+  async function updateUser() {
+    if (!editingUser || !editForm.name) return
+    setSaving(true)
+    const body: any = {
+      name: editForm.name,
+      role: editForm.role,
+    }
+    if (editForm.password) {
+      body.password = editForm.password
+    }
+    const res = await fetch(`/api/users/${editingUser.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    })
+    const data = await res.json()
+    setSaving(false)
+    if (res.ok) {
+      setShowEditModal(false)
+      setEditingUser(null)
+      fetch('/api/users').then(r => r.json()).then(d => setUsers(d))
+    } else {
+      alert(data.error || 'Failed to update user.')
     }
   }
 
@@ -107,16 +136,25 @@ export default function UsersPage() {
                     {new Date(u.createdAt).toLocaleDateString()}
                   </td>
                   <td>
-                    {u.id !== session?.user?.id && (
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button className="btn btn-ghost btn-sm" onClick={() => toggleActive(u.id, u.active)}>
-                          {u.active ? '🚫 Disable' : '✓ Enable'}
-                        </button>
-                        <button className="btn btn-ghost btn-sm" style={{ color: 'var(--danger)' }} onClick={() => deleteUser(u.id)}>
-                          🗑 Delete
-                        </button>
-                      </div>
-                    )}
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button className="btn btn-ghost btn-sm" onClick={() => {
+                        setEditingUser(u)
+                        setEditForm({ name: u.name, password: '', role: u.role })
+                        setShowEditModal(true)
+                      }}>
+                        ✏️ Edit
+                      </button>
+                      {u.id !== session?.user?.id && (
+                        <>
+                          <button className="btn btn-ghost btn-sm" onClick={() => toggleActive(u.id, u.active)}>
+                            {u.active ? '🚫 Disable' : '✓ Enable'}
+                          </button>
+                          <button className="btn btn-ghost btn-sm" style={{ color: 'var(--danger)' }} onClick={() => deleteUser(u.id)}>
+                            🗑 Delete
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -172,6 +210,57 @@ export default function UsersPage() {
               <button className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
               <button className="btn btn-primary" onClick={createUser} disabled={saving || !form.name || !form.email || !form.password}>
                 {saving ? <span className="spinner" /> : null} Add User
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showEditModal && editingUser && (
+        <div className="modal-overlay" onClick={() => { setShowEditModal(false); setEditingUser(null); }}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Edit User / Change Password</h3>
+              <button className="btn btn-ghost" onClick={() => { setShowEditModal(false); setEditingUser(null); }}>✕</button>
+            </div>
+            <div className="modal-body">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
+                <div className="form-group">
+                  <label className="form-label">Full Name *</label>
+                  <input className="form-control" value={editForm.name} onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Email (Cannot be changed)</label>
+                  <input className="form-control" value={editingUser.email} disabled style={{ opacity: 0.6 }} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">New Password (Leave blank to keep current)</label>
+                  <input type="password" className="form-control" placeholder="Leave blank to keep current" value={editForm.password} onChange={e => setEditForm(f => ({ ...f, password: e.target.value }))} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Role</label>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    {[['STAFF', 'Staff'], ['ADMIN', 'Admin']].map(([val, label]) => (
+                      <button key={val} type="button" className={`btn ${editForm.role === val ? 'btn-primary' : 'btn-secondary'}`}
+                        style={{ flex: 1, justifyContent: 'center' }}
+                        disabled={editingUser.id === session?.user?.id}
+                        onClick={() => setEditForm(f => ({ ...f, role: val }))}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  {editingUser.id === session?.user?.id && (
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'block' }}>
+                      You cannot change your own role.
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-secondary" onClick={() => { setShowEditModal(false); setEditingUser(null); }}>Cancel</button>
+              <button className="btn btn-primary" onClick={updateUser} disabled={saving || !editForm.name}>
+                {saving ? <span className="spinner" /> : null} Save Changes
               </button>
             </div>
           </div>
