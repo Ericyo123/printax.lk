@@ -84,8 +84,14 @@ export default function NewJobPage() {
       fetch('/api/pricing').then(r => r.json()),
       fetch('/api/customers').then(r => r.json()),
     ]).then(([pd, custs]) => {
-      setPaperSizes(pd.paperSizes || [])
+      const sizes = pd.paperSizes || []
+      setPaperSizes(sizes)
       setCustomers(custs)
+      if (sizes.length > 0) {
+        setJobsList(prev => prev.map(j => 
+          j.paperSizeId === 'dummy-size' ? { ...j, paperSizeId: sizes[0].id } : j
+        ))
+      }
     })
   }, [])
 

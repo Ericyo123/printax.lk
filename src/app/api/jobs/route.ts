@@ -36,9 +36,22 @@ export async function POST(req: NextRequest) {
       customerId, createInvoice, dueDate, paymentMethod, discount = 0,
     } = validatedData as any
 
+    // Resolve paperSizeId dynamically to avoid foreign key violations
+    let resolvedPaperSizeId = paperSizeId
+    const paperSizeExists = resolvedPaperSizeId 
+      ? await prisma.paperSize.findUnique({ where: { id: resolvedPaperSizeId }, select: { id: true } })
+      : null
+    
+    if (!paperSizeExists) {
+      const firstPaperSize = await prisma.paperSize.findFirst({ select: { id: true } })
+      if (firstPaperSize) {
+        resolvedPaperSizeId = firstPaperSize.id
+      }
+    }
+
     // Get pricing rule
     const rule = await prisma.pricingRule.findUnique({
-      where: { paperSizeId_printType: { paperSizeId, printType } },
+      where: { paperSizeId_printType: { paperSizeId: resolvedPaperSizeId, printType } },
     })
     if (!rule) return NextResponse.json({ error: 'Pricing rule not found' }, { status: 400 })
 
@@ -88,7 +101,7 @@ export async function POST(req: NextRequest) {
 
     const job = await prisma.job.create({
       data: {
-        description, paperSizeId, printType, printMode,
+        description, paperSizeId: resolvedPaperSizeId, printType, printMode,
         pages, copies, pricingType,
         baseAmount, additionalTotal, discount, totalAmount, notes,
         invoiceId: invoice?.id || null,

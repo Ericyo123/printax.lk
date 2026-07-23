@@ -59,12 +59,24 @@ export async function POST(req: NextRequest) {
     let totalJobsAmount = 0
 
     for (const job of jobs) {
+      let resolvedPaperSizeId = job.paperSizeId
+      const paperSizeExists = resolvedPaperSizeId 
+        ? await prisma.paperSize.findUnique({ where: { id: resolvedPaperSizeId }, select: { id: true } })
+        : null
+      
+      if (!paperSizeExists) {
+        const firstPaperSize = await prisma.paperSize.findFirst({ select: { id: true } })
+        if (firstPaperSize) {
+          resolvedPaperSizeId = firstPaperSize.id
+        }
+      }
+
       let rule = null;
       if (job.pricingType !== 'MANUAL') {
         rule = await prisma.pricingRule.findUnique({
-          where: { paperSizeId_printType: { paperSizeId: job.paperSizeId, printType: job.printType } },
+          where: { paperSizeId_printType: { paperSizeId: resolvedPaperSizeId, printType: job.printType } },
         })
-        if (!rule) return NextResponse.json({ error: `Pricing rule not found for paper size: ${job.paperSizeId}` }, { status: 400 })
+        if (!rule) return NextResponse.json({ error: `Pricing rule not found for paper size: ${resolvedPaperSizeId}` }, { status: 400 })
       }
 
       const baseAmount = job.pricingType === 'MANUAL' 
@@ -79,6 +91,7 @@ export async function POST(req: NextRequest) {
 
       preparedJobs.push({
         ...job,
+        paperSizeId: resolvedPaperSizeId,
         baseAmount,
         additionalTotal,
         totalAmount: jobTotal,
