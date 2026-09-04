@@ -213,7 +213,15 @@ export async function downloadStatementPDF(stmt: any) {
 
 export async function openStatementWhatsApp(stmt: any, customerPhone?: string | null, customerName?: string | null) {
   const name = customerName || stmt.customer?.name || 'Valued Customer'
-  const phone = (customerPhone || stmt.customer?.phone || '').replace(/[^0-9+]/g, '')
+  const rawPhone = (customerPhone || stmt.customer?.phone || '').replace(/[^0-9]/g, '')
+  // Normalize Sri Lankan phone numbers: 077... -> 9477..., 77... -> 9477...
+  let phone = rawPhone
+  if (phone.startsWith('0')) {
+    phone = '94' + phone.slice(1)
+  } else if (phone.length === 9 && (phone.startsWith('7') || phone.startsWith('1'))) {
+    phone = '94' + phone
+  }
+
   const period = `${MONTH_NAMES[(stmt.month || 1) - 1]} ${stmt.year}`
   const total = `Rs. ${(stmt.totalAmount || 0).toLocaleString('en-LK', { minimumFractionDigits: 2 })}`
 
@@ -227,56 +235,61 @@ export async function openStatementWhatsApp(stmt: any, customerPhone?: string | 
   const businessName = settings.businessName || 'Printax Solutions'
   const invoices = Array.isArray(stmt.invoices) ? stmt.invoices : []
   const count = invoices.length
+  const divider = '--------------------------------------------------'
 
-  let message = `Hello *${name}*,\n\n`
-  message += `Here is your monthly statement breakdown from *${businessName}*:\n\n`
-  message += `📄 *Statement No:* ${stmt.statementNo}\n`
-  message += `📅 *Period:* ${period}\n`
+  let message = `*MONTHLY STATEMENT OF ACCOUNT*\n`
+  message += `*${businessName}*\n`
+  message += `${divider}\n`
+  message += `Client: *${name}*\n`
+  message += `Statement No: *${stmt.statementNo}*\n`
+  message += `Period: *${period}*\n`
   if (stmt.dueDate) {
-    message += `⏳ *Due Date:* ${new Date(stmt.dueDate).toLocaleDateString('en-GB')}\n`
+    message += `Due Date: *${new Date(stmt.dueDate).toLocaleDateString('en-GB')}*\n`
   }
-  message += `🧾 *Invoices Included:* ${count}\n`
-  message += `💰 *Total Due:* *${total}*\n`
-  message += `━━━━━━━━━━━━━━━━━━━━\n`
+  message += `Invoices Count: *${count}*\n`
+  message += `Total Balance Due: *${total}*\n`
+  message += `${divider}\n\n`
 
   if (invoices.length > 0) {
-    message += `📋 *INVOICE BREAKDOWN:*\n\n`
+    message += `*INVOICE BREAKDOWN:*\n\n`
     invoices.forEach((inv: any, idx: number) => {
       const invDate = inv.date ? new Date(inv.date).toLocaleDateString('en-GB') : ''
       const invTotal = `Rs. ${(inv.totalAmount || 0).toLocaleString('en-LK', { minimumFractionDigits: 2 })}`
-      const invStatus = inv.paymentStatus === 'PAID' ? '✅ Paid' : '⏳ Unpaid'
+      const isPaid = inv.paymentStatus === 'PAID'
+      const statusText = isPaid ? '[PAID]' : '[DUE]'
 
       message += `${idx + 1}. *${inv.invoiceNumber}* (${invDate})\n`
       if (inv.jobs && Array.isArray(inv.jobs) && inv.jobs.length > 0) {
         inv.jobs.forEach((j: any) => {
           const jobDesc = j.description || (j.paperSize ? `${j.paperSize.name} Print` : 'Print Job')
           const copies = j.copies > 1 ? ` (${j.copies} copies)` : ''
-          message += `   • ${jobDesc}${copies}\n`
+          message += `   - ${jobDesc}${copies}\n`
         })
       }
-      message += `   Amount: *${invTotal}* [${invStatus}]\n\n`
+      message += `   Amount: *${invTotal}* ${statusText}\n\n`
     })
-    message += `━━━━━━━━━━━━━━━━━━━━\n`
+    message += `${divider}\n\n`
   }
 
-  message += `📊 *SUMMARY:*\n`
-  message += `• Total Invoices: ${count}\n`
-  message += `• Balance Due: *${total}*\n\n`
+  message += `*SUMMARY:*\n`
+  message += `- Total Invoices: ${count}\n`
+  message += `- Total Balance Due: *${total}*\n\n`
 
   if (settings.bankName && settings.accountNumber) {
-    message += `🏦 *PAYMENT DETAILS:*\n`
-    message += `• Bank: *${settings.bankName}*\n`
-    if (settings.accountName) message += `• Account Name: *${settings.accountName}*\n`
-    message += `• Account Number: *${settings.accountNumber}*\n`
-    if (settings.branch) message += `• Branch: *${settings.branch}*\n`
-    if (settings.swiftCode) message += `• SWIFT/BIC: ${settings.swiftCode}\n`
+    message += `*BANK PAYMENT DETAILS:*\n`
+    message += `- Bank: *${settings.bankName}*\n`
+    if (settings.accountName) message += `- Account Name: *${settings.accountName}*\n`
+    message += `- Account Number: *${settings.accountNumber}*\n`
+    if (settings.branch) message += `- Branch: *${settings.branch}*\n`
+    if (settings.swiftCode) message += `- SWIFT/BIC: ${settings.swiftCode}\n`
     message += `\n`
   }
 
-  message += `Please reply to this message or send your payment confirmation receipt once settled.\n\n`
-  message += `Thank you for your valued business!\n*${businessName}*`
+  message += `Please send the payment receipt/confirmation to this number once settled.\n\n`
+  message += `Thank you for your business!\n`
+  message += `*${businessName}*`
 
   const encoded = encodeURIComponent(message)
-  const url = phone ? `https://wa.me/${phone.startsWith('+') ? phone.slice(1) : phone.startsWith('0') ? '94' + phone.slice(1) : phone}?text=${encoded}` : `https://wa.me/?text=${encoded}`
+  const url = phone ? `https://api.whatsapp.com/send?phone=${phone}&text=${encoded}` : `https://api.whatsapp.com/send?text=${encoded}`
   window.open(url, '_blank')
 }
