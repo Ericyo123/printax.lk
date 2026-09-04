@@ -211,22 +211,70 @@ export async function downloadStatementPDF(stmt: any) {
   }
 }
 
-export function openStatementWhatsApp(stmt: any, customerPhone?: string | null, customerName?: string | null) {
+export async function openStatementWhatsApp(stmt: any, customerPhone?: string | null, customerName?: string | null) {
   const name = customerName || stmt.customer?.name || 'Valued Customer'
   const phone = (customerPhone || stmt.customer?.phone || '').replace(/[^0-9+]/g, '')
   const period = `${MONTH_NAMES[(stmt.month || 1) - 1]} ${stmt.year}`
-  const total = `Rs. ${(stmt.totalAmount || 0).toLocaleString()}`
-  const count = stmt.invoices?.length || 0
+  const total = `Rs. ${(stmt.totalAmount || 0).toLocaleString('en-LK', { minimumFractionDigits: 2 })}`
 
-  let message = `Hello *${name}*,\n\nHere is your monthly statement from *Printax Solutions*:\n\n`
+  // Fetch settings for business name and bank details
+  let settings: any = {}
+  try {
+    const sRes = await fetch('/api/settings')
+    if (sRes.ok) settings = await sRes.json()
+  } catch {}
+
+  const businessName = settings.businessName || 'Printax Solutions'
+  const invoices = Array.isArray(stmt.invoices) ? stmt.invoices : []
+  const count = invoices.length
+
+  let message = `Hello *${name}*,\n\n`
+  message += `Here is your monthly statement breakdown from *${businessName}*:\n\n`
   message += `📄 *Statement No:* ${stmt.statementNo}\n`
   message += `📅 *Period:* ${period}\n`
+  if (stmt.dueDate) {
+    message += `⏳ *Due Date:* ${new Date(stmt.dueDate).toLocaleDateString('en-GB')}\n`
+  }
   message += `🧾 *Invoices Included:* ${count}\n`
   message += `💰 *Total Due:* *${total}*\n`
-  if (stmt.dueDate) {
-    message += `⏳ *Due Date:* ${new Date(stmt.dueDate).toLocaleDateString()}\n`
+  message += `━━━━━━━━━━━━━━━━━━━━\n`
+
+  if (invoices.length > 0) {
+    message += `📋 *INVOICE BREAKDOWN:*\n\n`
+    invoices.forEach((inv: any, idx: number) => {
+      const invDate = inv.date ? new Date(inv.date).toLocaleDateString('en-GB') : ''
+      const invTotal = `Rs. ${(inv.totalAmount || 0).toLocaleString('en-LK', { minimumFractionDigits: 2 })}`
+      const invStatus = inv.paymentStatus === 'PAID' ? '✅ Paid' : '⏳ Unpaid'
+
+      message += `${idx + 1}. *${inv.invoiceNumber}* (${invDate})\n`
+      if (inv.jobs && Array.isArray(inv.jobs) && inv.jobs.length > 0) {
+        inv.jobs.forEach((j: any) => {
+          const jobDesc = j.description || (j.paperSize ? `${j.paperSize.name} Print` : 'Print Job')
+          const copies = j.copies > 1 ? ` (${j.copies} copies)` : ''
+          message += `   • ${jobDesc}${copies}\n`
+        })
+      }
+      message += `   Amount: *${invTotal}* [${invStatus}]\n\n`
+    })
+    message += `━━━━━━━━━━━━━━━━━━━━\n`
   }
-  message += `\nPlease find your detailed statement breakdown. For any inquiries or payment verification, feel free to reply to this message.\n\nThank you for choosing *Printax Solutions*!`
+
+  message += `📊 *SUMMARY:*\n`
+  message += `• Total Invoices: ${count}\n`
+  message += `• Balance Due: *${total}*\n\n`
+
+  if (settings.bankName && settings.accountNumber) {
+    message += `🏦 *PAYMENT DETAILS:*\n`
+    message += `• Bank: *${settings.bankName}*\n`
+    if (settings.accountName) message += `• Account Name: *${settings.accountName}*\n`
+    message += `• Account Number: *${settings.accountNumber}*\n`
+    if (settings.branch) message += `• Branch: *${settings.branch}*\n`
+    if (settings.swiftCode) message += `• SWIFT/BIC: ${settings.swiftCode}\n`
+    message += `\n`
+  }
+
+  message += `Please reply to this message or send your payment confirmation receipt once settled.\n\n`
+  message += `Thank you for your valued business!\n*${businessName}*`
 
   const encoded = encodeURIComponent(message)
   const url = phone ? `https://wa.me/${phone.startsWith('+') ? phone.slice(1) : phone.startsWith('0') ? '94' + phone.slice(1) : phone}?text=${encoded}` : `https://wa.me/?text=${encoded}`

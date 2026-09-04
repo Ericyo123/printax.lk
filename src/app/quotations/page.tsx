@@ -132,7 +132,7 @@ export default function QuotationsPage() {
       case 'ACCEPTED':
         return <span className="badge badge-success">Accepted</span>
       case 'CONVERTED':
-        return <span className="badge badge-purple" style={{ background: '#ede9fe', color: '#6d28d9', borderColor: '#ddd6fe' }}>Converted to Invoice</span>
+        return <span className="badge badge-purple" style={{ background: '#ede9fe', color: '#6d28d9', borderColor: '#ddd6fe' }}>Converted</span>
       case 'SENT':
         return <span className="badge badge-info">Sent</span>
       case 'REJECTED':
@@ -354,7 +354,7 @@ export default function QuotationsPage() {
                   </td>
                   <td>
                     <span className="badge badge-warning" style={{ background: '#fef3c7', color: '#b45309', borderColor: '#fde68a' }}>
-                      In-Progress Draft
+                      Draft
                     </span>
                   </td>
                   <td style={{ textAlign: 'right' }} onClick={e => e.stopPropagation()}>
