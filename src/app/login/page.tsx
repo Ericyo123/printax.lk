@@ -30,7 +30,17 @@ export default function LoginPage() {
       redirect: false 
     })
     if (res?.error) {
-      setError('Invalid email or password')
+      if (res.error === 'USER_NOT_FOUND') {
+        setError('No account found with this email address. Please check spelling.')
+      } else if (res.error === 'USER_INACTIVE') {
+        setError('This account has been disabled. Please contact the administrator.')
+      } else if (res.error === 'INCORRECT_PASSWORD') {
+        setError('Incorrect password. Please verify and try again.')
+      } else if (res.error === 'MISSING_CREDENTIALS') {
+        setError('Please enter both email and password.')
+      } else {
+        setError('Invalid email or password. Please check your credentials.')
+      }
       setLoading(false)
     } else {
       router.push('/')
