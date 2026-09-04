@@ -589,3 +589,69 @@ tbody td { padding: 0.875rem 1rem; font-size: 0.875rem; color: var(--text-primar
   }
 }
 
+/* Quotation Responsive Layouts */
+.grid-quotation-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 1.5rem;
+  align-items: start;
+}
+@media (max-width: 1024px) {
+  .grid-quotation-form {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+}
+
+.grid-quotation-detail {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 1.5rem;
+  align-items: start;
+}
+@media (max-width: 1024px) {
+  .grid-quotation-detail {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+}
+
+.quotation-client-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  position: relative;
+}
+@media (max-width: 640px) {
+  .quotation-client-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}
+
+.quotation-item-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2.5fr) 90px 140px 140px;
+  gap: 0.75rem;
+  align-items: start;
+}
+@media (max-width: 768px) {
+  .quotation-item-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+  }
+  .quotation-item-desc {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 480px) {
+  .quotation-item-grid {
+    grid-template-columns: 80px 1fr 1fr;
+    gap: 0.5rem;
+  }
+  .quotation-item-desc {
+    grid-column: 1 / -1;
+  }
+}
+
+

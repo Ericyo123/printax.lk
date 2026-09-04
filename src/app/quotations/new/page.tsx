@@ -300,7 +300,7 @@ export default function NewQuotationPage() {
       )}
 
       <form onSubmit={handleSubmit}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 340px', gap: '1.5rem', alignItems: 'start' }}>
+        <div className="grid-quotation-form">
           {/* Main Left Form */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {/* Customer Details: Client Name & Phone Number */}
@@ -309,7 +309,7 @@ export default function NewQuotationPage() {
                 <User size={18} color="var(--primary)" /> Client Information
               </h3>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', position: 'relative' }}>
+              <div className="quotation-client-grid">
                 <div style={{ position: 'relative' }}>
                   <label className="form-label">Client Name *</label>
                   <input
@@ -410,8 +410,8 @@ export default function NewQuotationPage() {
                       )}
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2.5fr) 90px 140px 140px', gap: '0.75rem', alignItems: 'center' }}>
-                      <div>
+                    <div className="quotation-item-grid">
+                      <div className="quotation-item-desc">
                         <label className="form-label" style={{ fontSize: '0.8rem', marginBottom: '0.2rem' }}>Description *</label>
                         <input
                           className="form-control"
