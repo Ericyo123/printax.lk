@@ -12,10 +12,18 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [showPass, setShowPass] = useState(false)
 
+  const [isResetMode, setIsResetMode] = useState(false)
+  const [securityKey, setSecurityKey] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [showResetPass, setShowResetPass] = useState(false)
+  const [resetSuccess, setResetSuccess] = useState('')
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError('')
+    setResetSuccess('')
     const res = await signIn('credentials', { 
       email: email.trim().toLowerCase(), 
       password, 
@@ -26,6 +34,54 @@ export default function LoginPage() {
       setLoading(false)
     } else {
       router.push('/')
+    }
+  }
+
+  async function handleResetPassword(e: React.FormEvent) {
+    e.preventDefault()
+    if (!email.trim()) {
+      setError('Please enter your account email')
+      return
+    }
+    if (newPassword.length < 6) {
+      setError('Password must be at least 6 characters')
+      return
+    }
+    if (newPassword !== confirmPassword) {
+      setError('Passwords do not match')
+      return
+    }
+
+    setLoading(true)
+    setError('')
+    setResetSuccess('')
+
+    try {
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email.trim().toLowerCase(),
+          newPassword,
+          securityKey: securityKey.trim()
+        })
+      })
+      const data = await res.json()
+      setLoading(false)
+
+      if (res.ok) {
+        setResetSuccess(data.message || 'Password updated successfully! You can now log in.')
+        setPassword(newPassword)
+        setIsResetMode(false)
+        setNewPassword('')
+        setConfirmPassword('')
+        setSecurityKey('')
+      } else {
+        setError(data.error || 'Failed to update password')
+      }
+    } catch {
+      setLoading(false)
+      setError('Network error occurred. Please try again.')
     }
   }
 
@@ -72,37 +128,119 @@ export default function LoginPage() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-              <div className="form-group">
-                <label className="form-label" htmlFor="email">Email address</label>
-                <input
-                  id="email" type="email" className="form-control"
-                  placeholder="you@printax.com"
-                  value={email} onChange={e => setEmail(e.target.value)} required
-                />
+            {resetSuccess && (
+              <div className="alert alert-success mb-5" style={{ background: '#ecfdf5', color: '#065f46', border: '1px solid #a7f3d0' }}>
+                {resetSuccess}
               </div>
+            )}
 
-              <div className="form-group">
-                <label className="form-label" htmlFor="password">Password</label>
-                <div className="relative">
+            {!isResetMode ? (
+              <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                <div className="form-group">
+                  <label className="form-label" htmlFor="email">Email address</label>
                   <input
-                    id="password" type={showPass ? 'text' : 'password'} className="form-control"
-                    placeholder="••••••••"
-                    value={password} onChange={e => setPassword(e.target.value)} required
-                    style={{ paddingRight: '2.75rem' }}
+                    id="email" type="email" className="form-control"
+                    placeholder="you@printax.com"
+                    value={email} onChange={e => setEmail(e.target.value)} required
                   />
-                  <button type="button" onClick={() => setShowPass(!showPass)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none text-[var(--text-muted)] cursor-pointer text-sm flex items-center justify-center">
-                    {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
                 </div>
-              </div>
 
-              <button type="submit" className="btn btn-primary w-full btn-lg mt-2 justify-center" disabled={loading}>
-                {loading ? <span className="spinner" /> : null}
-                {loading ? 'Signing in…' : 'Sign in'}
-              </button>
-            </form>
+                <div className="form-group">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                    <label className="form-label" htmlFor="password" style={{ margin: 0 }}>Password</label>
+                    <button
+                      type="button"
+                      onClick={() => { setIsResetMode(true); setError(''); setResetSuccess('') }}
+                      style={{ background: 'none', border: 'none', color: 'var(--primary)', fontSize: '0.8125rem', cursor: 'pointer', padding: 0 }}
+                    >
+                      Forgot / Change Password?
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <input
+                      id="password" type={showPass ? 'text' : 'password'} className="form-control"
+                      placeholder="••••••••"
+                      value={password} onChange={e => setPassword(e.target.value)} required
+                      style={{ paddingRight: '2.75rem' }}
+                    />
+                    <button type="button" onClick={() => setShowPass(!showPass)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none text-[var(--text-muted)] cursor-pointer text-sm flex items-center justify-center">
+                      {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                </div>
+
+                <button type="submit" className="btn btn-primary w-full btn-lg mt-2 justify-center" disabled={loading}>
+                  {loading ? <span className="spinner" /> : null}
+                  {loading ? 'Signing in…' : 'Sign in'}
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleResetPassword} className="flex flex-col gap-4">
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '0.75rem', fontSize: '0.8125rem', color: '#475569', marginBottom: '0.25rem' }}>
+                  Enter your registered account email and admin master key to change your password immediately.
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Registered Email</label>
+                  <input
+                    type="email" className="form-control"
+                    placeholder="e.g. mohommadammar826@gmail.com"
+                    value={email} onChange={e => setEmail(e.target.value)} required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Master Admin Security Key</label>
+                  <input
+                    type="password" className="form-control"
+                    placeholder="Enter security key (default: printax)"
+                    value={securityKey} onChange={e => setSecurityKey(e.target.value)} required
+                  />
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem', display: 'block' }}>
+                    Default recovery key: <strong>printax</strong>
+                  </span>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">New Password</label>
+                  <div className="relative">
+                    <input
+                      type={showResetPass ? 'text' : 'password'} className="form-control"
+                      placeholder="At least 6 characters"
+                      value={newPassword} onChange={e => setNewPassword(e.target.value)} required
+                      style={{ paddingRight: '2.75rem' }}
+                    />
+                    <button type="button" onClick={() => setShowResetPass(!showResetPass)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none text-[var(--text-muted)] cursor-pointer text-sm flex items-center justify-center">
+                      {showResetPass ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Confirm New Password</label>
+                  <input
+                    type="password" className="form-control"
+                    placeholder="Confirm new password"
+                    value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required
+                  />
+                </div>
+
+                <button type="submit" className="btn btn-primary w-full btn-lg mt-2 justify-center" disabled={loading}>
+                  {loading ? <span className="spinner" /> : null}
+                  {loading ? 'Updating Password…' : 'Update Password'}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => { setIsResetMode(false); setError('') }}
+                  className="btn btn-secondary w-full justify-center"
+                >
+                  &larr; Back to Sign In
+                </button>
+              </form>
+            )}
           </div>
 
           <p className="text-center text-[var(--text-muted)] text-xs mt-8">

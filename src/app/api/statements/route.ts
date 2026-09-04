@@ -20,13 +20,17 @@ export async function GET(req: NextRequest) {
       },
       orderBy: [{ year: 'desc' }, { month: 'desc' }],
     })
-    // Attach customer info
-    const withCustomer = await Promise.all(
-      statements.map(async (s) => {
-        const customer = await prisma.customer.findUnique({ where: { id: s.customerId } })
-        return { ...s, customer }
-      })
-    )
+
+    const customerIds = Array.from(new Set(statements.map(s => s.customerId).filter(Boolean)))
+    const customers = customerIds.length > 0 
+      ? await prisma.customer.findMany({ where: { id: { in: customerIds } } })
+      : []
+    const customerMap = new Map(customers.map(c => [c.id, c]))
+
+    const withCustomer = statements.map(s => ({
+      ...s,
+      customer: customerMap.get(s.customerId) || null
+    }))
     return NextResponse.json(withCustomer)
   } catch (e) {
     return NextResponse.json({ error: 'Failed' }, { status: 500 })

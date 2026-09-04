@@ -13,16 +13,60 @@ export async function GET(req: NextRequest) {
     const year = now.getFullYear()
     const month = now.getMonth() + 1
     
-    // 1. Fetch Summary Data
-    const invoices = await prisma.invoice.findMany({
-      select: { totalAmount: true, paymentStatus: true }
-    })
+    const start = new Date(year, month - 1, 1)
+    const end = new Date(year, month, 0, 23, 59, 59)
+
+    // 1. Fetch ALL data in a SINGLE concurrent batch (eliminates 4 sequential roundtrips)
+    const [
+      invoices, 
+      expenses, 
+      customerCount,
+      pendingQuotesCount, 
+      thisMonthExpensesAgg,
+      recentInvoices
+    ] = await Promise.all([
+      prisma.invoice.findMany({ select: { id: true, invoiceNumber: true, totalAmount: true, paymentStatus: true, date: true } }),
+      prisma.expense.aggregate({ _sum: { amount: true }, _count: true }),
+      prisma.customer.count(),
+      prisma.quotation.count({ where: { status: { in: ['DRAFT', 'SENT'] } } }),
+      prisma.expense.aggregate({
+        where: {
+          date: {
+            gte: start,
+            lte: end
+          }
+        },
+        _sum: { amount: true }
+      }),
+      prisma.invoice.findMany({
+        take: 6,
+        orderBy: { createdAt: 'desc' },
+        include: { customer: { select: { name: true, id: true } } }
+      })
+    ])
+
+    const totalExpenses = expenses._sum.amount || 0
+    const thisMonthExpenses = thisMonthExpensesAgg._sum.amount || 0
+
     const summary = {
-      totalRevenue: 0, totalInvoices: invoices.length,
-      paidRevenue: 0, paidCount: 0,
-      unpaidRevenue: 0, unpaidCount: 0,
-      customerCount: await prisma.customer.count()
+      totalRevenue: 0, 
+      totalInvoices: invoices.length,
+      paidRevenue: 0, 
+      paidCount: 0,
+      unpaidRevenue: 0, 
+      unpaidCount: 0,
+      customerCount,
+      totalExpenses,
+      thisMonthExpenses,
+      netProfit: 0,
+      pendingQuotesCount
     }
+
+    const startTimestamp = start.getTime()
+    const endTimestamp = end.getTime()
+
+    // Single pass over invoices: calculate summary + filter this month's daily invoices
+    const thisMonthInvoices: typeof invoices = []
     for (const inv of invoices) {
       summary.totalRevenue += inv.totalAmount
       if (inv.paymentStatus === 'PAID') {
@@ -32,37 +76,41 @@ export async function GET(req: NextRequest) {
         summary.unpaidRevenue += inv.totalAmount
         summary.unpaidCount++
       }
-    }
 
-    // 2. Fetch Daily Chart Data
-    const start = new Date(year, month - 1, 1)
-    const end = new Date(year, month, 0, 23, 59, 59)
-    const dailyInvoices = await prisma.invoice.findMany({
-      where: { date: { gte: start, lte: end } },
-      select: { date: true, totalAmount: true, paymentStatus: true },
-    })
-
-    const dailyMap: Record<string, { revenue: number; paid: number; count: number }> = {}
-    for (let d = 1; d <= end.getDate(); d++) {
-      const key = String(d).padStart(2, '0')
-      dailyMap[key] = { revenue: 0, paid: 0, count: 0 }
-    }
-    for (const inv of dailyInvoices) {
-      const day = String(new Date(inv.date).getDate()).padStart(2, '0')
-      if (dailyMap[day]) {
-        dailyMap[day].revenue += inv.totalAmount
-        dailyMap[day].count++
-        if (inv.paymentStatus === 'PAID') dailyMap[day].paid += inv.totalAmount
+      const invTime = new Date(inv.date).getTime()
+      if (invTime >= startTimestamp && invTime <= endTimestamp) {
+        thisMonthInvoices.push(inv)
       }
     }
-    const chartData = Object.entries(dailyMap).map(([day, vals]) => ({ day, ...vals }))
+    summary.netProfit = summary.totalRevenue - totalExpenses
 
-    // 3. Fetch Recent Invoices
-    const recentInvoices = await prisma.invoice.findMany({
-      take: 6,
-      orderBy: { createdAt: 'desc' },
-      include: { customer: { select: { name: true, id: true } } }
-    })
+    // 2. Build Daily Chart Data in strictly sequential chronological order
+    const daysCount = end.getDate()
+    const chartData = []
+    for (let d = 1; d <= daysCount; d++) {
+      const dayStr = String(d).padStart(2, '0')
+      let revenue = 0
+      let paid = 0
+      let count = 0
+
+      for (const inv of thisMonthInvoices) {
+        if (new Date(inv.date).getDate() === d) {
+          revenue += inv.totalAmount
+          count++
+          if (inv.paymentStatus === 'PAID') {
+            paid += inv.totalAmount
+          }
+        }
+      }
+
+      chartData.push({
+        day: dayStr,
+        dayNum: d,
+        revenue,
+        paid,
+        count
+      })
+    }
 
     return NextResponse.json({
       summary,

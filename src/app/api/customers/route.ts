@@ -33,3 +33,32 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: e.message }, { status: 500 })
   }
 }
+
+export async function DELETE(req: NextRequest) {
+  const session = await getServerSession(authOptions)
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  try {
+    const body = await req.json()
+    const ids: string[] = body.ids || []
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return NextResponse.json({ error: 'No IDs provided' }, { status: 400 })
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.invoice.updateMany({
+        where: { customerId: { in: ids } },
+        data: { customerId: null }
+      })
+      await tx.quotation.updateMany({
+        where: { customerId: { in: ids } },
+        data: { customerId: null }
+      })
+      await tx.customer.deleteMany({ where: { id: { in: ids } } })
+    })
+
+    return NextResponse.json({ success: true, count: ids.length })
+  } catch (e: any) {
+    console.error('Batch delete customers error:', e)
+    return NextResponse.json({ error: e.message || 'Failed to delete customers' }, { status: 500 })
+  }
+}

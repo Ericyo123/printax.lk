@@ -3,6 +3,9 @@ import { useEffect, useState } from 'react'
 import { AppShell } from '@/components/AppShell'
 import { useParams, useRouter } from 'next/navigation'
 
+import { Check, RotateCcw, Printer, Download } from 'lucide-react'
+import { clientCache } from '@/lib/clientCache'
+
 export default function InvoiceDetailPage() {
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
@@ -20,10 +23,13 @@ export default function InvoiceDetailPage() {
     const res = await fetch(`/api/invoices/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ paymentStatus: 'PAID', paymentMethod: 'CASH' }), // Defaulting to CASH for DB requirement
+      body: JSON.stringify({ paymentStatus: 'PAID', paymentMethod: 'CASH' }),
     })
     const data = await res.json()
     setInvoice(data); setSaving(false)
+    clientCache.invalidate('invoices_all')
+    clientCache.invalidate('dashboard_data')
+    clientCache.invalidate('statements_all')
   }
 
   async function markUnpaid() {
@@ -36,6 +42,31 @@ export default function InvoiceDetailPage() {
     })
     const data = await res.json()
     setInvoice(data); setSaving(false)
+    clientCache.invalidate('invoices_all')
+    clientCache.invalidate('dashboard_data')
+    clientCache.invalidate('statements_all')
+  }
+
+  async function deleteInvoice() {
+    if (!invoice) return
+    if (!window.confirm(`Are you sure you want to permanently delete invoice ${invoice.invoiceNumber}? This cannot be undone.`)) return
+    setSaving(true)
+    try {
+      const res = await fetch(`/api/invoices/${id}`, { method: 'DELETE' })
+      if (res.ok) {
+        clientCache.invalidate('invoices_all')
+        clientCache.invalidate('dashboard_data')
+        clientCache.invalidate('statements_all')
+        router.push('/invoices')
+      } else {
+        const data = await res.json()
+        alert(data.error || 'Failed to delete invoice')
+        setSaving(false)
+      }
+    } catch {
+      alert('Error deleting invoice')
+      setSaving(false)
+    }
   }
 
   function printInvoice() { window.print() }
@@ -296,13 +327,21 @@ export default function InvoiceDetailPage() {
         </div>
         <div className="page-actions">
           {invoice.paymentStatus !== 'PAID' && (
-            <button className="btn btn-success" onClick={markPaid}>✓ Mark Paid</button>
+            <button className="btn btn-success" onClick={markPaid} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+              <Check size={16} /> Mark Paid
+            </button>
           )}
           {invoice.paymentStatus === 'PAID' && (
-            <button className="btn btn-secondary" onClick={markUnpaid} disabled={saving}>↩ Mark Unpaid</button>
+            <button className="btn btn-secondary" onClick={markUnpaid} disabled={saving} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+              <RotateCcw size={16} /> Mark Unpaid
+            </button>
           )}
-          <button className="btn btn-secondary" onClick={printInvoice}>🖨 Print</button>
-          <button className="btn btn-primary" onClick={downloadPDF}>⬇ Download PDF</button>
+          <button className="btn btn-secondary" onClick={printInvoice} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+            <Printer size={16} /> Print
+          </button>
+          <button className="btn btn-primary" onClick={downloadPDF} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+            <Download size={16} /> Download PDF
+          </button>
         </div>
       </div>
 

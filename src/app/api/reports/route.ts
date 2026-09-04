@@ -36,7 +36,11 @@ export async function GET(req: NextRequest) {
           if (inv.paymentStatus === 'PAID') dailyMap[day].paid += inv.totalAmount
         }
       }
-      const data = Object.entries(dailyMap).map(([day, vals]) => ({ day, ...vals }))
+      const data = []
+      for (let d = 1; d <= end.getDate(); d++) {
+        const key = String(d).padStart(2, '0')
+        data.push({ day: key, ...(dailyMap[key] || { revenue: 0, paid: 0, count: 0 }) })
+      }
       return NextResponse.json({ data })
     }
 

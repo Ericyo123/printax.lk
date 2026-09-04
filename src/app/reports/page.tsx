@@ -166,9 +166,13 @@ export default function ReportsPage() {
         ) : (
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={data} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-              <XAxis dataKey={tab === 'daily' ? 'day' : 'month'} tick={{ fill: '#475569', fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: '#475569', fontSize: 11 }} axisLine={false} tickLine={false} />
+              <XAxis dataKey={tab === 'daily' ? 'day' : 'month'} tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} interval={tab === 'daily' ? 1 : 0} />
+              <YAxis 
+                tick={{ fill: '#64748b', fontSize: 11 }} 
+                axisLine={false} 
+                tickLine={false} 
+                tickFormatter={v => v >= 1000000 ? `${(v/1000000).toFixed(1)}M` : v >= 1000 ? `${(v/1000).toFixed(0)}k` : `${v}`} 
+              />
               <Tooltip contentStyle={tooltipStyle} formatter={(v: any, name: any) => [`Rs. ${(v || 0).toLocaleString()}`, name === 'revenue' ? 'Revenue' : 'Paid']} />
               <Bar dataKey="revenue" fill="#155e96" radius={[4, 4, 0, 0]} name="revenue" />
               <Bar dataKey="paid" fill="#10b981" radius={[4, 4, 0, 0]} name="paid" />

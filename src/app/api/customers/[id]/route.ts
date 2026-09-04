@@ -3,17 +3,24 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const customer = await prisma.customer.findUnique({
-      where: { id: params.id },
-      include: {
-        invoices: {
-          orderBy: { date: 'desc' },
-          include: { jobs: { include: { paperSize: true } } },
+    const [customer, statements] = await Promise.all([
+      prisma.customer.findUnique({
+        where: { id: params.id },
+        include: {
+          invoices: {
+            orderBy: { date: 'desc' },
+            include: { jobs: { include: { paperSize: true } } },
+          },
         },
-      },
-    })
+      }),
+      prisma.statement.findMany({
+        where: { customerId: params.id },
+        orderBy: [{ year: 'desc' }, { month: 'desc' }],
+        include: { invoices: true },
+      })
+    ])
     if (!customer) return NextResponse.json({ error: 'Not found' }, { status: 404 })
-    return NextResponse.json(customer)
+    return NextResponse.json({ ...customer, statements: statements || [] })
   } catch (e) {
     return NextResponse.json({ error: 'Failed' }, { status: 500 })
   }

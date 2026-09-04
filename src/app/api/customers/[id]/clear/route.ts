@@ -23,7 +23,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       unpaidInvoices.map(inv => 
         prisma.invoice.update({
           where: { id: inv.id },
-          data: { paymentStatus: 'PAID', paymentMethod: 'CASH' }
+          data: { paymentStatus: 'PAID', paymentMethod: 'CASH', paymentDate: new Date() }
         })
       )
     )

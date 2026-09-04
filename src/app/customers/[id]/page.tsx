@@ -1,9 +1,10 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { AppShell } from '@/components/AppShell'
-import { Receipt, AlertCircle } from 'lucide-react'
+import { Receipt, AlertCircle, FileSpreadsheet, MessageSquare, ArrowLeft, Check, Download } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
+import { downloadStatementPDF, openStatementWhatsApp, MONTH_NAMES } from '@/lib/statementPdf'
 
 export default function CustomerDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -49,7 +50,9 @@ export default function CustomerDetailPage() {
           </p>
         </div>
         <div className="page-actions">
-          <Link href="/customers" className="btn btn-secondary">← Back</Link>
+          <Link href="/customers" className="btn btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+            <ArrowLeft size={16} /> Back
+          </Link>
           <Link href={`/jobs/new?customerId=${customer.id}`} className="btn btn-primary">+ New Job</Link>
         </div>
       </div>
@@ -90,47 +93,125 @@ export default function CustomerDetailPage() {
                   This customer has an outstanding balance of <strong>Rs. {customer.outstandingBalance.toLocaleString()}</strong>
                 </span>
               </div>
-              <button className="btn btn-success btn-sm" onClick={settleCustomerBalance}>✓ Settle All</button>
+              <button className="btn btn-success btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }} onClick={settleCustomerBalance}>
+                <Check size={14} /> Settle All
+              </button>
             </div>
           )}
         </div>
 
-        {/* Invoice history */}
-        <div className="card">
-          <h3 style={{ marginBottom: '1.25rem' }}>Invoice History</h3>
-          {customer.invoices.length === 0 ? (
-            <div className="empty-state" style={{ padding: '2rem' }}>
-              <div className="empty-state-icon"><Receipt size={40} /></div>
-              <p>No invoices yet</p>
+        {/* Invoices and Statements Tabs */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          {/* Statement History */}
+          <div className="card">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <FileSpreadsheet size={20} color="var(--primary)" />
+                Monthly Statements ({customer.statements?.length || 0})
+              </h3>
+              <Link href="/statements" className="btn btn-secondary btn-sm">
+                + Manage Statements
+              </Link>
             </div>
-          ) : (
-            <div className="table-wrapper">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Invoice #</th>
-                    <th>Date</th>
-                    <th>Jobs</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {customer.invoices.map((inv: any) => (
-                    <tr key={inv.id}>
-                      <td style={{ fontWeight: 600, color: '#000' }}>{inv.invoiceNumber}</td>
-                      <td style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>{new Date(inv.date).toLocaleDateString()}</td>
-                      <td style={{ color: 'var(--text-secondary)' }}>{inv.jobs?.length || 0}</td>
-                      <td style={{ fontWeight: 700 }}>Rs. {inv.totalAmount.toLocaleString()}</td>
-                      <td><span className={`badge ${inv.paymentStatus === 'PAID' ? 'badge-success' : 'badge-warning'}`}>{inv.paymentStatus}</span></td>
-                      <td><Link href={`/invoices/${inv.id}`} className="btn btn-secondary btn-sm">View</Link></td>
+            
+            {(!customer.statements || customer.statements.length === 0) ? (
+              <div className="empty-state" style={{ padding: '2rem' }}>
+                <div className="empty-state-icon"><FileSpreadsheet size={36} /></div>
+                <p>No monthly statements generated for this customer yet</p>
+                <Link href="/statements" className="btn btn-primary btn-sm" style={{ marginTop: '0.5rem' }}>
+                  Generate First Statement
+                </Link>
+              </div>
+            ) : (
+              <div className="table-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Statement #</th>
+                      <th>Period</th>
+                      <th>Invoices</th>
+                      <th>Total</th>
+                      <th>Status</th>
+                      <th style={{ textAlign: 'right' }}>Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+                  </thead>
+                  <tbody>
+                    {customer.statements.map((stmt: any) => (
+                      <tr key={stmt.id}>
+                        <td style={{ fontWeight: 700, color: '#000' }}>{stmt.statementNo}</td>
+                        <td style={{ color: 'var(--text-secondary)' }}>{MONTH_NAMES[stmt.month - 1]} {stmt.year}</td>
+                        <td style={{ color: 'var(--text-secondary)' }}>{stmt.invoices?.length || 0}</td>
+                        <td style={{ fontWeight: 700 }}>Rs. {stmt.totalAmount.toLocaleString()}</td>
+                        <td>
+                          <span className={`badge ${stmt.status === 'PAID' ? 'badge-success' : 'badge-warning'}`}>
+                            {stmt.status}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: 'right' }}>
+                          <div style={{ display: 'flex', gap: '0.35rem', justifyContent: 'flex-end' }}>
+                            <button 
+                              className="btn btn-secondary btn-sm" 
+                              onClick={() => downloadStatementPDF({ ...stmt, customer })}
+                              title="Download PDF"
+                              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+                            >
+                              <Download size={13} /> PDF
+                            </button>
+                            <button 
+                              className="btn btn-sm" 
+                              onClick={() => openStatementWhatsApp(stmt, customer.phone, customer.name)}
+                              title="Send to Customer via WhatsApp"
+                              style={{ background: '#25D366', color: '#fff', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.35rem 0.6rem' }}
+                            >
+                              <MessageSquare size={14} /> Send WhatsApp
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {/* Invoice history */}
+          <div className="card">
+            <h3 style={{ marginBottom: '1.25rem' }}>Invoice History</h3>
+            {customer.invoices.length === 0 ? (
+              <div className="empty-state" style={{ padding: '2rem' }}>
+                <div className="empty-state-icon"><Receipt size={40} /></div>
+                <p>No invoices yet</p>
+              </div>
+            ) : (
+              <div className="table-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Invoice #</th>
+                      <th>Date</th>
+                      <th>Jobs</th>
+                      <th>Amount</th>
+                      <th>Status</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {customer.invoices.map((inv: any) => (
+                      <tr key={inv.id}>
+                        <td style={{ fontWeight: 600, color: '#000' }}>{inv.invoiceNumber}</td>
+                        <td style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>{new Date(inv.date).toLocaleDateString()}</td>
+                        <td style={{ color: 'var(--text-secondary)' }}>{inv.jobs?.length || 0}</td>
+                        <td style={{ fontWeight: 700 }}>Rs. {inv.totalAmount.toLocaleString()}</td>
+                        <td><span className={`badge ${inv.paymentStatus === 'PAID' ? 'badge-success' : 'badge-warning'}`}>{inv.paymentStatus}</span></td>
+                        <td><Link href={`/invoices/${inv.id}`} className="btn btn-secondary btn-sm">View</Link></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </AppShell>

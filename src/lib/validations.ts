@@ -36,6 +36,7 @@ export const jobSchema = z.object({
 
 export const invoiceSchema = z.object({
   customerId: z.string().optional().nullable(),
+  customerName: z.string().optional().nullable(),
   date: z.string().or(z.date()).optional(),
   dueDate: z.string().or(z.date()).optional().nullable(),
   paymentStatus: z.enum(['PAID', 'UNPAID', 'PARTIAL']).default('UNPAID'),
@@ -46,6 +47,7 @@ export const invoiceSchema = z.object({
 
 export const createJobSchema = jobSchema.extend({
   customerId: z.string().optional().nullable(),
+  customerName: z.string().optional().nullable(),
   createInvoice: z.boolean().default(false),
   dueDate: z.string().or(z.date()).optional().nullable(),
   paymentMethod: z.string().optional().nullable(),
@@ -58,3 +60,44 @@ export const statementSchema = z.object({
   invoiceIds: z.array(z.string()),
   dueDate: z.string().or(z.date()).optional().nullable(),
 })
+
+export const quotationItemSchema = z.object({
+  description: z.string().min(1, 'Description is required'),
+  paperSizeId: z.string().optional().nullable(),
+  printType: z.enum(['COLOR', 'BW']).optional().nullable(),
+  printMode: z.enum(['SINGLE', 'DOUBLE']).optional().nullable(),
+  pages: z.number().int().min(1).default(1),
+  copies: z.number().int().min(1).default(1),
+  pricingType: z.enum(['PER_PAGE', 'PER_COPY', 'PER_BOOK', 'MANUAL']).default('MANUAL'),
+  unitPrice: z.number().min(0).default(0),
+  baseAmount: z.number().min(0).default(0),
+  additionalTotal: z.number().min(0).default(0),
+  discount: z.number().min(0).default(0),
+  totalAmount: z.number().min(0).default(0),
+  notes: z.string().optional().nullable(),
+})
+
+export const quotationSchema = z.object({
+  customerId: z.string().optional().nullable(),
+  customerName: z.string().optional().nullable(),
+  customerPhone: z.string().optional().nullable(),
+  customerEmail: z.string().optional().nullable(),
+  customerAddress: z.string().optional().nullable(),
+  validUntil: z.string().or(z.date()).optional().nullable(),
+  status: z.enum(['DRAFT', 'SENT', 'ACCEPTED', 'REJECTED', 'EXPIRED', 'CONVERTED']).default('DRAFT'),
+  discount: z.number().min(0).default(0),
+  notes: z.string().optional().nullable(),
+  items: z.array(quotationItemSchema).min(1, 'At least one quotation item is required'),
+})
+
+export const expenseSchema = z.object({
+  title: z.string().min(1, 'Description / Title is required'),
+  category: z.string().min(1, 'Category is required'),
+  amount: z.number().positive('Amount must be greater than 0'),
+  date: z.string().or(z.date()).optional(),
+  paymentMethod: z.string().optional().nullable().default('CASH'),
+  reference: z.string().optional().nullable(),
+  vendor: z.string().optional().nullable(),
+  notes: z.string().optional().nullable(),
+})
+

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { AppShell } from '@/components/AppShell'
 import { useRouter } from 'next/navigation'
 import { Plus, ShoppingCart, Pencil, Trash2, Info, Calculator, Save, Search } from 'lucide-react'
+import { clientCache } from '@/lib/clientCache'
 
 interface PaperSize { id: string; name: string }
 interface Customer { id: string; name: string; type: string }
@@ -21,6 +22,7 @@ export default function NewJobPage() {
   const [quantity, setQuantity] = useState<number | ''>(1)
   const [amount, setAmount] = useState<number | ''>('')
   const [customerId, setCustomerId] = useState('')
+  const [walkInCustomerName, setWalkInCustomerName] = useState('')
   
   // Consolidated Job Cart State
   const [jobsList, setJobsList] = useState<any[]>([])
@@ -38,6 +40,7 @@ export default function NewJobPage() {
         setDescription(data.description ?? '')
         setQuantity(data.quantity ?? 1)
         setAmount(data.amount ?? '')
+        setWalkInCustomerName(data.walkInCustomerName ?? '')
         if (data.customerId) {
           setCustomerId(data.customerId)
           setIsWalkIn(false)
@@ -62,10 +65,11 @@ export default function NewJobPage() {
       amount,
       customerId: isWalkIn ? '' : customerId,
       customerSearch,
+      walkInCustomerName,
       jobsList,
       invoiceDiscount
     }))
-  }, [description, quantity, amount, customerId, customerSearch, jobsList, invoiceDiscount, isLoaded, isWalkIn])
+  }, [description, quantity, amount, customerId, customerSearch, walkInCustomerName, jobsList, invoiceDiscount, isLoaded, isWalkIn])
 
   // Derived
   const validQty = typeof quantity === 'number' ? quantity : 1
@@ -80,9 +84,23 @@ export default function NewJobPage() {
   const isMonthly = selectedCustomer?.type === 'MONTHLY'
 
   useEffect(() => {
+    const cachedPricing = clientCache.get('pricing_data')
+    const cachedCusts = clientCache.get('customers_all')
+    if (cachedPricing?.paperSizes) {
+      setPaperSizes(cachedPricing.paperSizes)
+      if (cachedPricing.paperSizes.length > 0) {
+        setJobsList(prev => prev.map(j => 
+          j.paperSizeId === 'dummy-size' ? { ...j, paperSizeId: cachedPricing.paperSizes[0].id } : j
+        ))
+      }
+    }
+    if (Array.isArray(cachedCusts) && cachedCusts.length > 0) {
+      setCustomers(cachedCusts)
+    }
+
     Promise.all([
-      fetch('/api/pricing').then(r => r.json()),
-      fetch('/api/customers').then(r => r.json()),
+      clientCache.fetchWithCache('pricing_data', '/api/pricing'),
+      clientCache.fetchWithCache('customers_all', '/api/customers'),
     ]).then(([pd, custs]) => {
       const sizes = pd.paperSizes || []
       setPaperSizes(sizes)
@@ -195,6 +213,7 @@ export default function NewJobPage() {
 
     const body = {
       customerId: isWalkIn ? null : customerId || null,
+      customerName: isWalkIn ? (walkInCustomerName.trim() || null) : null,
       paymentStatus: 'UNPAID',
       notes: undefined,
       jobs: finalJobs.map(j => ({
@@ -224,6 +243,9 @@ export default function NewJobPage() {
       setLoading(false)
       if (res.ok && data.invoice) {
         localStorage.removeItem(CACHE_KEY)
+        clientCache.invalidate('invoices_all')
+        clientCache.invalidate('dashboard_data')
+        clientCache.invalidate('statements_all')
         router.push(`/invoices/${data.invoice.id}`)
       } else {
         alert(data.error || 'Failed to create invoice. Please try again.')
@@ -319,6 +341,21 @@ export default function NewJobPage() {
                   />
                   Walk-in Customer (No account required)
                 </label>
+
+                {isWalkIn && (
+                  <div style={{ marginTop: '0.75rem' }}>
+                    <label className="form-label" style={{ fontSize: '0.8125rem' }}>
+                      Walk-in Customer Name <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>(Optional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="e.g. Kasun Perera / Global Graphics..."
+                      value={walkInCustomerName}
+                      onChange={e => setWalkInCustomerName(e.target.value)}
+                    />
+                  </div>
+                )}
               </div>
 
               {!isWalkIn && (

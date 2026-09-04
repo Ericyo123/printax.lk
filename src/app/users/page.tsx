@@ -4,6 +4,7 @@ import { AppShell } from '@/components/AppShell'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Pagination } from '@/components/Pagination'
+import { Pencil, Trash2, Ban, CheckCircle2, X, UserPlus } from 'lucide-react'
 
 export default function UsersPage() {
   const { data: session } = useSession()
@@ -137,20 +138,24 @@ export default function UsersPage() {
                   </td>
                   <td>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <button className="btn btn-ghost btn-sm" onClick={() => {
+                      <button className="btn btn-ghost btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }} onClick={() => {
                         setEditingUser(u)
                         setEditForm({ name: u.name, password: '', role: u.role })
                         setShowEditModal(true)
                       }}>
-                        ✏️ Edit
+                        <Pencil size={14} /> Edit
                       </button>
                       {u.id !== session?.user?.id && (
                         <>
-                          <button className="btn btn-ghost btn-sm" onClick={() => toggleActive(u.id, u.active)}>
-                            {u.active ? '🚫 Disable' : '✓ Enable'}
+                          <button className="btn btn-ghost btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }} onClick={() => toggleActive(u.id, u.active)}>
+                            {u.active ? (
+                              <><Ban size={14} color="var(--warning)" /> Disable</>
+                            ) : (
+                              <><CheckCircle2 size={14} color="var(--success)" /> Enable</>
+                            )}
                           </button>
-                          <button className="btn btn-ghost btn-sm" style={{ color: 'var(--danger)' }} onClick={() => deleteUser(u.id)}>
-                            🗑 Delete
+                          <button className="btn btn-ghost btn-sm" style={{ color: 'var(--danger)', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }} onClick={() => deleteUser(u.id)}>
+                            <Trash2 size={14} /> Delete
                           </button>
                         </>
                       )}
@@ -176,7 +181,7 @@ export default function UsersPage() {
           <div className="modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h3>Add New User</h3>
-              <button className="btn btn-ghost" onClick={() => setShowModal(false)}>✕</button>
+              <button className="btn btn-ghost" onClick={() => setShowModal(false)}><X size={18} /></button>
             </div>
             <div className="modal-body">
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
@@ -221,7 +226,7 @@ export default function UsersPage() {
           <div className="modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h3>Edit User / Change Password</h3>
-              <button className="btn btn-ghost" onClick={() => { setShowEditModal(false); setEditingUser(null); }}>✕</button>
+              <button className="btn btn-ghost" onClick={() => { setShowEditModal(false); setEditingUser(null); }}><X size={18} /></button>
             </div>
             <div className="modal-body">
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>

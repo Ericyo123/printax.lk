@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 
-import { Building2, Landmark } from 'lucide-react'
+import { Building2, Landmark, FileText } from 'lucide-react'
 import { AppShell } from '@/components/AppShell'
 
 export default function SettingsPage() {
@@ -18,7 +18,8 @@ export default function SettingsPage() {
     accountNumber: '',
     swiftCode: '',
     branch: '',
-    currency: 'LKR'
+    currency: 'LKR',
+    defaultQuotationNotes: 'Payment terms: 50% advance upon confirmation. Validity: 14 days.'
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -182,10 +183,31 @@ export default function SettingsPage() {
             </div>
           </div>
         </div>
+
+        {/* Quotation Defaults */}
+        <div className="card" style={{ padding: '1.5rem', gridColumn: '1 / -1' }}>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <FileText size={20} className="text-primary-light" /> Quotation Defaults
+          </h2>
+          <div className="form-group">
+            <label className="form-label">Default Quotation Notes & Payment Terms</label>
+            <textarea 
+              className="form-control"
+              rows={3}
+              value={settings.defaultQuotationNotes || ''} 
+              onChange={(e) => setSettings({ ...settings, defaultQuotationNotes: e.target.value })} 
+              placeholder="e.g. Payment terms: 50% advance upon confirmation. Validity: 14 days."
+              style={{ resize: 'vertical' }}
+            />
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.35rem', display: 'block' }}>
+              This text will automatically pre-fill the &quot;Notes &amp; Terms&quot; field on all new quotations created by you or your staff.
+            </span>
+          </div>
+        </div>
       </div>
       
       <div style={{ marginTop: '2rem', padding: '1rem', background: 'var(--bg-elevated)', borderRadius: '8px', border: '1px solid var(--border)', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-        <strong style={{ color: 'var(--text-primary)' }}>Note:</strong> These details will be automatically included in all generated Invoices and Monthly Statements.
+        <strong style={{ color: 'var(--text-primary)' }}>Note:</strong> These details will be automatically included in all generated Invoices, Monthly Statements, and Quotations.
       </div>
     </AppShell>
   )

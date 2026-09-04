@@ -143,22 +143,30 @@ a { color: #000; text-decoration: none; }
 }
 
 /* Stat cards */
-.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; }
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; }
 .stat-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 1.5rem;
+  padding: 1.25rem 1.5rem;
   position: relative; overflow: hidden;
   transition: all var(--transition);
 }
 .stat-card:hover { border-color: var(--border-hover); transform: translateY(-2px); box-shadow: var(--shadow); }
-.stat-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 0.5rem; }
+.stat-label { 
+  font-size: 0.75rem; 
+  font-weight: 600; 
+  text-transform: uppercase; 
+  letter-spacing: 0.06em; 
+  color: var(--text-muted); 
+  margin-bottom: 0.5rem; 
+  padding-right: 3rem; /* Prevents text from colliding with stat-icon */
+}
 .stat-value { font-size: 1.75rem; font-weight: 700; color: var(--text-primary); letter-spacing: -0.02em; }
 .stat-sub { font-size: 0.8125rem; color: var(--text-secondary); margin-top: 0.25rem; }
 .stat-icon {
-  position: absolute; top: 1rem; right: 1rem;
-  width: 40px; height: 40px; border-radius: var(--radius-sm);
+  position: absolute; top: 1.25rem; right: 1.25rem;
+  width: 38px; height: 38px; border-radius: var(--radius-sm);
   display: flex; align-items: center; justify-content: center;
   font-size: 1.1rem;
 }
@@ -507,9 +515,26 @@ tbody td { padding: 0.875rem 1rem; font-size: 0.875rem; color: var(--text-primar
   display: grid;
   grid-template-columns: 1fr 380px;
   gap: 1.5rem;
+  align-items: start;
 }
 @media (max-width: 1024px) {
   .grid-dashboard {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dashboard-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+@media (max-width: 1100px) {
+  .dashboard-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 640px) {
+  .dashboard-stat-grid {
     grid-template-columns: 1fr;
   }
 }

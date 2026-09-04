@@ -3,6 +3,7 @@ import { useSession, signOut } from 'next-auth/react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { clientCache } from '@/lib/clientCache'
 
 import { 
   LayoutDashboard, 
@@ -15,16 +16,22 @@ import {
   Settings, 
   UserCircle,
   Menu,
-  LogOut
+  LogOut,
+  FileQuestion,
+  TrendingDown,
+  PieChart,
+  FileSpreadsheet
 } from 'lucide-react'
 
 const navItems = [
   { href: '/dashboard', icon: <LayoutDashboard size={18} />, label: 'Dashboard', section: 'Main', adminOnly: true },
   { href: '/jobs/new', icon: <PlusSquare size={18} />, label: 'New Job', section: 'Main' },
   { href: '/invoices', icon: <Receipt size={18} />, label: 'Invoices', section: 'Main' },
+  { href: '/quotations', icon: <FileText size={18} />, label: 'Quotations', section: 'Main' },
   { href: '/customers', icon: <Users size={18} />, label: 'Customers', section: 'Main' },
-  { href: '/statements', icon: <FileText size={18} />, label: 'Statements', section: 'Billing' },
-  { href: '/payments', icon: <CreditCard size={18} />, label: 'Payments', section: 'Billing' },
+  { href: '/statements', icon: <FileSpreadsheet size={18} />, label: 'Statements', section: 'Main' },
+  { href: '/expenses', icon: <TrendingDown size={18} />, label: 'Expenses', section: 'Billing' },
+  { href: '/statements/profit-loss', icon: <PieChart size={18} />, label: 'Profit & Loss', section: 'Billing', adminOnly: true },
   { href: '/reports', icon: <BarChart3 size={18} />, label: 'Reports', section: 'Reports', adminOnly: true },
   { href: '/settings', icon: <Settings size={18} />, label: 'Settings', section: 'Admin', adminOnly: true },
   { href: '/users', icon: <UserCircle size={18} />, label: 'Users', section: 'Admin', adminOnly: true },
@@ -45,6 +52,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     setMobileOpen(false)
   }, [pathname])
 
+  const isAdmin = session?.user?.role === 'ADMIN'
+
+  // Pre-warm client cache in background so all pages render in 0ms
+  useEffect(() => {
+    if (session) {
+      clientCache.prefetchCoreData(session.user?.role === 'ADMIN')
+    }
+  }, [session])
+
   if (status === 'loading') {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -54,7 +70,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
   if (!session) return null
 
-  const isAdmin = session.user?.role === 'ADMIN'
   const visibleItems = navItems.filter(i => !i.adminOnly || isAdmin)
   const sections = Array.from(new Set(visibleItems.map(i => i.section)))
 
@@ -73,13 +88,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {sections.map(section => (
             <div key={section}>
               <div className="nav-section-label">{section}</div>
-              {visibleItems.filter(i => i.section === section).map(item => (
-                <Link key={item.href} href={item.href}
-                  className={`nav-item ${pathname === item.href || (item.href !== '/dashboard' && item.href !== '/settings' && pathname.startsWith(item.href)) ? 'active' : ''}`}>
-                  <span className="nav-icon" style={{ fontSize: '1rem' }}>{item.icon}</span>
-                  {item.label}
-                </Link>
-              ))}
+              {visibleItems.filter(i => i.section === section).map(item => {
+                const isActive = item.href === '/statements' 
+                  ? pathname === '/statements'
+                  : (pathname === item.href || (item.href !== '/dashboard' && item.href !== '/settings' && pathname.startsWith(item.href)))
+                return (
+                  <Link key={item.href} href={item.href}
+                    className={`nav-item ${isActive ? 'active' : ''}`}>
+                    <span className="nav-icon" style={{ fontSize: '1rem' }}>{item.icon}</span>
+                    {item.label}
+                  </Link>
+                )
+              })}
             </div>
           ))}
         </nav>
