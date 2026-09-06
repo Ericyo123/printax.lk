@@ -6,6 +6,7 @@ import { Pagination } from '@/components/Pagination'
 import { FileText, Info, MessageSquare, Eye, Printer, X, Download, Check } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { downloadStatementPDF, openStatementWhatsApp, MONTH_NAMES } from '@/lib/statementPdf'
+import { WhatsAppModal } from '@/components/WhatsAppModal'
 
 import { clientCache } from '@/lib/clientCache'
 
@@ -23,6 +24,7 @@ export default function StatementsPage() {
   const [loading, setLoading] = useState(!cachedData)
   const [showModal, setShowModal] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [whatsAppModalStmt, setWhatsAppModalStmt] = useState<any>(null)
   const [form, setForm] = useState({ customerId: '', month: new Date().getMonth() + 1, year: new Date().getFullYear(), dueDate: '' })
   const [availableInvoices, setAvailableInvoices] = useState<any[]>([])
   const [selectedInvoices, setSelectedInvoices] = useState<string[]>([])
@@ -213,7 +215,7 @@ export default function StatementsPage() {
                       </button>
                       <button
                         className="btn btn-sm"
-                        onClick={() => openStatementWhatsApp(s)}
+                        onClick={() => setWhatsAppModalStmt(s)}
                         title="Send Statement to Customer via WhatsApp"
                         style={{
                           background: '#25D366',
@@ -428,7 +430,7 @@ export default function StatementsPage() {
                 </button>
                 <button
                   className="btn btn-sm"
-                  onClick={() => openStatementWhatsApp(previewStatement)}
+                  onClick={() => setWhatsAppModalStmt(previewStatement)}
                   style={{
                     background: '#25D366',
                     color: '#fff',
@@ -530,6 +532,14 @@ export default function StatementsPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {whatsAppModalStmt && (
+        <WhatsAppModal
+          isOpen={!!whatsAppModalStmt}
+          onClose={() => setWhatsAppModalStmt(null)}
+          statement={whatsAppModalStmt}
+        />
       )}
     </AppShell>
   )

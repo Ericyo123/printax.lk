@@ -211,28 +211,33 @@ export async function downloadStatementPDF(stmt: any) {
   }
 }
 
-export async function openStatementWhatsApp(stmt: any, customerPhone?: string | null, customerName?: string | null) {
-  const name = customerName || stmt.customer?.name || 'Valued Customer'
-  const rawPhone = (customerPhone || stmt.customer?.phone || '').replace(/[^0-9]/g, '')
-  // Normalize Sri Lankan phone numbers: 077... -> 9477..., 77... -> 9477...
-  let phone = rawPhone
-  if (phone.startsWith('0')) {
-    phone = '94' + phone.slice(1)
-  } else if (phone.length === 9 && (phone.startsWith('7') || phone.startsWith('1'))) {
-    phone = '94' + phone
-  }
+export type WhatsAppTarget = 'standard' | 'business' | 'web' | 'chooser'
 
+export function normalizePhoneNumber(rawPhone?: string | null): string {
+  const digits = (rawPhone || '').replace(/[^0-9]/g, '')
+  if (!digits) return ''
+  // Normalize Sri Lankan phone numbers: 077... -> 9477..., 77... -> 9477...
+  if (digits.startsWith('0')) {
+    return '94' + digits.slice(1)
+  }
+  if (digits.length === 9 && (digits.startsWith('7') || digits.startsWith('1'))) {
+    return '94' + digits
+  }
+  return digits
+}
+
+export function buildStatementWhatsAppDetails(
+  stmt: any,
+  customerPhone?: string | null,
+  customerName?: string | null,
+  settings?: any
+) {
+  const name = customerName || stmt.customer?.name || 'Valued Customer'
+  const phone = normalizePhoneNumber(customerPhone || stmt.customer?.phone)
   const period = `${MONTH_NAMES[(stmt.month || 1) - 1]} ${stmt.year}`
   const total = `Rs. ${(stmt.totalAmount || 0).toLocaleString('en-LK', { minimumFractionDigits: 2 })}`
 
-  // Fetch settings for business name and bank details
-  let settings: any = {}
-  try {
-    const sRes = await fetch('/api/settings')
-    if (sRes.ok) settings = await sRes.json()
-  } catch {}
-
-  const businessName = settings.businessName || 'Printax Solutions'
+  const businessName = settings?.businessName || 'Printax Solutions'
   const invoices = Array.isArray(stmt.invoices) ? stmt.invoices : []
   const count = invoices.length
   const divider = '--------------------------------------------------'
@@ -275,7 +280,7 @@ export async function openStatementWhatsApp(stmt: any, customerPhone?: string | 
   message += `- Total Invoices: ${count}\n`
   message += `- Total Balance Due: *${total}*\n\n`
 
-  if (settings.bankName && settings.accountNumber) {
+  if (settings?.bankName && settings?.accountNumber) {
     message += `*BANK PAYMENT DETAILS:*\n`
     message += `- Bank: *${settings.bankName}*\n`
     if (settings.accountName) message += `- Account Name: *${settings.accountName}*\n`
@@ -289,7 +294,99 @@ export async function openStatementWhatsApp(stmt: any, customerPhone?: string | 
   message += `Thank you for your business!\n`
   message += `*${businessName}*`
 
+  return { name, phone, message }
+}
+
+export function sendWhatsAppMessage({
+  phone,
+  message,
+  target = 'standard'
+}: {
+  phone?: string | null
+  message: string
+  target: WhatsAppTarget
+}) {
+  const cleanPhone = normalizePhoneNumber(phone)
   const encoded = encodeURIComponent(message)
-  const url = phone ? `https://api.whatsapp.com/send?phone=${phone}&text=${encoded}` : `https://api.whatsapp.com/send?text=${encoded}`
-  window.open(url, '_blank')
+  const isAndroid = typeof navigator !== 'undefined' && /android/i.test(navigator.userAgent)
+  const isIOS = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent)
+  const fallbackUrl = encodeURIComponent(
+    cleanPhone ? `https://wa.me/${cleanPhone}?text=${encoded}` : `https://api.whatsapp.com/send?text=${encoded}`
+  )
+
+  if (target === 'web') {
+    const url = cleanPhone
+      ? `https://web.whatsapp.com/send?phone=${cleanPhone}&text=${encoded}`
+      : `https://web.whatsapp.com/send?text=${encoded}`
+    window.open(url, '_blank')
+    return
+  }
+
+  if (target === 'standard') {
+    if (isAndroid) {
+      // Explicitly target standard WhatsApp Messenger package (com.whatsapp)
+      const intentUrl = cleanPhone
+        ? `intent://send?phone=${cleanPhone}&text=${encoded}#Intent;package=com.whatsapp;scheme=whatsapp;S.browser_fallback_url=${fallbackUrl};end`
+        : `intent://send?text=${encoded}#Intent;package=com.whatsapp;scheme=whatsapp;S.browser_fallback_url=${fallbackUrl};end`
+      window.location.href = intentUrl
+      return
+    }
+    // For iOS / Desktop
+    const url = cleanPhone
+      ? `https://wa.me/${cleanPhone}?text=${encoded}`
+      : `https://api.whatsapp.com/send?text=${encoded}`
+    window.open(url, '_blank')
+    return
+  }
+
+  if (target === 'business') {
+    if (isAndroid) {
+      // Explicitly target WhatsApp Business package (com.whatsapp.w4b)
+      const intentUrl = cleanPhone
+        ? `intent://send?phone=${cleanPhone}&text=${encoded}#Intent;package=com.whatsapp.w4b;scheme=whatsapp;S.browser_fallback_url=${fallbackUrl};end`
+        : `intent://send?text=${encoded}#Intent;package=com.whatsapp.w4b;scheme=whatsapp;S.browser_fallback_url=${fallbackUrl};end`
+      window.location.href = intentUrl
+      return
+    }
+    // For iOS / Desktop
+    const url = cleanPhone
+      ? `https://wa.me/${cleanPhone}?text=${encoded}`
+      : `https://api.whatsapp.com/send?text=${encoded}`
+    window.open(url, '_blank')
+    return
+  }
+
+  // target === 'chooser'
+  if (isAndroid || isIOS) {
+    const schemeUrl = cleanPhone
+      ? `whatsapp://send?phone=${cleanPhone}&text=${encoded}`
+      : `whatsapp://send?text=${encoded}`
+    window.location.href = schemeUrl
+  } else {
+    const url = cleanPhone
+      ? `https://wa.me/${cleanPhone}?text=${encoded}`
+      : `https://api.whatsapp.com/send?text=${encoded}`
+    window.open(url, '_blank')
+  }
+}
+
+export async function openStatementWhatsApp(
+  stmt: any,
+  customerPhone?: string | null,
+  customerName?: string | null,
+  target: WhatsAppTarget = 'standard'
+) {
+  // Fetch settings for business name and bank details
+  let settings: any = {}
+  try {
+    const sRes = await fetch('/api/settings')
+    if (sRes.ok) settings = await sRes.json()
+  } catch {}
+
+  const details = buildStatementWhatsAppDetails(stmt, customerPhone, customerName, settings)
+  sendWhatsAppMessage({
+    phone: details.phone,
+    message: details.message,
+    target
+  })
 }

@@ -5,11 +5,13 @@ import { Receipt, AlertCircle, FileSpreadsheet, MessageSquare, ArrowLeft, Check,
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { downloadStatementPDF, openStatementWhatsApp, MONTH_NAMES } from '@/lib/statementPdf'
+import { WhatsAppModal } from '@/components/WhatsAppModal'
 
 export default function CustomerDetailPage() {
   const { id } = useParams<{ id: string }>()
   const [customer, setCustomer] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [whatsAppModalStmt, setWhatsAppModalStmt] = useState<any>(null)
 
   async function fetchCustomer() {
     const r = await fetch(`/api/customers/${id}`)
@@ -159,7 +161,7 @@ export default function CustomerDetailPage() {
                             </button>
                             <button 
                               className="btn btn-sm" 
-                              onClick={() => openStatementWhatsApp(stmt, customer.phone, customer.name)}
+                              onClick={() => setWhatsAppModalStmt(stmt)}
                               title="Send to Customer via WhatsApp"
                               style={{ background: '#25D366', color: '#fff', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.35rem 0.6rem' }}
                             >
@@ -214,6 +216,15 @@ export default function CustomerDetailPage() {
           </div>
         </div>
       </div>
+      {whatsAppModalStmt && (
+        <WhatsAppModal
+          isOpen={!!whatsAppModalStmt}
+          onClose={() => setWhatsAppModalStmt(null)}
+          statement={whatsAppModalStmt}
+          customerPhone={customer?.phone}
+          customerName={customer?.name}
+        />
+      )}
     </AppShell>
   )
 }
