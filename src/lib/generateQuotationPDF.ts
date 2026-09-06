@@ -113,7 +113,7 @@ export async function generateQuotationPDF(quotation: any, settings?: any) {
     headStyles: { fillColor: [21, 94, 150], textColor: 255, fontStyle: 'bold' },
     styles: { fontSize: 9.5, cellPadding: 4 },
     columnStyles: {
-      0: { cellWidth: 10, halign: 'center' },
+      0: { cellWidth: 14, halign: 'center' },
       1: { cellWidth: 'auto' },
       2: { cellWidth: 22, halign: 'center' },
       3: { cellWidth: 32, halign: 'right' },
